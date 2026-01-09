@@ -50,15 +50,6 @@ app.use('/', async (req, res, next) => {
 // client routes
 app.use("/clients", clientRoutes);
 
-
-// Basic route
-app.get('/', (req, res) => {
-  res.render('home', {
-    isAuthenticated: req.isAuthenticated,
-    userInfo: req.session ? req.session.userInfo : null
-  });
-});
-
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });

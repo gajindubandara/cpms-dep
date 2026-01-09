@@ -1,4 +1,3 @@
-import { generators } from 'openid-client';
 import { jwtVerify, createRemoteJWKSet } from 'jose';
 
 // Middleware to check authentication
