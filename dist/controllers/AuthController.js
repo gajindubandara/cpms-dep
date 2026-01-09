@@ -18,23 +18,6 @@ const renderHome = (req, res) => {
     });
 };
 
-// Login controller
-const login = (client) => (req, res) => {
-    const nonce = generators.nonce();
-    const state = generators.state();
-
-    req.session.nonce = nonce;
-    req.session.state = state;
-
-    const authUrl = client.authorizationUrl({
-        scope: 'email openid phone',
-        state: state,
-        nonce: nonce,
-    });
-
-    res.redirect(authUrl);
-};
-
 // Logout controller
 const logout = (req, res) => {
     req.session.destroy();
@@ -223,7 +206,6 @@ const refreshToken = async (req, res) => {
 export {
     checkAuth,
     renderHome,
-    login,
     logout,
     callback,
     verifyToken,
