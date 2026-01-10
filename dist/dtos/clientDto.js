@@ -2,7 +2,7 @@ import { ClientType } from "../enums/clientType.js";
 import { Status } from "../enums/clientStatus.js";
 
 export class ClientDTO {
-  constructor({clientId, clientName, email, address, phone, status, clientType, createdAt, updatedAt,} = {}) {
+  constructor({clientId, clientName, email, address, phone, status, clientType, createdAt, updatedAt} = {}) {
     if (clientId !== undefined) this.clientId = clientId;
     if (clientName !== undefined) this.clientName = clientName;
     if (email !== undefined) this.email = email;

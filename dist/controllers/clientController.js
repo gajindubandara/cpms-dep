@@ -37,7 +37,11 @@ export const getClientById = async (req, res) => {
   try {
     const clientId = req.params.clientId;
     const result = await getClientByIdService(clientId);
-    res.status(200).json({ success: true, data: result });
+    if(result){
+      res.status(200).json({ success: true, data: result });
+    }else{
+      res.status(404).json({ message: "Client not found" });
+    }
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

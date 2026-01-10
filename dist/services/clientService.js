@@ -20,7 +20,6 @@ export const createClientService = async (createClientDTO) => {
   const clientId = uuidv4();
 
   const model = mapCreateClientDTOtoClientModel(createClientDTO);
-
   // Check if email already exists
   if (model.email) {
     const existingClient = await getClientByEmail(model.email);
@@ -32,7 +31,6 @@ export const createClientService = async (createClientDTO) => {
   return await createClient({
     ...model,
     clientId,
-    queryDate: new Date().toISOString(),
   });
 };
 

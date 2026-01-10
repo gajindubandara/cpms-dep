@@ -6,7 +6,7 @@ import {
   GetCommand,
   QueryCommand,
   DeleteCommand,
-  ScanCommand
+  ScanCommand,
 } from "@aws-sdk/lib-dynamodb";
 
 // create client
@@ -34,7 +34,7 @@ export const updateClient = async (clientId, updates) => {
   updates.updatedAt = new Date().toISOString();
 
   const ExpressionAttributeNames = {
-    "#attrs": "Attributes"  // Map to the Attributes object
+    "#attrs": "Attributes",
   };
   const ExpressionAttributeValues = {};
   const updateParts = [];
@@ -78,6 +78,7 @@ export const getClientById = async (clientId) => {
   };
 
   const result = await ddbDocClient.send(new GetCommand(params));
+  console.log("result received at client service", result.Item)
   return result.Item;
 };
 
@@ -126,15 +127,15 @@ export const getClientByEmail = async (email) => {
   if (!email) throw new Error("Email is required");
 
   const params = {
-  TableName: "G2Labs-CPMS",
-  FilterExpression: "Attributes.email = :email",
-  ExpressionAttributeValues: {
-    ":email": email,
-  }
-};
+    TableName: "G2Labs-CPMS",
+    FilterExpression: "Attributes.email = :email",
+    ExpressionAttributeValues: {
+      ":email": email,
+    },
+  };
 
-const result = await ddbDocClient.send(new ScanCommand(params));
-return result.Items && result.Items.length > 0 ? result.Items[0] : null;
+  const result = await ddbDocClient.send(new ScanCommand(params));
+  return result.Items && result.Items.length > 0 ? result.Items[0] : null;
 };
 
 // delete client

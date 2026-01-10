@@ -3,6 +3,7 @@ import clientRoutes from "./routes/clientRoute.js";
 // import commonMiddleware from './middleware/commonMiddleware.js';
 import authRoutes from './routes/authRoutes.js';
 import dotenv from 'dotenv';
+import projectRoutes from "./routes/projectRoutes.js"
 dotenv.config();
 const app = express();
 const port = 3000;
