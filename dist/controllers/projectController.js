@@ -40,7 +40,6 @@ export const getProjectById = async (req, res) => {
 export const createFeature = async (req, res) => {
   try {
     const dto = new ProjectDTO(req.body);
-
     const result = await createFeatureService(dto);
     res.status(201).json({ success: true, data: result });
   } catch (err) {
@@ -55,7 +54,6 @@ export const getFeature = async (req, res) => {
     console.log("this is being accessed");
     const projectId = req.query.projectId;
     const featureId = req.query.featureId;
-    console.log("projectId" + projectId + "featureId " + featureId);
     const result = await getFeatureService(projectId, featureId);
     res.status(200).json({ success: true, data: result });
   } catch (err) {

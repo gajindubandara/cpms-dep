@@ -8,13 +8,20 @@ import { getClientById } from "../daos/clientDao.js";
 
 //create Project
 export const createprojectService = async (createProjectDTO) => {
+  // Validate required fields before mapping
+  if (!createProjectDTO.clientId) {
+    throw new Error("clientId is required");
+  }
+
   const projectId = uuidv4();
   const featureId = 0;
   const model = mapCreateProjectDTOtoProjectModel(createProjectDTO);
 
-  //check if client with that id is avaialable
+  //check if client with that id is available
   const existClient = await getClientById(model.clientId);
-  console.log("existing client received at projecetservice", existClient);
+  if(!existClient){
+    throw new Error("Client with that id is not available");
+  }
 
   return await createProject({
     ...model,
@@ -31,15 +38,39 @@ export const getProjectService = async (projectId) => {
 
 //create feature service
 export const createFeatureService = async (dto) => {
+  //validate dto values
+  if (!dto.clientId) {
+    throw new Error("clientId is required");
+  }
+  if (!dto.projectId) {
+    throw new Error("projectId is required");
+  }
+
   const model = mapCreateProjectDTOtoProjectModel(dto);
-  const features =  await featAll(model.clientId,model.projectId);
-  const featureIds = features.map(item => item.SK?.split("#")[3]);
-  const last = Math.max(...featureIds);
-  const featureId = last+1;
+  
+  // Check if client exists
+  const clientIdAvailability = await getClientById(model.clientId);
+  if(!clientIdAvailability){
+    throw new Error("Client not found");
+  }
+
+  // Check if project exists
+  const projectIdAvailability = await getProjectById(model.projectId);
+  if(!projectIdAvailability || projectIdAvailability.length === 0){
+    throw new Error("No project found with that id");
+  }
+
+  const features =  await featAll(model.clientId, model.projectId);
+  const featureIds = features.map(item => item.SK?.split("#")[3]).filter(id => id !== undefined);
+  
+  // Handle case when no features exist yet
+  const last = featureIds.length > 0 ? Math.max(...featureIds.map(id => parseInt(id))) : -1;
+  const featureId = last + 1;
+  
   return await createProject({
     ...model,
     featureId
-  })
+  });
 };
 
 //get feature of a project
@@ -47,7 +78,6 @@ export const getFeatureService = async(projectId, featureId) => {
     if(!projectId || !featureId){
       throw new Error("Ids are required to get feature")
     }
-    console.log("projectId"+projectId+"featureId "+featureId);
     return await featureByFeatId(projectId,featureId)
 }
 
@@ -81,7 +111,6 @@ export const updateFeatureService = async(dto) => {
   const projectId = dto.projectId;
   const clientId = dto.clientId;
   const featureId = dto.featureId;
-  console.log("featureid", featureId)
 
   const updates = mapUpdateProjectDTOtoProjectModel(dto)
   return updateFeature(clientId, projectId, featureId, updates);
@@ -95,7 +124,6 @@ export const deleteProjectService = async (clientId, projectId) => {
 
   const features = await featAll(clientId, projectId);
   const featureIds = features.map(item => item.SK?.split("#")[3]);
-  console.log(featureIds)
   // Delete each feature except "0"
   for (const featureId of featureIds) {
     if (featureId !== "0") {
@@ -115,7 +143,6 @@ export const deleteFeatureService = async(clientId, projectId, featureId) => {
   if(!clientId || !projectId){
     throw new Error("The ids are required for query")
   }
-  console.log("featureid: "+featureId+"clientId: "+clientId+"projectId: "+projectId)
   const result = await deleteFeature(clientId, projectId, featureId);
   return result;
 }
@@ -142,7 +169,6 @@ export const getClientProjectsService = async(clientId) =>{
   const onlyProjects = [];
   projects.forEach(element =>{
     let project = (element.SK).split("#")[3]
-    console.log(project)
     if(project == 0){
       onlyProjects.push(element)
     }

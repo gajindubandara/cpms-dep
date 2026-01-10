@@ -53,7 +53,6 @@ export const featAll = async (clientId, projectId) => {
   };
 
   const result = await ddbDocClient.send(new QueryCommand(params));
-  console.log(result);
   return result.Items || [];
 };
 
@@ -257,7 +256,6 @@ export const deleteFeature = async (clientId, projectId, featureId) => {
     },
     ReturnValues: "ALL_OLD",
   };
-  console.log("featureid: "+featureId+"clientId: "+clientId+"projectId: "+projectId)
   const result = await ddbDocClient.send(new DeleteCommand(params));
   if(!result.Attributes){
     throw new Error("Could not find item with that id")
