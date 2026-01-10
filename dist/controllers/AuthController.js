@@ -1,4 +1,7 @@
 import { jwtVerify, createRemoteJWKSet } from 'jose';
+import { BadRequest, InternalServerError, Unauthorized } from "../errors/customErrors.js";
+import { requestCognitoToken } from "../helpers/RequestCognitoToken.js";
+import * as authService from "../services/authService.js";
 
 // Middleware to check authentication
 const checkAuth = (req, res, next) => {
@@ -25,81 +28,33 @@ const logout = (req, res) => {
 };
 
 // Callback controller
-const callback = (client) => async (req, res) => {
+const callback = async (req, res, next) => {
+     const code = req.query.code;
+
+    if (!code) {
+        return next(new BadRequest("Missing authorization code"));
+    }
+
     try {
-        // Get authorization code from request body
-        const { code } = req.body;
-
-        if (!code) {
-            console.error('Authorization code is missing.');
-            return res.status(400).json({ error: 'Authorization code is missing.' });
-        }
-
-        // Prepare token exchange request
-        const authHeader = 'Basic ' + Buffer.from(
-            `${process.env.COGNITO_CLIENT_ID}:${process.env.COGNITO_CLIENT_SECRET}`
-        ).toString('base64');
-
-        const params = new URLSearchParams({
-            grant_type: 'authorization_code',
+        const tokenData = await requestCognitoToken({
+            grant_type: "authorization_code",
             client_id: process.env.COGNITO_CLIENT_ID,
-            code: code,
+            code,
             redirect_uri: process.env.COGNITO_REDIRECT_URI,
         });
 
-        console.log('Token exchange request:', params.toString());
+        const userData = authService.decodeIdToken(tokenData.id_token);
 
-        // Exchange code for tokens
-        const tokenResponse = await fetch(`${process.env.COGNITO_DOMAIN}/oauth2/token`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': authHeader,
-            },
-            body: params.toString(),
-        });
-
-        const tokenData = await tokenResponse.json();
-        console.log('Token response:', tokenData);
-
-        // Validate token response
-        const requiredFields = ['id_token', 'access_token', 'refresh_token', 'expires_in', 'token_type'];
-        const isValid = requiredFields.every(field => tokenData[field]);
-
-        if (!isValid) {
-            console.error('Invalid token response:', tokenData);
-            return res.status(400).json({ 
-                error: tokenData.error || 'Invalid token response',
-                details: tokenData.error_description 
-            });
-        }
-
-        // Get user info using access token
-        const userInfo = await client.userinfo(tokenData.access_token);
-        
-        // Save tokens and user info in session
-        req.session.tokens = {
-            id_token: tokenData.id_token,
-            access_token: tokenData.access_token,
-            refresh_token: tokenData.refresh_token,
-            expires_in: tokenData.expires_in,
-            token_type: tokenData.token_type,
-        };
-        req.session.userInfo = userInfo;
-
-        console.log('User logged in:', userInfo);
-        
-        // Return tokens to frontend
-        res.status(200).json({
-            tokens: req.session.tokens,
-            userInfo: userInfo
+        return res.json({
+            name: userData.name,
+            email: userData.email,
+            image: userData.profile,
+            role: userData["custom:role"],
+            tokens: tokenData,
         });
     } catch (err) {
-        console.error('Callback error:', err);
-        res.status(500).json({ 
-            error: 'Authentication failed.',
-            details: err.message 
-        });
+        console.error(err.response?.data || err.message);
+        return next(new BadRequest(`Failed to fetch token: ${err.response?.data?.error || err.message}`));
     }
 };
 

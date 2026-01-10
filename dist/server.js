@@ -1,4 +1,5 @@
 import express from "express";
+import ticketRoutes from "./routes/ticketRoute.js";
 import clientRoutes from "./routes/clientRoute.js";
 // import commonMiddleware from './middleware/commonMiddleware.js';
 import authRoutes from './routes/authRoutes.js';
@@ -53,6 +54,9 @@ app.use(express.json()); // To parse JSON bodies
 app.get('/', (req, res) => {
     res.status(200).json({ status: 'cpms backend works' });
 });
+
+// Ticket routes
+app.use("/tickets", ticketRoutes);
 
 // Client routes
 app.use("/clients", clientRoutes);
