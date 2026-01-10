@@ -1,22 +1,13 @@
-import express from "express";
-import clientRoutes from "./routes/clinetRoute.js";
-import commonMiddleware from './middleware/commonMiddleware.js';
-import authRoutes from './routes/authRoutes.js';
-import dotenv from 'dotenv';
-dotenv.config();
+const express = require('express');
 const app = express();
 const port = 3000;
-import { Issuer, generators } from 'openid-client';
 
-import cors from 'cors';
-app.use(cors({
-  origin: true,
-  credentials: true
-}));
+app.use(express.json());
 
-
-// client routes
-app.use("/clients", clientRoutes);
+ // Basic route
+app.get('/', (req, res) => {
+  res.send('Hello World!');
+});
 
 // Health check endpoint
 app.get('/health', (req, res) => {
