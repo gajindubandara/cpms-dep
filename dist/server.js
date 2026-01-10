@@ -57,6 +57,9 @@ app.get('/', (req, res) => {
 // Client routes
 app.use("/clients", clientRoutes);
 
+//project routes
+app.use("/projects",projectRoutes)
+
 // Auth routes
 app.use("/auth", authRoutes);
 
