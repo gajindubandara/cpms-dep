@@ -3,7 +3,7 @@ import {
   mapCreateProjectDTOtoProjectModel,
   mapUpdateProjectDTOtoProjectModel,
 } from "../mappers/projectMapper.js";
-import { createProject, getProjectById, featAll, featureByFeatId, allProjects, updateProject, updateFeature, deleteProject, deleteFeature, projectsByQueryDate } from "../daos/projectDao.js";
+import { createProject, getProjectById, featAll, featureByFeatId, allProjects, updateProject, updateFeature, deleteProject, deleteFeature, projectsByQueryDate, projectByClientId } from "../daos/projectDao.js";
 import { getClientById } from "../daos/clientDao.js";
 
 //create Project
@@ -99,7 +99,6 @@ export const deleteProjectService = async (clientId, projectId) => {
   // Delete each feature except "0"
   for (const featureId of featureIds) {
     if (featureId !== "0") {
-      console.log("featureid: "+featureId+"clientId: "+clientId+"projectId: "+projectId)
       await deleteFeature(clientId, projectId, featureId);
     }
   }
@@ -130,4 +129,24 @@ export const getProjectsbyquerydateService = async(queryDate) => {
 
   const projects = await projectsByQueryDate(queryDate)
   return projects;
+}
+
+
+//get client projects
+export const getClientProjectsService = async(clientId) =>{
+  if(!clientId){
+    throw new Error("ClientId is needed for querying")
+  }
+
+  const projects = await projectByClientId(clientId)
+  const onlyProjects = [];
+  projects.forEach(element =>{
+    let project = (element.SK).split("#")[3]
+    console.log(project)
+    if(project == 0){
+      onlyProjects.push(element)
+    }
+  })
+  return onlyProjects;
+  
 }

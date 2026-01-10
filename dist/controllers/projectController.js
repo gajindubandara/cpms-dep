@@ -9,7 +9,8 @@ import {
   updateFeatureService,
   deleteProjectService,
   deleteFeatureService,
-  getProjectsbyquerydateService
+  getProjectsbyquerydateService,
+  getClientProjectsService
 } from "../services/projectService.js";
 
 //create project
@@ -131,4 +132,16 @@ export const getProjectsbyquerydate = async(req,res) => {
     }catch(err){
         res.status(500).json({success:false, message:err.message})
     }
+}
+
+//get projects by clientID
+export const getClientProjects = async(req,res) => {
+  try{
+      const clientId = req.query.clientId;
+      
+      const result = await getClientProjectsService(clientId)
+      res.status(200).json({success:true, data:result})
+  }catch(err){
+    res.status(500).json({success:false, message:err.message })
+  }
 }

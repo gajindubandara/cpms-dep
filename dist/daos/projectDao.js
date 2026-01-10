@@ -61,7 +61,6 @@ export const featAll = async (clientId, projectId) => {
 export const projectByClientId = async (clidentId) => {
   const params = {
     TableName: process.env.TABLE_NAME,
-    IndexName: "SK-INDEX-PROJECTID-CLIENT",
     KeyConditionExpression: "#pk = :pk AND begins_with(#sk, :skPreFix)",
     ExpressionAttributeNames: {
       "#pk": "PK",

@@ -9,12 +9,14 @@ import {
   updateFeature,
   deleteProject,
   deleteFeature,
-  getProjectsbyquerydate
+  getProjectsbyquerydate,
+  getClientProjects
 } from "../controllers/projectController.js";
 const router = express.Router();
 
 router.post("/create-project", createProject);
 router.post("/create-feature", createFeature);
+router.get("/clientProjects", getClientProjects);
 router.delete("/delete-project",deleteProject)
 router.delete("/delete-feature",deleteFeature)
 router.put("/update-project", updateProject);
