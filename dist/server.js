@@ -15,38 +15,6 @@ app.use(cors({
 }));
 
 
-// OpenID Client setup
-let client;
-
-async function getOpenIdClient() {
-  if (!client) {
-    const issuer = await Issuer.discover(process.env.COGNITO_ISSUER);
-
-    client = new issuer.Client({
-      client_id: process.env.COGNITO_CLIENT_ID,
-      client_secret: process.env.COGNITO_CLIENT_SECRET,
-      redirect_uris: [process.env.COGNITO_REDIRECT_URI],
-      response_types: ['code']
-    });
-  }
-
-  return client;
-}
-
-// Middleware
-commonMiddleware.forEach(mw => app.use(mw));
-
-// Use the organized auth routes
-app.use('/', async (req, res, next) => {
-  try {
-    const client = await getOpenIdClient();
-    return authRoutes(client)(req, res, next);
-  } catch (err) {
-    console.error('OpenID client init failed:', err);
-    res.status(500).send('Authentication setup failed');
-  }
-});
-
 // client routes
 app.use("/clients", clientRoutes);
 
