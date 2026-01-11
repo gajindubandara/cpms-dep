@@ -14,11 +14,10 @@ import {
   mapAdminUpdateTicketDTOtoTicketModel
 } from "../mappers/ticketMapper.js";
 import { getClientById } from "../daos/clientDao.js";
-import { getProjectById } from "../daos/projectDao.js";
+import { getProjectById, projectByClientId } from "../daos/projectDao.js";
 
 // Service to create a ticket
 export const createTicketService = async (createTicketDTO) => {
-  // Basic validation
   if (!createTicketDTO || typeof createTicketDTO !== 'object') {
     throw new Error('Invalid input: Ticket data is required.');
   }
@@ -33,22 +32,22 @@ export const createTicketService = async (createTicketDTO) => {
     throw new Error('Client not found');
   }
 
-  // Assuming a getProjectById function exists to validate project
-  const project = await getProjectById(projectId);
-  if (!project) {
-    throw new Error('Project not found');
+  // Ensure the project belongs to the client
+  const projects = await projectByClientId(clientId);
+  const ownsProject = projects.some(p => p.SK && p.SK.startsWith(`PROJECT#${projectId}`));
+  if (!ownsProject) {
+    throw new Error('Project does not belong to this client');
   }
 
   try {
-    // Map DTO to model input (adds/validates fields if needed)
     const ticketData = mapCreateTicketDTOtoTicketModel(createTicketDTO);
     return await createTicket(ticketData);
   } catch (err) {
-    // Log and rethrow for controller to handle
     console.error('Error in createTicketService:', err);
     throw new Error('Failed to create ticket. ' + (err.message || ''));
   }
 };
+
 
 // Service to get all tickets by ticketId
 export const getTicketsByTicketIdService = async (ticketId) => {
@@ -61,6 +60,7 @@ export const getTicketsByTicketIdService = async (ticketId) => {
   }
 };
 
+
 // Service to get all tickets
 export const getAllTicketsService = async () => {
   try {
@@ -70,6 +70,7 @@ export const getAllTicketsService = async () => {
     throw new Error('Failed to get all tickets. ' + (err.message || ''));
   }
 };
+
 
 // Service to delete a ticket
 export const deleteTicketService = async (clientId, ticketId) => {
@@ -89,6 +90,7 @@ export const deleteTicketService = async (clientId, ticketId) => {
   }
 };
 
+
 // Service to get tickets by queryDate
 export const getTicketsByQueryDateService = async (queryDate) => {
   if (!queryDate) throw new Error('queryDate is required');
@@ -99,6 +101,7 @@ export const getTicketsByQueryDateService = async (queryDate) => {
     throw new Error('Failed to get tickets by queryDate. ' + (err.message || ''));
   }
 };
+
 
 // Service to update ticket message as client
 export const updateTicketMessageAsClientService = async (clientId, ticketId, updateDTO) => {
@@ -120,6 +123,7 @@ export const updateTicketMessageAsClientService = async (clientId, ticketId, upd
   }
 };
 
+
 // Service to update ticket as admin
 export const updateTicketAsAdminService = async (clientId, ticketId, updateDTO) => {
   if (!clientId || !ticketId) throw new Error('clientId and ticketId are required');
@@ -132,6 +136,7 @@ export const updateTicketAsAdminService = async (clientId, ticketId, updateDTO) 
     throw new Error('Failed to update ticket as admin. ' + (err.message || ''));
   }
 };
+
 
 // Service to get tickets by clientId
 export const getTicketsByClientIdService = async (clientId) => {
