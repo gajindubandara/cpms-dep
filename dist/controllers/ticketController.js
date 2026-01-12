@@ -4,6 +4,7 @@ import {
   getAllTicketsService,
   deleteTicketService,
   getTicketsByQueryDateService,
+  getTicketsByQueryDateRangeService,
   updateTicketMessageAsClientService,
   updateTicketAsAdminService,
   getTicketsByClientIdService
@@ -70,6 +71,18 @@ export const getTicketsByQueryDateController = async (req, res) => {
     res.status(200).json({ success: true, tickets });
   } catch (err) {
     console.error('Error in getTicketsByQueryDateController:', err);
+    res.status(400).json({ success: false, error: err.message });
+  }
+};
+
+// Controller to get tickets by queryDate range
+export const getTicketsByQueryDateRangeController = async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+    const tickets = await getTicketsByQueryDateRangeService(startDate, endDate);
+    res.status(200).json({ success: true, tickets });
+  } catch (err) {
+    console.error('Error in getTicketsByQueryDateRangeController:', err);
     res.status(400).json({ success: false, error: err.message });
   }
 };

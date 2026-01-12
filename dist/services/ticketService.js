@@ -4,6 +4,7 @@ import {
   getAllTickets,
   deleteTicket,
   getTicketsByQueryDate,
+  getTicketsByQueryDateRange,
   updateTicketMessageAsClient,
   updateTicketAsAdmin,
   getTicketsByClientId
@@ -103,6 +104,18 @@ export const getTicketsByQueryDateService = async (queryDate) => {
 };
 
 
+// Service to get tickets by queryDate range
+export const getTicketsByQueryDateRangeService = async (startDate, endDate) => {
+  if (!startDate || !endDate) throw new Error('startDate and endDate are required');
+  try {
+    return await getTicketsByQueryDateRange(startDate, endDate);
+  } catch (err) {
+    console.error('Error in getTicketsByQueryDateRangeService:', err);
+    throw new Error('Failed to get tickets by query date range. ' + (err.message || ''));
+  }
+};
+
+
 // Service to update ticket message as client
 export const updateTicketMessageAsClientService = async (clientId, ticketId, updateDTO) => {
   if (!clientId || !ticketId) throw new Error('clientId and ticketId are required');
@@ -110,8 +123,8 @@ export const updateTicketMessageAsClientService = async (clientId, ticketId, upd
   const tickets = await getTicketsByTicketId(ticketId);
   const ticket = tickets.find(t => t.PK === `CLIENT#${clientId}` && t.SK === `TICKET#${ticketId}`);
   if (!ticket) throw new Error('Ticket not found');
-  if (ticket.Attributes && ticket.Attributes.status === 'In Progress') {
-    throw new Error('Cannot update message: Ticket is In Progress');
+  if (ticket.Attributes && (ticket.Attributes.status === 'In Progress' || ticket.Attributes.status === 'Resolved')) {
+    throw new Error('Cannot update message: Ticket is In Progress or Resolved');
   }
   const updates = mapClientUpdateTicketDTOtoTicketModel(updateDTO);
   if (Object.keys(updates).length === 0) throw new Error('No valid fields to update');

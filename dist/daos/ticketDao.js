@@ -63,6 +63,26 @@ export const getTicketsByQueryDate = async (queryDate) => {
   return result.Items || [];
 };
 
+// Get all tickets by queryDate range using Scan (for small tables)
+export const getTicketsByQueryDateRange = async (startDate, endDate) => {
+  if (!startDate || !endDate) throw new Error("startDate and endDate are required");
+  const params = {
+    TableName: "G2Labs-CPMS",
+    FilterExpression: "#queryDate BETWEEN :startDate AND :endDate AND begins_with(#sk, :skPrefix)",
+    ExpressionAttributeNames: {
+      "#queryDate": "queryDate",
+      "#sk": "SK"
+    },
+    ExpressionAttributeValues: {
+      ":startDate": startDate,
+      ":endDate": endDate,
+      ":skPrefix": "TICKET#"
+    }
+  };
+  const result = await ddbDocClient.send(new ScanCommand(params));
+  return result.Items || [];
+};
+
 // Get all tickets (scan entire table)
 export const getAllTickets = async () => {
   const params = {
