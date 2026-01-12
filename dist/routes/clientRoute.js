@@ -10,11 +10,11 @@ import {
 
 const router = express.Router();
 
-router.post("/createClient", createClient);
+router.post("/", createClient);
 router.put("/:clientId", updateClient);
 router.get("/date", getAllClientsByQueryDate);
 router.get("/:clientId", getClientById);
-router.get("/getAllClients", getAllClients);
+router.get("/", getAllClients);
 router.delete("/:clientId", deleteClient);
 
 export default router;
