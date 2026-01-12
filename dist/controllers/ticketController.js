@@ -118,6 +118,9 @@ export const getTicketsByClientIdController = async (req, res) => {
   try {
     const { clientId } = req.params;
     const tickets = await getTicketsByClientIdService(clientId);
+    if (!tickets || tickets.length === 0) {
+      return res.status(404).json({ success: false, error: 'No tickets found for this client' });
+    }
     res.status(200).json({ success: true, tickets });
   } catch (err) {
     console.error('Error in getTicketsByClientIdController:', err);
