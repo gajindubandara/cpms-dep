@@ -6,75 +6,83 @@ import {
   getAllClientsByQueryDateService,
   deleteClientService,
 } from "../services/clientService.js";
-
+import { validateClientDTO } from "../validators/clientValidator.js";
 import { ClientDTO } from "../dtos/clientDto.js";
+import { NotFoundError } from "../errors/customErrors.js";
 
 // create client
-export const createClient = async (req, res) => {
+export const createClient = async (req, res, next) => {
   try {
     const dto = new ClientDTO(req.body);
+    validateClientDTO(dto);
     const result = await createClientService(dto);
     res.status(201).json({ success: true, data: result });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    next(err);
   }
 };
 
 // update client
-export const updateClient = async (req, res) => {
+export const updateClient = async (req, res, next) => {
   try {
     const clientId = req.params.clientId;
     const dto = new ClientDTO(req.body);
+    validateClientDTO(dto);
     const result = await updateClientService(clientId, dto);
     res.status(200).json({ success: true, data: result });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    next(err);
   }
 };
 
-//get client by id 
-export const getClientById = async (req, res) => {
+// get client by id
+export const getClientById = async (req, res, next) => {
   try {
     const clientId = req.params.clientId;
     const result = await getClientByIdService(clientId);
-    if(result){
-      res.status(200).json({ success: true, data: result });
-    }else{
-      res.status(404).json({ message: "Client not found" });
+
+    if (!result) {
+      throw new NotFoundError("Client not found");
     }
+
+    res.status(200).json({ success: true, data: result });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    next(err);
   }
 };
 
 // get all clients
-export const getAllClients = async (req, res) => {
+export const getAllClients = async (req, res, next) => {
   try {
     const result = await getAllClientsService();
     res.status(200).json({ success: true, data: result });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    next(err);
   }
 };
 
 // get all clients by queryDate
-export const getAllClientsByQueryDate = async (req, res) => {
+export const getAllClientsByQueryDate = async (req, res, next) => {
   try {
     const queryDate = req.query.queryDate;
     const result = await getAllClientsByQueryDateService(queryDate);
     res.status(200).json({ success: true, data: result });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    next(err);
   }
 };
 
 // delete client
-export const deleteClient = async (req, res) => {
+export const deleteClient = async (req, res, next) => {
   try {
     const clientId = req.params.clientId;
     const result = await deleteClientService(clientId);
-    res.status(200).json({ success: true, data: result, message: "Client deleted successfully" });
+    res.status(200).json({
+      success: true,
+      data: result,
+      message: "Client deleted successfully",
+    });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    next(err);
   }
 };

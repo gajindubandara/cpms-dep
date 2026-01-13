@@ -3,14 +3,27 @@ import {
   mapCreateProjectDTOtoProjectModel,
   mapUpdateProjectDTOtoProjectModel,
 } from "../mappers/projectMapper.js";
-import { createProject, getProjectById, featAll, featureByFeatId, allProjects, updateProject, updateFeature, deleteProject, deleteFeature, projectsByQueryDate, projectByClientId } from "../daos/projectDao.js";
+import {
+  createProject,
+  getProjectById,
+  featAll,
+  featureByFeatId,
+  allProjects,
+  updateProject,
+  updateFeature,
+  deleteProject,
+  deleteFeature,
+  projectsByQueryDate,
+  projectByClientId,
+} from "../daos/projectDao.js";
 import { getClientById } from "../daos/clientDao.js";
+import { BadRequest, NotFoundError } from "../errors/customErrors.js";
 
 //create Project
 export const createprojectService = async (createProjectDTO) => {
   // Validate required fields before mapping
   if (!createProjectDTO.clientId) {
-    throw new Error("clientId is required");
+    throw new BadRequest("clientId is required");
   }
 
   const projectId = uuidv4();
@@ -19,8 +32,8 @@ export const createprojectService = async (createProjectDTO) => {
 
   //check if client with that id is available
   const existClient = await getClientById(model.clientId);
-  if(!existClient){
-    throw new Error("Client with that id is not available");
+  if (!existClient) {
+    throw new NotFoundError("Client with that id is not available");
   }
 
   return await createProject({
@@ -32,7 +45,7 @@ export const createprojectService = async (createProjectDTO) => {
 
 //get project by projectId
 export const getProjectService = async (projectId) => {
-  if (!projectId) throw new Error("Ids are required for querying");
+  if (!projectId) throw new BadRequest("Ids are required for querying");
   return await getProjectById(projectId);
 };
 
@@ -40,24 +53,24 @@ export const getProjectService = async (projectId) => {
 export const createFeatureService = async (dto) => {
   //validate dto values
   if (!dto.clientId) {
-    throw new Error("clientId is required");
+    throw new BadRequest("clientId is required");
   }
   if (!dto.projectId) {
-    throw new Error("projectId is required");
+    throw new BadRequest("projectId is required");
   }
 
   const model = mapCreateProjectDTOtoProjectModel(dto);
   
   // Check if client exists
   const clientIdAvailability = await getClientById(model.clientId);
-  if(!clientIdAvailability){
-    throw new Error("Client not found");
+  if (!clientIdAvailability) {
+    throw new NotFoundError("Client not found");
   }
 
   // Check if project exists
   const projectIdAvailability = await getProjectById(model.projectId);
-  if(!projectIdAvailability || projectIdAvailability.length === 0){
-    throw new Error("No project found with that id");
+  if (!projectIdAvailability || projectIdAvailability.length === 0) {
+    throw new NotFoundError("No project found with that id");
   }
 
   const features =  await featAll(model.clientId, model.projectId);
@@ -76,7 +89,7 @@ export const createFeatureService = async (dto) => {
 //get feature of a project
 export const getFeatureService = async(projectId, featureId) => {
     if(!projectId || !featureId){
-      throw new Error("Ids are required to get feature")
+      throw new BadRequest("Ids are required to get feature")
     }
     return await featureByFeatId(projectId,featureId)
 }
@@ -119,7 +132,7 @@ export const updateFeatureService = async(dto) => {
 //delete project
 export const deleteProjectService = async (clientId, projectId) => {
   if (!clientId || !projectId) {
-    throw new Error("The ids are required for query");
+    throw new BadRequest("The ids are required for query");
   }
 
   const features = await featAll(clientId, projectId);
@@ -141,7 +154,7 @@ export const deleteProjectService = async (clientId, projectId) => {
 //delete feature
 export const deleteFeatureService = async(clientId, projectId, featureId) => {
   if(!clientId || !projectId){
-    throw new Error("The ids are required for query")
+    throw new BadRequest("The ids are required for query")
   }
   const result = await deleteFeature(clientId, projectId, featureId);
   return result;
@@ -151,7 +164,7 @@ export const deleteFeatureService = async(clientId, projectId, featureId) => {
 //query by date
 export const getProjectsbyquerydateService = async(queryDate) => {
   if(!queryDate){
-    throw new Error("valid Query date is needed to retreive information")
+    throw new BadRequest("valid Query date is needed to retreive information")
   }
 
   const projects = await projectsByQueryDate(queryDate)
@@ -162,7 +175,7 @@ export const getProjectsbyquerydateService = async(queryDate) => {
 //get client projects
 export const getClientProjectsService = async(clientId) =>{
   if(!clientId){
-    throw new Error("ClientId is needed for querying")
+    throw new BadRequest("ClientId is needed for querying")
   }
 
   const projects = await projectByClientId(clientId)

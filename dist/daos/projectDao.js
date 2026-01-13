@@ -7,6 +7,7 @@ import {
   DeleteCommand,
   ScanCommand,
 } from "@aws-sdk/lib-dynamodb";
+import { BadRequest, NotFoundError } from "../errors/customErrors.js";
 
 //crerate new project
 export const createProject = async (projectData) => {
@@ -131,9 +132,9 @@ export const projectsByQueryDate = async (queryDate) => {
 
 //update project
 export const updateProject = async (clientId, projectId, updates) => {
-  if (!projectId) throw new Error("ProjectId Required");
+  if (!projectId) throw new BadRequest("ProjectId Required");
   if (!updates || Object.keys(updates).length === 0)
-    throw new Error("updates Required");
+    throw new BadRequest("updates Required");
 
   //deleting indexing keys
   delete updates.projectId;
@@ -178,9 +179,9 @@ export const updateProject = async (clientId, projectId, updates) => {
 
 //update feature
 export const updateFeature = async (clientId, projectId, featureId, updates) => {
-  if (!projectId) throw new Error("ProjectId Required");
+  if (!projectId) throw new BadRequest("ProjectId Required");
   if (!updates || Object.keys(updates).length === 0)
-    throw new Error("updates Required");
+    throw new BadRequest("updates Required");
 
   //deleting indexing keys
   delete updates.projectId;
@@ -225,8 +226,8 @@ export const updateFeature = async (clientId, projectId, featureId, updates) => 
 
 //delete project
 export const deleteProject = async (clientId, projectId) => {
-  if (!clientId) throw new Error("Client id is required");
-  if (!projectId) throw new Error("Project id is required");
+  if (!clientId) throw new BadRequest("Client id is required");
+  if (!projectId) throw new BadRequest("Project id is required");
 
   const params = {
     TableName: process.env.TABLE_NAME,
@@ -238,15 +239,15 @@ export const deleteProject = async (clientId, projectId) => {
   };
 
   const result = await ddbDocClient.send(new DeleteCommand(params));
-  if(!result.Attributes){
-    throw new Error("Could not find item with that id")
+  if (!result.Attributes) {
+    throw new NotFoundError("Could not find item with that id");
   }
   return result.Attributes;
 };
 
 //delete feature
 export const deleteFeature = async (clientId, projectId, featureId) => {
-  if (!projectId || !clientId || !featureId) throw new Error("Project id is required");
+  if (!projectId || !clientId || !featureId) throw new BadRequest("Project id is required");
 
   const params = {
     TableName: process.env.TABLE_NAME,
@@ -257,8 +258,8 @@ export const deleteFeature = async (clientId, projectId, featureId) => {
     ReturnValues: "ALL_OLD",
   };
   const result = await ddbDocClient.send(new DeleteCommand(params));
-  if(!result.Attributes){
-    throw new Error("Could not find item with that id")
+  if (!result.Attributes) {
+    throw new NotFoundError("Could not find item with that id");
   }
   return result.Attributes;
 };

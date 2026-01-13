@@ -16,6 +16,8 @@ import {
   mapCreateClientDTOtoClientModel,
   mapUpdateClientDTOtoClientModel,
 } from "../mappers/clientMapper.js";
+import { AlreadyExistsError, BadRequest } from "../errors/customErrors.js";
+import { v4 as uuidv4 } from "uuid";
 
 import { CognitoIdentityProviderClient, AdminCreateUserCommand, AdminGetUserCommand } from "@aws-sdk/client-cognito-identity-provider";
 
@@ -27,7 +29,7 @@ export const createClientService = async (createClientDTO) => {
   if (model.email) {
     const existingClient = await getClientByEmail(model.email);
     if (existingClient) {
-      throw new Error("Email already exists");
+      throw new AlreadyExistsError("Email already exists");
     }
   }
   // Create user in Cognito
@@ -82,12 +84,12 @@ export const createClientService = async (createClientDTO) => {
 
 //update client
 export const updateClientService = async (clientId, updateClientDTO) => {
-  if (!clientId) throw new Error("clientId is required");
+  if (!clientId) throw new BadRequest("clientId is required");
 
   const updates = mapUpdateClientDTOtoClientModel(updateClientDTO);
 
   if (Object.keys(updates).length === 0) {
-    throw new Error("No valid fields to update");
+    throw new BadRequest("No valid fields to update");
   }
 
   return await updateClient(clientId, updates);
@@ -95,7 +97,7 @@ export const updateClientService = async (clientId, updateClientDTO) => {
 
 //get client by id
 export const getClientByIdService = async (clientId) => {
-  if (!clientId) throw new Error("clientId is required");
+  if (!clientId) throw new BadRequest("clientId is required");
 
   return await getClientById(clientId);
 };
@@ -107,14 +109,14 @@ export const getAllClientsService = async () => {
 
 //get all clients by queryDate
 export const getAllClientsByQueryDateService = async (queryDate) => {
-  if (!queryDate) throw new Error("queryDate is required");
+  if (!queryDate) throw new BadRequest("queryDate is required");
 
   return await getAllClientsByQueryDate(queryDate);
 };
 
 //delete client
 export const deleteClientService = async (clientId) => {
-  if (!clientId) throw new Error("clientId is required");
+  if (!clientId) throw new BadRequest("clientId is required");
   const projects = await projectByClientId(clientId);
 
   for (const element of projects) {

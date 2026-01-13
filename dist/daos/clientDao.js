@@ -8,6 +8,7 @@ import {
   DeleteCommand,
   ScanCommand,
 } from "@aws-sdk/lib-dynamodb";
+import { BadRequest } from "../errors/customErrors.js";
 
 // Utility to remove undefined values from an object
 function removeUndefined(obj) {
@@ -36,9 +37,9 @@ export const createClient = async (clientData) => {
 
 
 export const updateClient = async (clientId, updates) => {
-  if (!clientId) throw new Error("Client Id is required");
+  if (!clientId) throw new BadRequest("Client Id is required");
   if (!updates || Object.keys(updates).length === 0)
-    throw new Error("No updates provided");
+    throw new BadRequest("No updates provided");
 
   delete updates.clientId;
   delete updates.PK;
@@ -114,7 +115,7 @@ export const getAllClients = async () => {
 
 // get all clients by queryDate (creation date)
 export const getAllClientsByQueryDate = async (queryDate) => {
-  if (!queryDate) throw new Error("queryDate is required");
+  if (!queryDate) throw new BadRequest("queryDate is required");
 
   const params = {
     TableName: "G2Labs-CPMS",
@@ -136,7 +137,7 @@ export const getAllClientsByQueryDate = async (queryDate) => {
 
 // get client by email
 export const getClientByEmail = async (email) => {
-  if (!email) throw new Error("Email is required");
+  if (!email) throw new BadRequest("Email is required");
 
   const params = {
     TableName: "G2Labs-CPMS",
@@ -152,7 +153,7 @@ export const getClientByEmail = async (email) => {
 
 // delete client
 export const deleteClient = async (clientId) => {
-  if (!clientId) throw new Error("Client Id is required");
+  if (!clientId) throw new BadRequest("Client Id is required");
 
   const params = {
     TableName: "G2Labs-CPMS",
