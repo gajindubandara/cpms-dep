@@ -78,7 +78,6 @@ export const getClientById = async (clientId) => {
   };
 
   const result = await ddbDocClient.send(new GetCommand(params));
-  console.log("result received at client service", result.Item)
   return result.Item;
 };
 

@@ -15,6 +15,7 @@ export const Project = {
             startDate: data.startDate,
             endDate: data.endDate,
             status: data.status?? ProjectStatus.PLANNED,
+            cost: data.cost,
             profitMargin: data.profitMargin,
             commissionPercent: data.commissionPercent,
             isRecurring: data.isRecurring,

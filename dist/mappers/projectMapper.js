@@ -12,6 +12,7 @@ export const mapCreateProjectDTOtoProjectModel = (dto) => ({
     startDate: dto.startDate,
     endDate: dto.endDate,
     status: dto.status,
+    cost: dto.cost,
     profitMargin: dto.profitMargin,
     commissionPercent: dto.commissionPercent,
     isRecurring: dto.isRecurring,
@@ -35,6 +36,7 @@ export const mapUpdateProjectDTOtoProjectModel = (dto) => {
             ? dto.status 
             : ProjectStatus.PLANNED;
     }
+    if(dto.cost !== undefined) model.cost = dto.cost;
     if(dto.profitMargin !== undefined) model.profitMargin = dto.profitMargin;
     if(dto.commissionPercent !== undefined) model.commissionPercent = dto.commissionPercent;
     if(dto.isRecurring !== undefined) {
