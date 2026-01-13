@@ -1,6 +1,5 @@
 export const BillingCycle = {
     MONTHLY: "MONTHLY",
-    QUATERLY: "QUATERLY",
-    YEARLY: "QUATERLY",
+    YEARLY: "YEARLY",
     NONE: "NONE"
 }
