@@ -9,18 +9,31 @@ import {
   ScanCommand,
 } from "@aws-sdk/lib-dynamodb";
 
+// Utility to remove undefined values from an object
+function removeUndefined(obj) {
+  return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v !== undefined));
+}
+
 // create client
 export const createClient = async (clientData) => {
   const item = Client.create(clientData);
-
+  // Check for null/undefined clientId
+  if (!clientData.clientId) {
+    const error = new Error("clientId is required");
+    error.statusCode = 400;
+    throw error;
+  }
+  if (item.Attributes) {
+    item.Attributes = removeUndefined(item.Attributes);
+  }
   const params = {
     TableName: "G2Labs-CPMS",
     Item: item,
   };
-
   await ddbDocClient.send(new PutCommand(params));
   return item;
 };
+
 
 export const updateClient = async (clientId, updates) => {
   if (!clientId) throw new Error("Client Id is required");
