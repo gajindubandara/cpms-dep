@@ -33,7 +33,7 @@ export const getProjectById = async (req, res, next) => {
     const projectId = req.params.projectId;
     const result = await getProjectService(projectId);
 
-    if (!result?.Item) {
+    if (!result) {
       throw new NotFoundError("Project with that id not found");
     }
 
@@ -84,7 +84,6 @@ export const getAllProjects = async (req, res, next) => {
 export const updateProject = async (req, res, next) => {
   try {
     const dto = new ProjectDTO(req.body);
-    validateProjectDTO(dto);
     const result = await updateProjectService(dto);
     res.status(200).json({ success: true, data: result });
   } catch (err) {

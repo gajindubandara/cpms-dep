@@ -27,7 +27,6 @@ export const updateClient = async (req, res, next) => {
   try {
     const clientId = req.params.clientId;
     const dto = new ClientDTO(req.body);
-    validateClientDTO(dto);
     const result = await updateClientService(clientId, dto);
     res.status(200).json({ success: true, data: result });
   } catch (err) {

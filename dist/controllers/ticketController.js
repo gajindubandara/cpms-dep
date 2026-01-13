@@ -107,7 +107,6 @@ export const updateTicketMessageAsClientController = async (
   try {
     const { clientId, ticketId } = req.params;
     const dto = new TicketDTO(req.body);
-    validateTicketDTO(dto);
     const updated = await updateTicketMessageAsClientService(
       clientId,
       ticketId,
@@ -129,7 +128,6 @@ export const updateTicketAsAdminController = async (req, res, next) => {
   try {
     const { clientId, ticketId } = req.params;
     const dto = new TicketDTO(req.body);
-    validateTicketDTO(dto);
     const updated = await updateTicketAsAdminService(clientId, ticketId, dto);
     res.status(200).json({
       success: true,

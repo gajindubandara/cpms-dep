@@ -4,7 +4,6 @@ import {
   getClientById,
   getAllClients,
   getAllClientsByQueryDate,
-  getClientByEmail,
   deleteClient,
 } from "../daos/clientDao.js";
 import {
@@ -17,7 +16,6 @@ import {
   mapUpdateClientDTOtoClientModel,
 } from "../mappers/clientMapper.js";
 import { AlreadyExistsError, BadRequest } from "../errors/customErrors.js";
-import { v4 as uuidv4 } from "uuid";
 
 import { CognitoIdentityProviderClient, AdminCreateUserCommand, AdminGetUserCommand } from "@aws-sdk/client-cognito-identity-provider";
 
@@ -27,9 +25,12 @@ export const createClientService = async (createClientDTO) => {
 
   // Check if email already exists in DB
   if (model.email) {
-    const existingClient = await getClientByEmail(model.email);
-    if (existingClient) {
-      throw new AlreadyExistsError("Email already exists");
+    const allclients = await getAllClients();
+    
+    for(const client of allclients){
+      if(model.email == client.Attributes.email){
+        throw new AlreadyExistsError("Email already exists");
+      } 
     }
   }
   // Create user in Cognito

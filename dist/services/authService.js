@@ -1,7 +1,5 @@
-import axios from 'axios';
 import jwt from 'jsonwebtoken';
-import jwkToPem from 'jwk-to-pem';
-import { Unauthorized, BadRequest } from '../errors/customErrors.js';
+import { BadRequest } from '../errors/customErrors.js';
 
 export const decodeIdToken = (idToken) => {
     const decoded = jwt.decode(idToken);

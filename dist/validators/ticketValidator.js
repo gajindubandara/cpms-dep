@@ -1,45 +1,42 @@
 import { BadRequest } from "../errors/customErrors.js";
-import { TicketStatus } from "../enums/ticketStatus.js";
+
 // Basic validation for TicketDTO-shaped data
 export const validateTicketDTO = (data = {}) => {
   const {
-    ticketId,
     clientId,
-    projectId,
     subject,
     message,
-    status,
-    adminResponse,
   } = data;
 
-  if (ticketId !== undefined) {
-    throw new BadRequest("ticketId must be a string");
+
+  if (clientId == undefined) {
+    throw new BadRequest(
+      `clientId must be a string. Received: ${typeof clientId}. Value: ${clientId}`
+    );
   }
 
-  if (clientId !== undefined) {
-    throw new BadRequest("clientId must be a string");
+  if (clientId == undefined && clientId.trim().length === 0) {
+    throw new BadRequest("clientId cannot be empty or whitespace only");
   }
 
-  if (projectId !== undefined) {
-    throw new BadRequest("projectId must be a string");
+  if (subject == undefined && typeof subject !== "string") {
+    throw new BadRequest(
+      `subject must be a string. Received: ${typeof subject}. Value: ${subject}`
+    );
   }
 
-  if (subject !== undefined && typeof subject !== "string") {
-    throw new BadRequest("subject must be a string");
+  if (subject == undefined && subject.trim().length === 0) {
+    throw new BadRequest("subject cannot be empty or whitespace only");
   }
 
-  if (message !== undefined && typeof message !== "string") {
-    throw new BadRequest("message must be a string");
+  if (message == undefined && typeof message !== "string") {
+    throw new BadRequest(
+      `message must be a string. Received: ${typeof message}. Value: ${message}`
+    );
   }
 
-  if (status !== undefined) {
-    if (!Object.values(TicketStatus).includes(status)) {
-      throw new BadRequest("Invalid status value");
-    }
-  }
-
-  if (adminResponse !== undefined && typeof adminResponse !== "string") {
-    throw new BadRequest("adminResponse must be a string");
+  if (message == undefined && message.trim().length === 0) {
+    throw new BadRequest("message cannot be empty or whitespace only");
   }
 
   return true;

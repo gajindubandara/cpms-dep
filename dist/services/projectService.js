@@ -26,7 +26,6 @@ export const createprojectService = async (createProjectDTO) => {
     throw new BadRequest("clientId is required");
   }
 
-  const projectId = uuidv4();
   const featureId = 0;
   const model = mapCreateProjectDTOtoProjectModel(createProjectDTO);
 
@@ -38,7 +37,6 @@ export const createprojectService = async (createProjectDTO) => {
 
   return await createProject({
     ...model,
-    projectId,
     featureId,
   });
 };

@@ -135,22 +135,6 @@ export const getAllClientsByQueryDate = async (queryDate) => {
   return result.Items;
 };
 
-// get client by email
-export const getClientByEmail = async (email) => {
-  if (!email) throw new BadRequest("Email is required");
-
-  const params = {
-    TableName: "G2Labs-CPMS",
-    FilterExpression: "Attributes.email = :email",
-    ExpressionAttributeValues: {
-      ":email": email,
-    },
-  };
-
-  const result = await ddbDocClient.send(new ScanCommand(params));
-  return result.Items && result.Items.length > 0 ? result.Items[0] : null;
-};
-
 // delete client
 export const deleteClient = async (clientId) => {
   if (!clientId) throw new BadRequest("Client Id is required");

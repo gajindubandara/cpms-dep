@@ -9,7 +9,6 @@ export const validateProjectDTO = (data = {}) => {
   const {
     clientId,
     projectId,
-    featureId,
     projectName,
     description,
     startDate,
@@ -24,35 +23,31 @@ export const validateProjectDTO = (data = {}) => {
     billability,
   } = data;
 
-  if (clientId !== undefined) {
-    throw new BadRequest("clientId must be a string");
+  if (clientId == undefined) {
+    throw new BadRequest("clientId cannot be null");
   }
 
-  if (projectId !== undefined) {
-    throw new BadRequest("projectId must be a string");
+  if (projectId == undefined) {
+    throw new BadRequest("projectId cannot be null");
   }
 
-  if (featureId !== undefined) {
-    throw new BadRequest("featureId must be a number");
+  if (projectName == undefined && typeof projectName !== "string") {
+    throw new BadRequest("projectName cannot be null");
   }
 
-  if (projectName !== undefined && typeof projectName !== "string") {
-    throw new BadRequest("projectName must be a string");
+  if (description == undefined && typeof description !== "string") {
+    throw new BadRequest("description cannot be null");
   }
 
-  if (description !== undefined && typeof description !== "string") {
-    throw new BadRequest("description must be a string");
+  if (startDate == undefined) {
+    throw new BadRequest("startDate cannot be null");
   }
 
-  if (startDate !== undefined) {
-    throw new BadRequest("startDate must be a valid date string");
+  if (endDate == undefined) {
+    throw new BadRequest("endDate cannot be null");
   }
 
-  if (endDate !== undefined) {
-    throw new BadRequest("endDate must be a valid date string");
-  }
-
-  if (status !== undefined) {
+  if (status == undefined) {
     if (typeof status !== "string") {
       throw new BadRequest("status must be a string");
     }
@@ -61,19 +56,19 @@ export const validateProjectDTO = (data = {}) => {
     }
   }
 
-  if (cost !== undefined) {
-    throw new BadRequest("cost must be a number");
+  if (cost == undefined) {
+    throw new BadRequest("cost cannot be null");
   }
 
-  if (profitMargin !== undefined) {
-    throw new BadRequest("profitMargin must be a number");
+  if (profitMargin == undefined) {
+    throw new BadRequest("profitMargin cannot be null");
   }
 
-  if (commissionPercent !== undefined) {
-    throw new BadRequest("commissionPercent must be a number");
+  if (commissionPercent == undefined) {
+    throw new BadRequest("commissionPercent cannot be null");
   }
 
-  if (isRecurring !== undefined) {
+  if (isRecurring == undefined) {
     if (!Object.values(IsRecurring).includes(isRecurring)) {
       throw new BadRequest("Invalid isRecurring value");
     }
@@ -85,7 +80,7 @@ export const validateProjectDTO = (data = {}) => {
     }
   }
 
-  if (billingDate !== undefined && !isValidDate(billingDate)) {
+  if (billingDate == undefined) {
     throw new BadRequest("billingDate must be a valid date string");
   }
 
