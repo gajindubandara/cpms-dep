@@ -1,4 +1,6 @@
 import express from "express";
+import { verifyAccessToken } from '../middlewares/verifyAccessToken.js';
+import { authorize } from '../middlewares/authorizeAccess.js';
 import {
   createClient,
   updateClient,
@@ -10,11 +12,11 @@ import {
 
 const router = express.Router();
 
-router.post("/", createClient);
-router.put("/:clientId", updateClient);
-router.get("/date", getAllClientsByQueryDate);
-router.get("/:clientId", getClientById);
-router.get("/", getAllClients);
-router.delete("/:clientId", deleteClient);
+router.post("/",verifyAccessToken, authorize(["g2-cpms-admin"]), createClient);
+router.put("/:clientId",verifyAccessToken, authorize(["g2-cpms-admin"]), updateClient);
+router.get("/date",verifyAccessToken, authorize(["g2-cpms-admin"]), getAllClientsByQueryDate);
+router.get("/:clientId",verifyAccessToken,authorize(["g2-cpms-admin","g2-cpms-user"]), getClientById);
+router.get("/",verifyAccessToken, authorize(["g2-cpms-admin"]), getAllClients);
+router.delete("/:clientId",verifyAccessToken, authorize(["g2-cpms-admin"]), deleteClient);
 
 export default router;

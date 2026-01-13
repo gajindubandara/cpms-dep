@@ -29,6 +29,9 @@ export const getProjectById = async (req, res) => {
   try {
     const projectId = req.params.projectId;
     const result = await getProjectService(projectId);
+    if(!result.Item){
+      res.status(404).json({ message: "Project with that id not found"});
+    }
     res.status(200).json({ success: true, data: result });
   } catch (err) {
     console.log(err);
