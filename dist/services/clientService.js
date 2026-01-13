@@ -7,7 +7,11 @@ import {
   getClientByEmail,
   deleteClient,
 } from "../daos/clientDao.js";
-
+import {
+  projectByClientId,
+  deleteFeature,
+  deleteProject,
+} from "../daos/projectDao.js";
 import {
   mapCreateClientDTOtoClientModel,
   mapUpdateClientDTOtoClientModel,
@@ -69,6 +73,21 @@ export const getAllClientsByQueryDateService = async (queryDate) => {
 //delete client
 export const deleteClientService = async (clientId) => {
   if (!clientId) throw new Error("clientId is required");
+  const projects = await projectByClientId(clientId);
 
+  for (const element of projects) {
+    const parts = element.SK.split("#");
+    const featureId = parts[3];
+
+    if (featureId !== "0") {
+      await deleteFeature(
+        clientId,
+        element.SK.split("#")[1],
+        element.SK.split("#")[3]
+      );
+    } else {
+      await deleteProject(clientId, element.SK.split("#")[1]);
+    }
+  }
   return await deleteClient(clientId);
 };
