@@ -43,10 +43,6 @@ export const validateProjectDTO = (data = {}) => {
     throw new BadRequest("startDate cannot be null");
   }
 
-  if (endDate == undefined) {
-    throw new BadRequest("endDate cannot be null");
-  }
-
   if (status == undefined) {
     if (typeof status !== "string") {
       throw new BadRequest("status must be a string");
