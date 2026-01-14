@@ -93,7 +93,6 @@ const verifyToken = async (req, res) => {
             throw new Error('Expected access token');
         }
 
-        console.log('Token verified:', verified.payload);
 
         return res.status(200).json(verified.payload);
     } catch (error) {

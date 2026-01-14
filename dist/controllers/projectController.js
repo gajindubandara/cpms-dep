@@ -60,7 +60,6 @@ export const createFeature = async (req, res, next) => {
 // controller for getfeature
 export const getFeature = async (req, res, next) => {
   try {
-    console.log("this is being accessed");
     const projectId = req.query.projectId;
     const featureId = req.query.featureId;
     const result = await getFeatureService(projectId, featureId);

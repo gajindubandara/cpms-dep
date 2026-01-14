@@ -23,6 +23,5 @@ export const mapAdminUpdateTicketDTOtoTicketModel = (dto) => {
   if (dto.status !== undefined) model.status = dto.status;
   if (dto.adminResponse !== undefined) model.adminResponse = dto.adminResponse;
   if (dto.updatedAt !== undefined) model.updatedAt = dto.updatedAt;
-  console.log('Admin update mapped model:', model); // Debug log
   return model;
 };

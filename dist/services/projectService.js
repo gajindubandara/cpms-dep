@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
 import {
   mapCreateProjectDTOtoProjectModel,
   mapUpdateProjectDTOtoProjectModel,
@@ -17,8 +16,7 @@ import {
   projectByClientId,
 } from "../daos/projectDao.js";
 import { getClientById } from "../daos/clientDao.js";
-import { BadRequest, NotFoundError } from "../errors/customErrors.js";
-
+import { BadRequest, NotFoundError, AlreadyExistsError } from "../errors/customErrors.js";
 //create Project
 export const createprojectService = async (createProjectDTO) => {
   // Validate required fields before mapping
@@ -33,6 +31,21 @@ export const createprojectService = async (createProjectDTO) => {
   const existClient = await getClientById(model.clientId);
   if (!existClient) {
     throw new NotFoundError("Client with that id is not available");
+  }
+  const result = await allProjects();
+  const projects =[];
+  //filter the projects with 0
+  result.forEach(element => {
+    let pro = (element.SK).split("#")[3]
+    if(pro == 0){
+      projects.push(element)
+    }
+  });
+
+  for(const project of projects){
+    if((project.SK).split("#")[1] == model.projectId){
+      throw new AlreadyExistsError("Id already exists, try a new one")
+    }
   }
 
   return await createProject({
