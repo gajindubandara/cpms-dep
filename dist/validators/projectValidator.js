@@ -15,6 +15,7 @@ export const validateProjectDTO = (data = {}) => {
     endDate,
     status,
     cost,
+    finalAmount,
     profitMargin,
     commissionPercent,
     isRecurring,
@@ -54,6 +55,10 @@ export const validateProjectDTO = (data = {}) => {
 
   if (cost == undefined) {
     throw new BadRequest("cost cannot be null");
+  }
+
+  if (cost == undefined) {
+    throw new BadRequest("final amount cannot be null");
   }
 
   if (profitMargin == undefined) {

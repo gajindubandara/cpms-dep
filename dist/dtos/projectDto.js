@@ -14,6 +14,7 @@ export class ProjectDTO {
     endDate,
     status,
     cost,
+    finalAmount,
     profitMargin,
     commissionPercent,
     isRecurring,
@@ -30,6 +31,7 @@ export class ProjectDTO {
     if (description !== undefined) this.description = description;
     if (startDate !== undefined) this.startDate = startDate;
     if (endDate !== undefined) this.endDate = endDate;
+    if (finalAmount !== undefined) this.finalAmount = finalAmount;
 
     if (status !== undefined) {
       this.status = Object.values(ProjectStatus).includes(status)
