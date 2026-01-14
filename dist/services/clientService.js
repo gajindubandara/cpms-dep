@@ -22,6 +22,7 @@ import {
   AdminCreateUserCommand,
   AdminGetUserCommand,
   AdminDeleteUserCommand,
+  AdminAddUserToGroupCommand,
 } from "@aws-sdk/client-cognito-identity-provider";
 
 //create client
@@ -50,7 +51,12 @@ export const createClientService = async (createClientDTO) => {
         { Name: "email_verified", Value: "true" }
       ],
       TemporaryPassword: password
-      // Removed MessageAction: 'SUPPRESS' to enable default invitation email
+    }));
+    // Add user to g2-cpms-user group
+    await cognito.send(new AdminAddUserToGroupCommand({
+      UserPoolId: process.env.COGNITO_USER_POOL_ID,
+      Username: model.email,
+      GroupName: "g2-cpms-user"
     }));
   } catch (err) {
     if (err.name === "UsernameExistsException") {
