@@ -15,9 +15,14 @@ import {
   mapCreateClientDTOtoClientModel,
   mapUpdateClientDTOtoClientModel,
 } from "../mappers/clientMapper.js";
-import { AlreadyExistsError, BadRequest } from "../errors/customErrors.js";
+import { AlreadyExistsError, BadRequest, NotFoundError } from "../errors/customErrors.js";
 
-import { CognitoIdentityProviderClient, AdminCreateUserCommand, AdminGetUserCommand } from "@aws-sdk/client-cognito-identity-provider";
+import {
+  CognitoIdentityProviderClient,
+  AdminCreateUserCommand,
+  AdminGetUserCommand,
+  AdminDeleteUserCommand,
+} from "@aws-sdk/client-cognito-identity-provider";
 
 //create client
 export const createClientService = async (createClientDTO) => {
@@ -118,6 +123,23 @@ export const getAllClientsByQueryDateService = async (queryDate) => {
 //delete client
 export const deleteClientService = async (clientId) => {
   if (!clientId) throw new BadRequest("clientId is required");
+  const existingClient = await getClientById(clientId);
+  if (!existingClient) throw new NotFoundError("Client not found");
+
+  const email = existingClient?.Attributes?.email;
+  if (!email) throw new BadRequest("Client email not found; cannot delete Cognito user");
+
+  // Delete user in Cognito
+  const cognito = new CognitoIdentityProviderClient({
+    region: process.env.AWS_REGION_NAME,
+  });
+  await cognito.send(
+    new AdminDeleteUserCommand({
+      UserPoolId: process.env.COGNITO_USER_POOL_ID,
+      Username: email,
+    })
+  );
+
   const projects = await projectByClientId(clientId);
 
   for (const element of projects) {
