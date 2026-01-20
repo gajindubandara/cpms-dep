@@ -15,6 +15,7 @@ export class ProjectDTO {
     status,
     cost,
     finalAmount,
+    currency,
     profitMargin,
     commissionPercent,
     isRecurring,
@@ -38,6 +39,7 @@ export class ProjectDTO {
         ? status
         : ProjectStatus.PLANNED;
     }
+    if(currency !== undefined) this.currency = currency;
     if(cost !== undefined) this.cost = cost;
     if (profitMargin !== undefined) this.profitMargin = profitMargin;
     if (commissionPercent !== undefined)

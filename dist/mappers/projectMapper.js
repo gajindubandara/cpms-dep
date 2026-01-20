@@ -12,6 +12,7 @@ export const mapCreateProjectDTOtoProjectModel = (dto) => ({
     startDate: dto.startDate,
     endDate: dto.endDate,
     status: dto.status,
+    currency: dto.currency,
     cost: dto.cost,
     finalAmount: dto.finalAmount,
     profitMargin: dto.profitMargin,
@@ -38,6 +39,7 @@ export const mapUpdateProjectDTOtoProjectModel = (dto) => {
             : ProjectStatus.PLANNED;
     }
     if(dto.cost !== undefined) model.cost = dto.cost;
+    if(dto.currency !== undefined)model.currency = dto.currency;
     if(dto.finalAmount !== undefined) model.finalAmount = dto.finalAmount;
     if(dto.profitMargin !== undefined) model.profitMargin = dto.profitMargin;
     if(dto.commissionPercent !== undefined) model.commissionPercent = dto.commissionPercent;
