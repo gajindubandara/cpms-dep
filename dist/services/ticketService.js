@@ -26,11 +26,9 @@ import {
 // Service to create a ticket
 export const createTicketService = async (createTicketDTO) => {
   if (!createTicketDTO || typeof createTicketDTO !== 'object') {
-    throw new BadRequest('Invalid input: Ticket data is required.');
   }
   const { clientId, projectId, subject, message } = createTicketDTO;
   if (!clientId || !projectId || !subject || !message) {
-    throw new BadRequest('Missing required fields: clientId, projectId, subject, or message');
   }
 
   // Fetch client from DB
