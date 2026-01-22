@@ -27,8 +27,8 @@ import {
 export const createTicketService = async (createTicketDTO) => {
   if (!createTicketDTO || typeof createTicketDTO !== 'object') {
   }
-  const { clientId, projectId, subject, message } = createTicketDTO;
-  if (!clientId || !projectId || !subject || !message) {
+  const { clientId, projectId, subject, message, status } = createTicketDTO;
+  if (!clientId || !subject || !message) {
   }
 
   // Fetch client from DB
@@ -37,15 +37,29 @@ export const createTicketService = async (createTicketDTO) => {
     throw new NotFoundError('Client not found');
   }
 
-  // Ensure the project belongs to the client
-  const projects = await projectByClientId(clientId);
-  const ownsProject = projects.some(p => p.SK && p.SK.startsWith(`PROJECT#${projectId}`));
-  if (!ownsProject) {
-    throw new Forbidden('Project does not belong to this client');
+  // Extract client name from attributes
+  const clientName = client.Attributes?.clientName || client.Attributes?.name || client.clientName || 'Unknown Client';
+
+  let projectName = null;
+
+  // Ensure the project belongs to the client (if projectId is provided)
+  if (projectId) {
+    const projects = await projectByClientId(clientId);
+    const project = projects.find(p => p.SK && p.SK.startsWith(`PROJECT#${projectId}`));
+    if (!project) {
+      throw new Forbidden('Project does not belong to this client');
+    }
+    // Extract project name from project attributes
+    projectName = project.Attributes?.projectName || project.Attributes?.name || project.projectName || projectId;
   }
 
   try {
-    const ticketData = mapCreateTicketDTOtoTicketModel(createTicketDTO);
+    const ticketData = mapCreateTicketDTOtoTicketModel({
+      ...createTicketDTO,
+      clientName,
+      projectName,
+      status: status || 'Open'
+    });
     return await createTicket(ticketData);
   } catch (err) {
     console.error('Error in createTicketService:', err);

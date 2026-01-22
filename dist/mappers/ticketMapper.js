@@ -1,6 +1,8 @@
 export const mapCreateTicketDTOtoTicketModel = (dto) => ({
   clientId: dto.clientId,
+  clientName: dto.clientName,
   projectId: dto.projectId,
+  projectName: dto.projectName,
   subject: dto.subject,
   message: dto.message,
   status: dto.status,

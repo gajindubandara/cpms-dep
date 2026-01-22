@@ -12,7 +12,10 @@ export const Ticket = {
             PK: `CLIENT#${data.clientId}`,
             SK: `TICKET#${id}`,
             Attributes: {
-                projectId: data.projectId,
+                clientId: data.clientId,
+                clientName: data.clientName,
+                projectId: data.projectId || null,
+                projectName: data.projectName || null,
                 subject: data.subject,
                 message: data.message,
                 status: data.status ?? TicketStatus.OPEN,
