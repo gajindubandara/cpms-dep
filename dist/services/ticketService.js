@@ -109,10 +109,27 @@ export const getTicketsByQueryDateService = async (queryDate) => {
 
 
 // Service to get tickets by queryDate range
-export const getTicketsByQueryDateRangeService = async (startDate, endDate) => {
+export const getTicketsByQueryDateRangeService = async (startDate, endDate, type = "day") => {
   if (!startDate || !endDate) throw new BadRequest('startDate and endDate are required');
   try {
-    return await getTicketsByQueryDateRange(startDate, endDate);
+    const allTickets = await getTicketsByQueryDateRange(startDate, endDate);
+    let filteredTickets = allTickets;
+    if (type === "month") {
+      // Filter tickets by month and year
+      const [startYear, startMonth] = startDate.split("-");
+      filteredTickets = allTickets.filter(ticket => {
+        const [year, month] = (ticket.queryDate || "").split("-");
+        return year === startYear && month === startMonth;
+      });
+    } else if (type === "year") {
+      // Filter tickets by year
+      const startYear = startDate.split("-")[0];
+      filteredTickets = allTickets.filter(ticket => {
+        const year = (ticket.queryDate || "").split("-")[0];
+        return year === startYear;
+      });
+    } // else type === "day" (default) returns all in range
+    return filteredTickets;
   } catch (err) {
     console.error('Error in getTicketsByQueryDateRangeService:', err);
     throw new InternalServerError('Failed to get tickets by query date range. ' + (err.message || ''));
