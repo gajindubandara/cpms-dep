@@ -6,6 +6,7 @@ import authRoutes from './routes/authRoutes.js';
 import errorhandler from './middlewares/errorHandler.js';
 import dotenv from 'dotenv';
 import projectRoutes from "./routes/projectRoutes.js"
+import paymentRoutes from "./routes/paymentRoute.js"
 dotenv.config();
 const app = express();
 const port = 3000;
@@ -17,7 +18,7 @@ app.use(cors({
     credentials: true,
 }));
 
-app.use(express.json()); // To parse JSON bodies
+app.use(express.json({ limit: '50mb' })); // To parse JSON bodies with increased limit for payment slips
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -32,6 +33,9 @@ app.use("/clients", clientRoutes);
 
 //project routes
 app.use("/projects",projectRoutes)
+
+// Payment routes
+app.use("/payments", paymentRoutes);
 
 // Auth routes
 app.use("/auth", authRoutes);
