@@ -190,8 +190,6 @@ export const submitPaymentSlip = async (req, res, next) => {
   try {
     const { paymentId, projectId } = req.params;
 
-    console.log(`[submitPaymentSlip] Controller - paymentId: ${paymentId}, projectId: ${projectId}, file: ${req.file?.filename || 'none'}`);
-
     if (!paymentId || !projectId) {
       return res.status(400).json({
         success: false,
@@ -210,7 +208,6 @@ export const submitPaymentSlip = async (req, res, next) => {
     const validation = validatePaymentSlip(req.file);
 
     if (!validation.isValid) {
-      console.log(`[submitPaymentSlip] Validation failed:`, validation.errors);
       return res.status(400).json({
         success: false,
         message: 'Validation failed',
@@ -219,7 +216,6 @@ export const submitPaymentSlip = async (req, res, next) => {
     }
 
     const payment = await submitPaymentSlipService(paymentId, projectId, req.file);
-    console.log(`[submitPaymentSlip] Service returned:`, payment);
 
     res.status(200).json({
       success: true,

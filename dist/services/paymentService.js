@@ -114,15 +114,11 @@ export const updatePaymentService = async (paymentId, projectId, updatePaymentDT
 // Submit payment with slip (Client action)
 export const submitPaymentSlipService = async (paymentId, projectId, fileData) => {
   try {
-    console.log(`[submitPaymentSlip] Starting - paymentId: ${paymentId}, projectId: ${projectId}`);
-    
     // Verify payment exists
     const payment = await getPaymentById(paymentId, projectId);
-    console.log(`[submitPaymentSlip] Retrieved payment:`, payment);
     
     // Handle both structures: payment.Attributes and direct attributes
     const attrs = payment.Attributes || payment;
-    console.log(`[submitPaymentSlip] Payment attributes:`, { status: attrs.status, clientId: attrs.clientId });
     
     if (!attrs) {
       throw new NotFoundError('Payment not found or invalid data structure');
@@ -139,12 +135,8 @@ export const submitPaymentSlipService = async (paymentId, projectId, fileData) =
     }
 
     // Upload file to Cloudinary
-    console.log(`[submitPaymentSlip] Uploading file to Cloudinary - filename: ${fileData.originalname}, size: ${fileData.size}`);
-    
     const fileName = paymentId;
     const cloudinaryResponse = await uploadToCloudinary(fileData.buffer, fileName);
-    
-    console.log(`[submitPaymentSlip] File uploaded to Cloudinary - URL: ${cloudinaryResponse.secure_url}`);
 
     // Update payment with slip URL from Cloudinary and completion time
     const updates = {
@@ -153,9 +145,7 @@ export const submitPaymentSlipService = async (paymentId, projectId, fileData) =
       completedAt: new Date().toISOString(),
     };
 
-    console.log(`[submitPaymentSlip] Updating payment with status: COMPLETED`);
     const updatedPayment = await updatePayment(paymentId, projectId, updates);
-    console.log(`[submitPaymentSlip] Payment updated successfully:`, updatedPayment);
 
     return updatedPayment;
   } catch (error) {
