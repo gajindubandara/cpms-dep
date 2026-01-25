@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
+import { Readable } from 'stream';
 
 // Initialize Cloudinary with environment variables
 cloudinary.config({
@@ -36,7 +37,6 @@ export const uploadToCloudinary = async (fileBuffer, fileName, options = {}) => 
 
       // Convert buffer to stream and pipe to upload stream
       if (Buffer.isBuffer(fileBuffer)) {
-        const { Readable } = await import('stream');
         Readable.from(fileBuffer).pipe(uploadStream);
       } else {
         fileBuffer.pipe(uploadStream);

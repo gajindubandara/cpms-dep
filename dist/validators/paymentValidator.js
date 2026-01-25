@@ -66,25 +66,27 @@ export const validateUpdatePayment = (data) => {
   };
 };
 
-export const validatePaymentSlip = (paymentSlipData) => {
+export const validatePaymentSlip = (file) => {
   const errors = [];
 
-  if (!paymentSlipData) {
-    errors.push('Payment slip URL is required');
+  if (!file) {
+    errors.push('File is required');
   }
 
-  // Validate that it's a string (URL from Cloudinary)
-  if (paymentSlipData && typeof paymentSlipData !== 'string') {
-    errors.push('Payment slip must be a valid Cloudinary URL string');
+  // Validate that it's a file object from multer
+  if (file && !file.buffer) {
+    errors.push('Invalid file upload');
   }
 
-  // Validate URL format
-  if (paymentSlipData && typeof paymentSlipData === 'string') {
-    try {
-      new URL(paymentSlipData);
-    } catch {
-      errors.push('Payment slip must be a valid URL');
-    }
+  // Validate file type
+  const allowedMimes = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
+  if (file && file.mimetype && !allowedMimes.includes(file.mimetype)) {
+    errors.push('Only PNG, JPG, JPEG, and PDF files are allowed');
+  }
+
+  // Validate file size (10MB max)
+  if (file && file.size > 10 * 1024 * 1024) {
+    errors.push('File size must be less than 10MB');
   }
 
   return {

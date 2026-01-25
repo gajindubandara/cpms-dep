@@ -14,6 +14,7 @@ import {
 import { NotFoundError, BadRequest } from "../errors/customErrors.js";
 import { getClientById } from "../daos/clientDao.js";
 import { getProjectById } from "../daos/projectDao.js";
+import { uploadToCloudinary } from "../config/cloudinary.js";
 
 // Create payment (Admin only)
 export const createPaymentService = async (createPaymentDTO, adminId) => {
@@ -111,7 +112,7 @@ export const updatePaymentService = async (paymentId, projectId, updatePaymentDT
 };
 
 // Submit payment with slip (Client action)
-export const submitPaymentSlipService = async (paymentId, projectId, paymentSlipData) => {
+export const submitPaymentSlipService = async (paymentId, projectId, fileData) => {
   try {
     console.log(`[submitPaymentSlip] Starting - paymentId: ${paymentId}, projectId: ${projectId}`);
     
@@ -137,9 +138,17 @@ export const submitPaymentSlipService = async (paymentId, projectId, paymentSlip
       throw new BadRequest('Payment slip is awaiting approval. Cannot resubmit at this time.');
     }
 
+    // Upload file to Cloudinary
+    console.log(`[submitPaymentSlip] Uploading file to Cloudinary - filename: ${fileData.originalname}, size: ${fileData.size}`);
+    
+    const fileName = paymentId;
+    const cloudinaryResponse = await uploadToCloudinary(fileData.buffer, fileName);
+    
+    console.log(`[submitPaymentSlip] File uploaded to Cloudinary - URL: ${cloudinaryResponse.secure_url}`);
+
     // Update payment with slip URL from Cloudinary and completion time
     const updates = {
-      paymentSlip: paymentSlipData, // Cloudinary URL (e.g., https://res.cloudinary.com/.../payment-slips/...)
+      paymentSlip: cloudinaryResponse.secure_url, // Cloudinary URL
       status: 'COMPLETED',
       completedAt: new Date().toISOString(),
     };

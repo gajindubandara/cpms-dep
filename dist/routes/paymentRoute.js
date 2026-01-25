@@ -2,6 +2,7 @@ import express from 'express';
 import * as paymentController from '../controllers/paymentController.js';
 import { verifyAccessToken } from '../middlewares/verifyAccessToken.js';
 import { authorize } from '../middlewares/authorizeAccess.js';
+import { uploadSingle } from '../middlewares/uploadMiddleware.js';
 
 const router = express.Router();
 
@@ -45,7 +46,8 @@ router.get('/client/my-payments',
 
 // Submit payment slip (Client action)
 router.post('/:paymentId/project/:projectId/submit-slip', 
-  authorize(['g2-cpms-user']), 
+  authorize(['g2-cpms-user']),
+  uploadSingle,
   paymentController.submitPaymentSlip
 );
 
