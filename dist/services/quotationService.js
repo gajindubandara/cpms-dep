@@ -8,14 +8,15 @@ import {
     mapCreateQuotationDTOtoQuotationModel,
     mapClientUpdateQuotationDTOtoQuotationModel,
     mapAdminUpdateQuotationDTOtoQuotationModel} from "../mappers/quotationMapper.js";
-
 import { BadRequest, NotFoundError } from "../errors/customErrors.js";
+import { getClientById } from "../daos/clientDao.js";
+
 
 // Create Quotation Service
 export const createQuotationService = async (createQuotationDTO) => {
     // Validate required fields before mapping
     if (!createQuotationDTO.clientId) {
-        throw new BadRequest("clientId is required");
+        throw new BadRequest("clientId is required");  
     }
 
     // Ensure projectId is mapped in the model
@@ -23,6 +24,11 @@ export const createQuotationService = async (createQuotationDTO) => {
         throw new BadRequest("projectId is required");
     }
     const model = mapCreateQuotationDTOtoQuotationModel(createQuotationDTO);
+          const existClient = await getClientById(model.clientId);
+      if (!existClient) {
+        throw new NotFoundError("Client with that id is not available");
+      }
+
     return await createQuotation(model);
 }
 
