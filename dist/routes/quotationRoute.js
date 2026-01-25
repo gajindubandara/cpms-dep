@@ -5,15 +5,16 @@ import { createQuotationController,
         updateQuotationController,
         deleteQuotationController
  } from '../controllers/quotationController.js';
+import { verifyAccessToken } from '../middlewares/verifyAccessToken.js';
+import { authorize } from '../middlewares/authorizeAccess.js';
 
 
 const router = express.Router();
 
 // All routes require authentication
-router.post('/', createQuotationController);
-router.get('/:quotationId', getQuotationByIdController);
-router.get('/', getAllQuotationsController);
-router.put('/:quotationId', updateQuotationController);
-router.delete('/:quotationId', deleteQuotationController);
-
+router.post('/', verifyAccessToken, authorize (["g2-cpms-admin"]), createQuotationController);
+router.get('/:quotationId', verifyAccessToken, authorize(["g2-cpms-admin","g2-cpms-user"]), getQuotationByIdController);
+router.get('/', verifyAccessToken, authorize(["g2-cpms-admin"]), getAllQuotationsController);
+router.put('/:quotationId', verifyAccessToken, authorize (["g2-cpms-admin"]), updateQuotationController);
+router.delete('/:quotationId', verifyAccessToken, authorize (["g2-cpms-admin"]), deleteQuotationController);
 export default router;
