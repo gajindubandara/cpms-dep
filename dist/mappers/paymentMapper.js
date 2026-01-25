@@ -53,7 +53,7 @@ export const mapPaymentModelToAdminPaymentDTO = (payment) => {
     dueDate: attrs.dueDate,
     status: attrs.status,
     description: attrs.description,
-    paymentSlip: attrs.paymentSlip ? 'Uploaded' : 'Not Uploaded',
+    paymentSlip: attrs.paymentSlip, // Return actual URL, not label
     completedAt: attrs.completedAt,
     createdAt: attrs.createdAt,
     updatedAt: attrs.updatedAt,

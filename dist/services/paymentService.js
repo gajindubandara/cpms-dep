@@ -127,13 +127,19 @@ export const submitPaymentSlipService = async (paymentId, projectId, paymentSlip
       throw new NotFoundError('Payment not found or invalid data structure');
     }
     
-    if (attrs.status === 'APPROVED' || attrs.status === 'REJECTED') {
-      throw new BadRequest('Cannot submit slip for already approved or rejected payment');
+    // Allow submission for PENDING and REJECTED payments
+    // Do NOT allow for APPROVED (already done) or COMPLETED (awaiting approval)
+    if (attrs.status === 'APPROVED') {
+      throw new BadRequest('Cannot submit slip for already approved payment');
     }
 
-    // Update payment with slip and completion time
+    if (attrs.status === 'COMPLETED') {
+      throw new BadRequest('Payment slip is awaiting approval. Cannot resubmit at this time.');
+    }
+
+    // Update payment with slip URL from Cloudinary and completion time
     const updates = {
-      paymentSlip: paymentSlipData, // Base64 encoded image or file path
+      paymentSlip: paymentSlipData, // Cloudinary URL (e.g., https://res.cloudinary.com/.../payment-slips/...)
       status: 'COMPLETED',
       completedAt: new Date().toISOString(),
     };
@@ -220,6 +226,7 @@ export const deletePaymentService = async (paymentId, projectId) => {
 export const getAllPaymentsService = async () => {
   try {
     const payments = await getAllPayments();
+    console.log('[getAllPaymentsService] Retrieved raw payments:', payments.length);
     
     if (!payments || payments.length === 0) {
       return [];
@@ -234,19 +241,29 @@ export const getAllPaymentsService = async () => {
           
           // Skip if we don't have valid payment data
           if (!attrs || !attrs.paymentId || !attrs.clientId || !attrs.projectId) {
-            console.warn('Skipping invalid payment data:', payment);
+            console.warn('[getAllPaymentsService] Skipping invalid payment data:', payment);
             return null;
           }
           
+          console.log(`[getAllPaymentsService] Enriching payment ${attrs.paymentId} with clientId ${attrs.clientId} and projectId ${attrs.projectId}`);
+          
           const client = await getClientById(attrs.clientId);
           const project = await getProjectById(attrs.projectId);
-          return {
+          
+          const enriched = {
             ...payment,
             clientName: client?.Attributes?.clientName || 'Unknown Client',
             projectName: project?.Attributes?.projectName || 'Unknown Project',
           };
+          
+          console.log(`[getAllPaymentsService] Enriched payment ${attrs.paymentId}:`, { 
+            projectName: enriched.projectName, 
+            clientName: enriched.clientName 
+          });
+          
+          return enriched;
         } catch (error) {
-          console.error(`Failed to fetch client/project for payment:`, error);
+          console.error(`[getAllPaymentsService] Failed to fetch client/project for payment:`, error);
           return {
             ...payment,
             clientName: 'Unknown Client',
@@ -257,9 +274,11 @@ export const getAllPaymentsService = async () => {
     );
     
     // Filter out null entries
-    return enrichedPayments.filter(payment => payment !== null);
+    const result = enrichedPayments.filter(payment => payment !== null);
+    console.log(`[getAllPaymentsService] Returning ${result.length} enriched payments`);
+    return result;
   } catch (error) {
-    console.error('Error in getAllPaymentsService:', error);
+    console.error('[getAllPaymentsService] Error in getAllPaymentsService:', error);
     throw error;
   }
 };

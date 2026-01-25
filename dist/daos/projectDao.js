@@ -35,7 +35,7 @@ export const getProjectById = async (projectId) => {
     },
   };
   const result = await ddbDocClient.send(new QueryCommand(params));
-  return result.Items;
+  return result.Items && result.Items.length > 0 ? result.Items[0] : null;
 };
 
 //features by id(both project and feature comes handle it somehow)

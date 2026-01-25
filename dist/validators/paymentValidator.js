@@ -70,12 +70,21 @@ export const validatePaymentSlip = (paymentSlipData) => {
   const errors = [];
 
   if (!paymentSlipData) {
-    errors.push('Payment slip data is required');
+    errors.push('Payment slip URL is required');
   }
 
-  // If it's a base64 string or file path
+  // Validate that it's a string (URL from Cloudinary)
   if (paymentSlipData && typeof paymentSlipData !== 'string') {
-    errors.push('Payment slip must be a valid file or base64 string');
+    errors.push('Payment slip must be a valid Cloudinary URL string');
+  }
+
+  // Validate URL format
+  if (paymentSlipData && typeof paymentSlipData === 'string') {
+    try {
+      new URL(paymentSlipData);
+    } catch {
+      errors.push('Payment slip must be a valid URL');
+    }
   }
 
   return {
