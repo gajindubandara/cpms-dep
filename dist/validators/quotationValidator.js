@@ -1,5 +1,22 @@
+export const validateQuotationUpdateDTO = (data = {}) => {
+  if (data.clientId !== undefined && typeof data.clientId !== "string") {
+    throw new BadRequest("clientId must be a string");
+  }
+  if (data.projectId !== undefined && typeof data.projectId !== "string") {
+    throw new BadRequest("projectId must be a string");
+  }
+  if (data.amount !== undefined && (typeof data.amount !== "number" || data.amount < 0)) {
+    throw new BadRequest("amount must be a non-negative number");
+  }
+  if (data.status !== undefined && !Object.values(QuotationStatus).includes(data.status)) {
+    throw new BadRequest("Invalid status value");
+  }
+  if (data.items !== undefined && !Array.isArray(data.items)) {
+    throw new BadRequest("items must be an array");
+  }
+  return true;
+};
 import { QuotationStatus } from "../enums/quotationStatus.js";
-import {Status} from "../enums/quotationStatus.js";
 import { BadRequest } from "../errors/customErrors.js";
 
 export const validateQuotationDTO = (data = {}) => {

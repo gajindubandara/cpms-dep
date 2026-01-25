@@ -1,4 +1,4 @@
-import { ddbDocClient } from "../config/dynamodb.js";
+import  ddbDocClient from "../config/dynamodb.js";
 import { Quotation } from "../models/quotationModel.js";
 import {
   PutCommand,
@@ -50,33 +50,30 @@ export const updateQuotation = async (quotationId, updates) => {
   if (!updates || Object.keys(updates).length === 0)
     throw new BadRequest("No updates provided");
 
-    delete updates.quotationId;
-    delete updates.PK;
-    delete updates.SK;
+  delete updates.quotationId;
+  delete updates.PK;
+  delete updates.SK;
 
-    updates.updatedAt = new Date().toISOString();
+  updates.updatedAt = new Date().toISOString();
 
-    const ExpressionAttributeNames = {
-    "#attrs": "Attributes",
-  };
-    const ExpressionAttributeValues = {};
-    const updateParts = [];
+  // All updates go inside Attributes
+  const ExpressionAttributeNames = { "#attrs": "Attributes" };
+  const ExpressionAttributeValues = {};
+  const updateParts = [];
 
-    Object.keys(updates).forEach((key, index) => {
+  Object.keys(updates).forEach((key, index) => {
     const nameKey = `#attr${index}`;
     const valueKey = `:val${index}`;
-
-// Nested attribute handling
     updateParts.push(`#attrs.${nameKey} = ${valueKey}`);
     ExpressionAttributeNames[nameKey] = key;
     ExpressionAttributeValues[valueKey] = updates[key];
   });
 
-    const params = {
+  const params = {
     TableName: "G2Labs-CPMS",
     Key: {
-        PK: Quotation.pk(quotationId),
-        SK: Quotation.sk(),
+      PK: Quotation.pk(quotationId),
+      SK: Quotation.sk(),
     },
     UpdateExpression: `SET ${updateParts.join(", ")}`,
     ExpressionAttributeNames,
@@ -84,9 +81,9 @@ export const updateQuotation = async (quotationId, updates) => {
     ConditionExpression: "attribute_exists(PK)",
     ReturnValues: "ALL_NEW",
   };
-    const result = await ddbDocClient.send(new UpdateCommand(params));
-    return result.Attributes;
-}
+  const result = await ddbDocClient.send(new UpdateCommand(params));
+  return result.Attributes;
+};
 
 // Delete Quotation
 export const deleteQuotation = async (quotationId) => {
@@ -103,3 +100,21 @@ export const deleteQuotation = async (quotationId) => {
     const result = await ddbDocClient.send(new DeleteCommand(params));
     return result.Attributes;
 }
+
+// Get All Quotations
+export const getAllQuotations = async () => {
+  const { ScanCommand } = await import("@aws-sdk/lib-dynamodb");
+  const params = {
+    TableName: "G2Labs-CPMS",
+    FilterExpression: "begins_with(PK, :pkPrefix)",
+    ExpressionAttributeValues: {
+      ":pkPrefix": "QUOTATION#"
+    }
+  };
+  const result = await ddbDocClient.send(new ScanCommand(params));
+  // Extract only the Attributes and quotationId from each item
+  return (result.Items || []).map(item => ({
+    quotationId: item.PK.replace("QUOTATION#", ""),
+    ...item.Attributes
+  }));
+};

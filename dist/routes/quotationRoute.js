@@ -5,16 +5,15 @@ import { createQuotationController,
         updateQuotationController,
         deleteQuotationController
  } from '../controllers/quotationController.js';
-import { verifyAccessToken } from '../middlewares/authMiddleware.js';
-import { authorize } from '../middlewares/authorizationMiddleware.js';
+
 
 const router = express.Router();
 
 // All routes require authentication
-router.post('/', verifyAccessToken, createQuotationController);
-router.get('/:quotationId', verifyAccessToken, getQuotationByIdController);
-router.get('/', verifyAccessToken, getAllQuotationsController);
-router.put('/:quotationId', verifyAccessToken, updateQuotationController);
-router.delete('/:quotationId', verifyAccessToken, deleteQuotationController);
+router.post('/', createQuotationController);
+router.get('/:quotationId', getQuotationByIdController);
+router.get('/', getAllQuotationsController);
+router.put('/:quotationId', updateQuotationController);
+router.delete('/:quotationId', deleteQuotationController);
 
 export default router;

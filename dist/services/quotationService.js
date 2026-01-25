@@ -1,13 +1,13 @@
 import {
-    CreateQuotation,
-    GetAllQuotations,
-    GetQuotationById,
-    UpdateQuotation,
-    DeleteQuotation } from "../daos/quotationDao.js";
-
+    createQuotation,
+    getAllQuotations,
+    getQuotationById,
+    updateQuotation,
+    deleteQuotation } from "../daos/quotationDao.js";
 import {
     mapCreateQuotationDTOtoQuotationModel,
-    mapUpdateQuotationDTOtoQuotationModel,} from "../mappers/quotationMapper.js";
+    mapClientUpdateQuotationDTOtoQuotationModel,
+    mapAdminUpdateQuotationDTOtoQuotationModel} from "../mappers/quotationMapper.js";
 
 import { BadRequest, NotFoundError } from "../errors/customErrors.js";
 
@@ -23,34 +23,34 @@ export const createQuotationService = async (createQuotationDTO) => {
         throw new BadRequest("projectId is required");
     }
     const model = mapCreateQuotationDTOtoQuotationModel(createQuotationDTO);
-    return await CreateQuotation(model);
+    return await createQuotation(model);
 }
 
 // Get Quotation by ID Service
 export const getQuotationByIdService = async (quotationId) => {
-    return await GetQuotationById(quotationId);
+    return await getQuotationById(quotationId);
 }
 
 // Get All Quotations Service
 export const getAllQuotationsService = async () => {
-    return await GetAllQuotations();
+    return await getAllQuotations();
 }
 
 // Update Quotation Service
 export const updateQuotationService = async (quotationId, updateQuotationDTO) => {
     if (!quotationId) throw new BadRequest("quotationId is required");
-    const updates = mapUpdateQuotationDTOtoQuotationModel(updateQuotationDTO);
+    const updates = mapAdminUpdateQuotationDTOtoQuotationModel(updateQuotationDTO);
 
     if (Object.keys(updates).length === 0) {
         throw new BadRequest("No valid fields to update");
     } 
-    return await UpdateQuotation(quotationId, updates);
+    return await updateQuotation(quotationId, updates);
 }
 
 // Delete Quotation Service
 export const deleteQuotationService = async (quotationId) => {
     if (!quotationId) throw new BadRequest("quotationId is required");
-    const existingQuotation = await GetQuotationById(quotationId);
+    const existingQuotation = await getQuotationById(quotationId);
     if (!existingQuotation) throw new NotFoundError("Quotation not found");
-    return await DeleteQuotation(quotationId);
+    return await deleteQuotation(quotationId);
 }
