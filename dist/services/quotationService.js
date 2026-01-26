@@ -3,7 +3,9 @@ import {
     getAllQuotations,
     getQuotationById,
     updateQuotation,
-    deleteQuotation } from "../daos/quotationDao.js";
+    deleteQuotation,
+    getQuotationsByClientId
+} from "../daos/quotationDao.js";
 import {
     mapCreateQuotationDTOtoQuotationModel,
     mapAdminUpdateQuotationDTOtoQuotationModel} from "../mappers/quotationMapper.js";
@@ -39,6 +41,12 @@ export const getQuotationByIdService = async (quotationId) => {
 // Get All Quotations Service
 export const getAllQuotationsService = async () => {
     return await getAllQuotations();
+}
+
+// Get Quotations by Client ID Service
+export const getQuotationsByClientIdService = async (clientId) => {
+    if (!clientId) throw new BadRequest("clientId is required");
+    return await getQuotationsByClientId(clientId);
 }
 
 // Update Quotation Service

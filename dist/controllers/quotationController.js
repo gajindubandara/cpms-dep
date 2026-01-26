@@ -1,13 +1,26 @@
+
 import {
     createQuotationService,
     getQuotationByIdService,
     updateQuotationService,
     deleteQuotationService,
     getAllQuotationsService,
+    getQuotationsByClientIdService,
 } from "../services/quotationService.js";
 import { validateQuotationDTO, validateQuotationUpdateDTO } from "../validators/quotationValidator.js";
 import { QuotationDTO } from "../dtos/quotationDto.js";
 import { NotFoundError } from "../errors/customErrors.js";
+
+// Get Quotations by Client ID Controller
+export const getQuotationsByClientIdController = async (req, res, next) => {
+    try {
+        const { clientId } = req.params;
+        const quotations = await getQuotationsByClientIdService(clientId);
+        res.status(200).json(quotations);
+    } catch (error) {
+        next(error);
+    }
+};
 
 // Create Quotation Controller
 export const createQuotationController = async (req, res, next) => {

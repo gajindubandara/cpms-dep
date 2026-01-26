@@ -4,6 +4,7 @@ import {
     getAllInvoices,
     updateInvoice,
     deleteInvoice,
+    getInvoicesByClientId
 } from "../daos/invoiceDao.js";
 
 import  { BadRequest } from "../errors/customErrors.js";
@@ -38,6 +39,12 @@ export const getInvoiceByIdService = async (invoiceId) => {
 // Get All Invoices Service
 export const getAllInvoicesService = async () => {
     return await getAllInvoices();
+}
+
+// Get Invoices by Client ID Service
+export const getInvoicesByClientIdService = async (clientId) => {
+    if (!clientId) throw new BadRequest("clientId is required");
+    return await getInvoicesByClientId(clientId);
 }
 
 // Update Invoice Service

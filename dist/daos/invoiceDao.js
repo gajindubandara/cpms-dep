@@ -110,3 +110,17 @@ export const getAllInvoices = async () => {
     const result = await ddbDocClient.send(new ScanCommand(params));
     return result.Items;
 }
+
+// Get Invoices by Client ID
+export const getInvoicesByClientId = async (clientId) => {
+    const params = {
+        TableName: "G2Labs-CPMS",
+        FilterExpression: "begins_with(PK, :pkPrefix) AND Attributes.clientId = :clientId",
+        ExpressionAttributeValues: {
+            ":pkPrefix": "INVOICE#",
+            ":clientId": clientId
+        },
+    };
+    const result = await ddbDocClient.send(new ScanCommand(params));
+    return result.Items;
+}

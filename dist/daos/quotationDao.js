@@ -118,3 +118,21 @@ export const getAllQuotations = async () => {
     ...item.Attributes
   }));
 };
+
+// Get Quotations by Client ID
+export const getQuotationsByClientId = async (clientId) => {
+  const { ScanCommand } = await import("@aws-sdk/lib-dynamodb");
+  const params = {
+    TableName: "G2Labs-CPMS",
+    FilterExpression: "begins_with(PK, :pkPrefix) AND Attributes.clientId = :clientId",
+    ExpressionAttributeValues: {
+      ":pkPrefix": "QUOTATION#",
+      ":clientId": clientId
+    }
+  };
+  const result = await ddbDocClient.send(new ScanCommand(params));
+  return (result.Items || []).map(item => ({
+    quotationId: item.PK.replace("QUOTATION#", ""),
+    ...item.Attributes
+  }));
+};

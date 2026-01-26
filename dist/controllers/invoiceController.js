@@ -3,7 +3,8 @@ import {
     getInvoiceByIdService,
     getAllInvoicesService,
     updateInvoiceService,
-    deleteInvoiceService
+    deleteInvoiceService,
+    getInvoicesByClientIdService
 } from "../services/invoiceService.js";
 import { InvoiceDTO } from "../dtos/invoiceDto.js";
 import {
@@ -65,6 +66,17 @@ export const deleteInvoiceController = async (req, res, next) => {
 export const getAllInvoicesController = async (req, res, next) => {
     try {
         const invoices = await getAllInvoicesService();
+        res.status(200).json(invoices);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Get Invoices by Client ID Controller
+export const getInvoicesByClientIdController = async (req, res, next) => {
+    try {
+        const { clientId } = req.params;
+        const invoices = await getInvoicesByClientIdService(clientId);
         res.status(200).json(invoices);
     } catch (error) {
         next(error);
