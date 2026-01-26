@@ -21,6 +21,7 @@ app.use(cors({
 }));
 
 app.use(express.json({ limit: '50mb' })); // To parse JSON bodies with increased limit for payment slips
+app.use(express.urlencoded({ limit: '50mb', extended: true })); // To parse URL-encoded form data
 
 // Root endpoint
 app.get('/', (req, res) => {

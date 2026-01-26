@@ -1,6 +1,7 @@
 import express from "express";
 import { verifyAccessToken } from '../middlewares/verifyAccessToken.js';
 import { authorize } from '../middlewares/authorizeAccess.js';
+import { uploadSingle } from '../middlewares/uploadMiddleware.js';
 import {
   createClient,
   updateClient,
@@ -8,6 +9,7 @@ import {
   getAllClients,
   getAllClientsByQueryDate,
   deleteClient,
+  uploadReceipt,
 } from "../controllers/clientController.js";
 
 const router = express.Router();
@@ -18,5 +20,13 @@ router.get("/date",verifyAccessToken, authorize(["g2-cpms-admin"]), getAllClient
 router.get("/:clientId",verifyAccessToken,authorize(["g2-cpms-admin","g2-cpms-user"]), getClientById);
 router.get("/",verifyAccessToken, authorize(["g2-cpms-admin"]), getAllClients);
 router.delete("/:clientId",verifyAccessToken, authorize(["g2-cpms-admin"]), deleteClient);
+
+// Upload receipt (Client action)
+router.post("/:clientId/upload-receipt", 
+  verifyAccessToken, 
+  authorize(["g2-cpms-user", "g2-cpms-admin"]),
+  uploadSingle,
+  uploadReceipt
+);
 
 export default router;

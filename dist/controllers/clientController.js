@@ -9,6 +9,8 @@ import {
 import { validateClientDTO } from "../validators/clientValidator.js";
 import { ClientDTO } from "../dtos/clientDto.js";
 import { NotFoundError } from "../errors/customErrors.js";
+import { validatePaymentSlip } from "../validators/paymentValidator.js";
+import { uploadToCloudinary } from "../config/cloudinary.js";
 
 // create client
 export const createClient = async (req, res, next) => {
@@ -83,5 +85,48 @@ export const deleteClient = async (req, res, next) => {
     });
   } catch (err) {
     next(err);
+  }
+};
+
+// Upload receipt (Client action)
+export const uploadReceipt = async (req, res, next) => {
+  try {
+    const { clientId } = req.params;
+    const { projectId } = req.body;
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No file uploaded',
+      });
+    }
+
+    // Validate file
+    const validation = validatePaymentSlip(req.file);
+
+    if (!validation.isValid) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: validation.errors,
+      });
+    }
+
+    // Upload file to Cloudinary
+    const fileName = `receipt-${clientId}-${Date.now()}`;
+    const cloudinaryResponse = await uploadToCloudinary(req.file.buffer, fileName);
+
+    res.status(200).json({
+      success: true,
+      message: 'Receipt uploaded successfully',
+      data: {
+        receiptUrl: cloudinaryResponse.secure_url,
+        clientId,
+        projectId: projectId || null,
+        uploadedAt: new Date().toISOString(),
+      },
+    });
+  } catch (error) {
+    next(error);
   }
 };
