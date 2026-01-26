@@ -1,4 +1,4 @@
-import { InvoiceStatus } from "../enums/invoiceStatus";
+import { InvoiceStatus } from "../enums/invoiceStatus.js";
 export class InvoiceDTO {
   constructor({invoiceId, clientId, clientName, projectId, projectName, description, amount, status, createdAt, updatedAt, items} = {}) {
     if (invoiceId !== undefined) this.invoiceId = invoiceId;

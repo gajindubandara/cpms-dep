@@ -6,7 +6,6 @@ import {
     deleteQuotation } from "../daos/quotationDao.js";
 import {
     mapCreateQuotationDTOtoQuotationModel,
-    mapClientUpdateQuotationDTOtoQuotationModel,
     mapAdminUpdateQuotationDTOtoQuotationModel} from "../mappers/quotationMapper.js";
 import { BadRequest, NotFoundError } from "../errors/customErrors.js";
 import { getClientById } from "../daos/clientDao.js";

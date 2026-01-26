@@ -1,4 +1,4 @@
-import ddbDocClient from "../config/dynamodb"; 
+import ddbDocClient from "../config/dynamodb.js"; 
 import { Invoice } from "../models/invoiceModel.js";
 import {
     PutCommand,

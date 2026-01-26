@@ -7,7 +7,7 @@ import {
     deleteInvoiceController
 } from "../controllers/invoiceController.js";
 import { verifyAccessToken } from "../middlewares/verifyAccessToken.js";
-import { authorize } from "../middlewares/authorizeAccess.js.js";
+import { authorize } from "../middlewares/authorizeAccess.js";
 
 const router = express.Router();
 
@@ -17,3 +17,5 @@ router.get('/:invoiceId', verifyAccessToken, authorize(["g2-cpms-admin","g2-cpms
 router.get('/', verifyAccessToken, authorize(["g2-cpms-admin"]), getAllInvoicesController);
 router.put('/:invoiceId', verifyAccessToken, authorize (["g2-cpms-admin"]), updateInvoiceController);
 router.delete('/:invoiceId', verifyAccessToken, authorize (["g2-cpms-admin"]), deleteInvoiceController);
+
+export default router;

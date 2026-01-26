@@ -1,4 +1,4 @@
-import { InvoiceStatus } from "../enums/invoiceStatus";
+import { InvoiceStatus } from "../enums/invoiceStatus.js";
 
 export const Invoice = {
   pk: (invoiceId) => `INVOICE#${invoiceId}`,

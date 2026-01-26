@@ -1,6 +1,4 @@
 import invoiceRoutes from "./routes/invoiceRoute.js";
-// Invoice routes
-app.use("/invoices", invoiceRoutes);
 import express from "express";
 import ticketRoutes from "./routes/ticketRoute.js";
 import clientRoutes from "./routes/clientRoute.js";
@@ -46,6 +44,9 @@ app.use("/auth", authRoutes);
 
 // Quotation routes
 app.use("/quotations", quotationRoutes);
+
+// Invoice routes
+app.use("/invoices", invoiceRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
