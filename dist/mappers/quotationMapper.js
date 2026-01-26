@@ -13,13 +13,6 @@ export const mapCreateQuotationDTOtoQuotationModel = (dto) => ({
   items: dto.items,
 });
 
-// mapping the ClientupdateQuotationDTO to QuotationModel
-export const mapClientUpdateQuotationDTOtoQuotationModel = (dto) => {
-  const model = {};
-    if (dto.description !== undefined) model.description = dto.description;
-    if (dto.updatedAt !== undefined) model.updatedAt = dto.updatedAt;
-    return model;
-};
 
 // mapping the AdminupdateQuotationDTO to QuotationModel
 export const mapAdminUpdateQuotationDTOtoQuotationModel = (dto) => {
