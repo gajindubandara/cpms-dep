@@ -4,7 +4,8 @@ import {
     PutCommand,
     GetCommand,
     UpdateCommand,
-    DeleteCommand
+    DeleteCommand,
+    ScanCommand
 } from "@aws-sdk/lib-dynamodb";
 import { BadRequest } from "../errors/customErrors.js";
 
@@ -55,21 +56,31 @@ export const updateInvoice = async (invoiceId, updates) => {
     // All updates go inside Attributes
     const ExpressionAttributeNames = { "#attrs": "Attributes" };
     const ExpressionAttributeValues = {};
-    const UpdateExpressions = [];   
+    const UpdateExpressions = [];
     for (const [key, value] of Object.entries(updates)) {
+        let attrKey = key;
+        let nameKey = `#${key}`;
+        // Handle reserved keyword 'status'
+        if (key === 'status') {
+            nameKey = '#status';
+            ExpressionAttributeNames['#status'] = 'status';
+        } else {
+            ExpressionAttributeNames[nameKey] = key;
+        }
         ExpressionAttributeValues[`:${key}`] = value;
-        UpdateExpressions.push(`#attrs.${key} = :${key}`);
-    }   const params = {
+        UpdateExpressions.push(`#attrs.${nameKey} = :${key}`);
+    }
+    const params = {
         TableName: "G2Labs-CPMS",
         Key: {
             PK: Invoice.pk(invoiceId),
             SK: Invoice.sk(),
-        },  
+        },
         UpdateExpression: `SET ${UpdateExpressions.join(", ")}`,
         ExpressionAttributeNames,
         ExpressionAttributeValues,
         ReturnValues: "ALL_NEW",
-    };  
+    };
     const result = await ddbDocClient.send(new UpdateCommand(params));
     return result.Attributes;
 };

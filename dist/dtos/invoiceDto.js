@@ -11,7 +11,7 @@ export class InvoiceDTO {
     if (status !== undefined) {
       this.status = Object.values(InvoiceStatus).includes(status) ? status : InvoiceStatus.SENT;
     }
-    
+
     if (createdAt !== undefined) this.createdAt = createdAt;
     if (updatedAt !== undefined) this.updatedAt = updatedAt;
     if (items !== undefined) this.items = items;

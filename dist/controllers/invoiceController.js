@@ -1,10 +1,10 @@
 import {
-    createInvoice,
-    getInvoiceById,
-    updateInvoice,
-    deleteInvoice,
-} from "../daos/invoiceDao.js";
-import { BadRequest } from "../errors/customErrors.js";
+    createInvoiceService,
+    getInvoiceByIdService,
+    getAllInvoicesService,
+    updateInvoiceService,
+    deleteInvoiceService
+} from "../services/invoiceService.js";
 import { InvoiceDTO } from "../dtos/invoiceDto.js";
 import {
     validateInvoiceDTO,
@@ -16,7 +16,7 @@ export const createInvoiceController = async (req, res, next) => {
     try {
         const createInvoiceDTO = new InvoiceDTO(req.body);
         validateInvoiceDTO(createInvoiceDTO);
-        const newInvoice = await createInvoice(createInvoiceDTO);
+        const newInvoice = await createInvoiceService(createInvoiceDTO);
         res.status(201).json(newInvoice);
     } catch (error) {
         next(error);
@@ -27,10 +27,11 @@ export const createInvoiceController = async (req, res, next) => {
 export const getInvoiceByIdController = async (req, res, next) => {
     try {
         const { invoiceId } = req.params;
-        const invoice = await getInvoiceById(invoiceId);
+        const invoice = await getInvoiceByIdService(invoiceId);
         if (!invoice) {
-            throw new BadRequest("Invoice not found");
-        }      res.status(200).json(invoice);
+            return res.status(404).json({ message: "Invoice not found" });
+        }
+        res.status(200).json(invoice);
     } catch (error) {
         next(error);
     }
@@ -42,7 +43,7 @@ export const updateInvoiceController = async (req, res, next) => {
         const { invoiceId } = req.params;
         const updateInvoiceDTO = new InvoiceDTO(req.body);
         validateInvoiceUpdateDTO(updateInvoiceDTO);
-        const updatedInvoice = await updateInvoice(invoiceId, updateInvoiceDTO);
+        const updatedInvoice = await updateInvoiceService(invoiceId, updateInvoiceDTO);
         res.status(200).json(updatedInvoice);
     } catch (error) {
         next(error);
@@ -53,7 +54,7 @@ export const updateInvoiceController = async (req, res, next) => {
 export const deleteInvoiceController = async (req, res, next) => {
     try {
         const { invoiceId } = req.params;
-        await deleteInvoice(invoiceId);
+        await deleteInvoiceService(invoiceId);
         res.status(204).send();
     } catch (error) {
         next(error);
@@ -63,10 +64,10 @@ export const deleteInvoiceController = async (req, res, next) => {
 // Get All Invoices Controller
 export const getAllInvoicesController = async (req, res, next) => {
     try {
-        const invoices = await getAllInvoices();
+        const invoices = await getAllInvoicesService();
         res.status(200).json(invoices);
     } catch (error) {
         next(error);
-    } 
+    }
 };
 

@@ -1,13 +1,14 @@
 import {
-    createInvoice,  
+    createInvoice,
     getInvoiceById,
+    getAllInvoices,
     updateInvoice,
     deleteInvoice,
 } from "../daos/invoiceDao.js";
 
 import  { BadRequest } from "../errors/customErrors.js";
 import {
-    mapCreateInvoiceDTOtoInvoiceModel,
+    mapCreateInvoiceDtoToModel,
     mapUpdateInvoiceDTOtoInvoiceModel,
 } from "../mappers/invoiceMapper.js";
 import { getClientById } from "../daos/clientDao.js";
@@ -21,7 +22,7 @@ export const createInvoiceService = async (createInvoiceDTO) => {
     if (!createInvoiceDTO.projectId) {
         throw new BadRequest("projectId is required");
     }
-    const model = mapCreateInvoiceDTOtoInvoiceModel(createInvoiceDTO);
+    const model = mapCreateInvoiceDtoToModel(createInvoiceDTO);
     const existClient = await getClientById(model.clientId);
     if (!existClient) {
         throw new BadRequest("Client with that id is not available");

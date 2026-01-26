@@ -1,3 +1,18 @@
+// Mapping Update Invoice DTO to Invoice Model (for update logic)
+export const mapUpdateInvoiceDTOtoInvoiceModel = (dto) => {
+  const model = {};
+  if (dto.status !== undefined) model.status = dto.status;
+  if (dto.amount !== undefined) model.amount = dto.amount;
+  if (dto.updatedAt !== undefined) model.updatedAt = dto.updatedAt;
+  if (dto.clientId !== undefined) model.clientId = dto.clientId;
+  if (dto.clientName !== undefined) model.clientName = dto.clientName;
+  if (dto.projectId !== undefined) model.projectId = dto.projectId;
+  if (dto.projectName !== undefined) model.projectName = dto.projectName;
+  if (dto.description !== undefined) model.description = dto.description;
+  if (dto.items !== undefined) model.items = dto.items;
+  if (dto.createdAt !== undefined) model.createdAt = dto.createdAt;
+  return model;
+};
 // Mapping Create Invoice DTO to Invoice Model
 export const mapCreateInvoiceDtoToModel = (dto) => {
   return {
@@ -29,18 +44,4 @@ export const mapInvoiceModelToDto = (model) => {
   };
 }
 
-// Mapping Admin Update Invoice DTO to Invoice Model
-export const mapAdminUpdateInvoiceDtoToModel = (dto) => {
-  const model = {};
-    if (dto.status !== undefined) model.status = dto.status;
-    if (dto.amount !== undefined) model.amount = dto.amount;
-    if (dto.updatedAt !== undefined) model.updatedAt = dto.updatedAt;
-    if (dto.clientId !== undefined) model.clientId = dto.clientId;
-    if (dto.clientName !== undefined) model.clientName = dto.clientName;
-    if (dto.projectId !== undefined) model.projectId = dto.projectId;
-    if (dto.projectName !== undefined) model.projectName = dto.projectName;
-    if (dto.description !== undefined) model.description = dto.description;
-    if (dto.items !== undefined) model.items = dto.items;
-    if (dto.createdAt !== undefined) model.createdAt = dto.createdAt;
-    return model;
-};
+
