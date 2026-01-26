@@ -21,7 +21,6 @@ export const createTicketController = async (req, res, next) => {
     const ticket = await createTicketService(dto);
     res.status(201).json({ success: true, ticket });
   } catch (err) {
-    console.error("Error in createTicketController:", err);
     next(err);
   }
 };
@@ -38,7 +37,6 @@ export const getTicketsByTicketIdController = async (req, res, next) => {
 
     res.status(200).json({ success: true, tickets });
   } catch (err) {
-    console.error("Error in getTicketsByTicketIdController:", err);
     next(err);
   }
 };
@@ -49,7 +47,6 @@ export const getAllTicketsController = async (req, res, next) => {
     const tickets = await getAllTicketsService();
     res.status(200).json({ success: true, tickets });
   } catch (err) {
-    console.error("Error in getAllTicketsController:", err);
     next(err);
   }
 };
@@ -69,7 +66,6 @@ export const deleteTicketController = async (req, res, next) => {
       message: "Ticket deleted successfully",
     });
   } catch (err) {
-    console.error("Error in deleteTicketController:", err);
     next(err);
   }
 };
@@ -81,7 +77,6 @@ export const getTicketsByQueryDateController = async (req, res, next) => {
     const tickets = await getTicketsByQueryDateService(queryDate);
     res.status(200).json({ success: true, tickets });
   } catch (err) {
-    console.error("Error in getTicketsByQueryDateController:", err);
     next(err);
   }
 };
@@ -93,7 +88,6 @@ export const getTicketsByQueryDateRangeController = async (req, res, next) => {
     const tickets = await getTicketsByQueryDateRangeService(startDate, endDate, type);
     res.status(200).json({ success: true, tickets });
   } catch (err) {
-    console.error("Error in getTicketsByQueryDateRangeController:", err);
     next(err);
   }
 };
@@ -118,7 +112,6 @@ export const updateTicketMessageAsClientController = async (
       message: "Ticket message updated successfully",
     });
   } catch (err) {
-    console.error("Error in updateTicketMessageAsClientController:", err);
     next(err);
   }
 };
@@ -135,7 +128,6 @@ export const updateTicketAsAdminController = async (req, res, next) => {
       message: "Ticket updated as admin successfully",
     });
   } catch (err) {
-    console.error("Error in updateTicketAsAdminController:", err);
     next(err);
   }
 };
@@ -152,7 +144,6 @@ export const getTicketsByClientIdController = async (req, res, next) => {
 
     res.status(200).json({ success: true, tickets });
   } catch (err) {
-    console.error("Error in getTicketsByClientIdController:", err);
     next(err);
   }
 };

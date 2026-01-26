@@ -52,7 +52,6 @@ export const createFeature = async (req, res, next) => {
     const result = await createFeatureService(dto);
     res.status(201).json({ success: true, data: result });
   } catch (err) {
-    console.log(err);
     next(err);
   }
 };
@@ -86,7 +85,6 @@ export const updateProject = async (req, res, next) => {
     const result = await updateProjectService(dto);
     res.status(200).json({ success: true, data: result });
   } catch (err) {
-    console.log(err);
     next(err);
   }
 };
@@ -98,7 +96,6 @@ export const updateFeature = async (req, res, next) => {
     const result = await updateFeatureService(dto);
     res.status(200).json({ success: true, data: result });
   } catch (err) {
-    console.log(err);
     next(err);
   }
 };
@@ -115,7 +112,6 @@ export const deleteProject = async (req, res, next) => {
       message: "Project deleted successfully",
     });
   } catch (err) {
-    console.log(err);
     next(err);
   }
 };
@@ -129,7 +125,6 @@ export const deleteFeature = async (req, res, next) => {
     const result = await deleteFeatureService(clientId, projectId, featureId);
     res.status(200).json({ success: true, data: result });
   } catch (err) {
-    console.log(err);
     next(err);
   }
 };
