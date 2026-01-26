@@ -98,14 +98,7 @@ export const getPaymentsByClientId = async (clientId) => {
     },
   };
 
-  console.log('Querying payments with params:', JSON.stringify(params, null, 2)); // DEBUG
-  
   const result = await ddbDocClient.send(new ScanCommand(params));
-  
-  console.log('Query returned items:', result.Items?.length || 0); // DEBUG
-  if (result.Items && result.Items.length > 0) {
-    console.log('Sample item:', JSON.stringify(result.Items[0], null, 2)); // DEBUG
-  }
   
   return result.Items || [];
 };
@@ -152,9 +145,7 @@ export const updatePayment = async (paymentId, projectId, updates) => {
     ReturnValues: "ALL_NEW",
   };
 
-  console.log(`[updatePayment] Updating payment ${paymentId} with params:`, JSON.stringify(params, null, 2));
   const result = await ddbDocClient.send(new UpdateCommand(params));
-  console.log(`[updatePayment] Update successful, returning:`, JSON.stringify(result.Attributes, null, 2));
   return result.Attributes;
 };
 

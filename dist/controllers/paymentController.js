@@ -25,9 +25,6 @@ export const createPayment = async (req, res, next) => {
   try {
     const { projectId, clientId, amount, dueDate, description } = req.body;
 
-    console.log('Creating payment with clientId from request:', clientId); // DEBUG
-    console.log('Request body:', req.body); // DEBUG
-
     const validation = validateCreatePayment({
       projectId,
       clientId,
@@ -48,8 +45,6 @@ export const createPayment = async (req, res, next) => {
       { projectId, clientId, amount, dueDate, description },
       req.user?.sub
     );
-
-    console.log('Created payment:', payment); // DEBUG
 
     res.status(201).json({
       success: true,
@@ -114,9 +109,6 @@ export const getClientPayments = async (req, res, next) => {
   try {
     const clientId = req.user?.sub; // Get user ID from JWT token
 
-    console.log('Getting client payments for clientId:', clientId); // DEBUG
-    console.log('JWT user object:', req.user); // DEBUG
-
     if (!clientId) {
       return res.status(400).json({
         success: false,
@@ -125,8 +117,6 @@ export const getClientPayments = async (req, res, next) => {
     }
 
     const payments = await getClientPaymentsService(clientId);
-
-    console.log('Found payments:', payments.length); // DEBUG
 
     const mappedPayments = payments.map(mapPaymentModelToClientPaymentDTO);
 
