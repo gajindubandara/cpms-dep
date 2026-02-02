@@ -78,15 +78,15 @@ export const validatePaymentSlip = (file) => {
     errors.push('Invalid file upload');
   }
 
-  // Validate file type
-  const allowedMimes = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
+  // Validate file type - only allow images
+  const allowedMimes = ['image/png', 'image/jpeg', 'image/jpg'];
   if (file && file.mimetype && !allowedMimes.includes(file.mimetype)) {
-    errors.push('Only PNG, JPG, JPEG, and PDF files are allowed');
+    errors.push('Only PNG, JPG, and JPEG image files are allowed');
   }
 
-  // Validate file size (10MB max)
-  if (file && file.size > 10 * 1024 * 1024) {
-    errors.push('File size must be less than 10MB');
+  // Validate file size (5MB max)
+  if (file && file.size > 5 * 1024 * 1024) {
+    errors.push('File size must be less than 5MB');
   }
 
   return {

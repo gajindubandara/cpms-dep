@@ -20,7 +20,7 @@ export const uploadToCloudinary = async (fileBuffer, fileName, options = {}) => 
     return new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
-          resource_type: 'auto', // Auto-detect file type (image, pdf, etc)
+          resource_type: 'image', // Only accept image files
           public_id: `${fileName}`,
           folder: 'G2-Cpms/payment-slips',
           overwrite: true,
