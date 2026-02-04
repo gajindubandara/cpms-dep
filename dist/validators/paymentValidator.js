@@ -28,6 +28,10 @@ export const validateCreatePayment = (data) => {
     errors.push('description must be a string');
   }
 
+  if (data.currency !== undefined && typeof data.currency !== 'string') {
+    errors.push('currency must be a string');
+  }
+
   return {
     isValid: errors.length === 0,
     errors,
@@ -58,6 +62,10 @@ export const validateUpdatePayment = (data) => {
     if (!validStatuses.includes(data.status)) {
       errors.push(`status must be one of: ${validStatuses.join(', ')}`);
     }
+  }
+
+  if (data.currency !== undefined && typeof data.currency !== 'string') {
+    errors.push('currency must be a string');
   }
 
   return {

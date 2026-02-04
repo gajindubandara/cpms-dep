@@ -4,7 +4,8 @@ export const CreatePaymentDTO = {
   clientId: null,
   amount: null,
   dueDate: null,
-  description: null
+  description: null,
+  currency: null
 };
 
 export const UpdatePaymentDTO = {
@@ -12,7 +13,8 @@ export const UpdatePaymentDTO = {
   amount: null,
   dueDate: null,
   description: null,
-  status: null
+  status: null,
+  currency: null
 };
 
 export const ClientPaymentDTO = {
@@ -24,7 +26,8 @@ export const ClientPaymentDTO = {
   status: null,
   description: null,
   paymentSlip: null,
-  completedAt: null
+  completedAt: null,
+  currency: null
 };
 
 export const PaymentSlipDTO = {

@@ -16,6 +16,7 @@ export const Payment = {
       dueDate: data.dueDate,
       status: data.status ?? 'PENDING',
       description: data.description || '',
+      currency: data.currency,
       paymentSlip: data.paymentSlip || null, // Cloudinary secure URL (e.g., https://res.cloudinary.com/.../payment-slips/...)
       completedAt: data.completedAt || null,
       createdAt: new Date().toISOString(),
@@ -31,6 +32,7 @@ export const Payment = {
       dueDate: data.dueDate,
       status: data.status,
       description: data.description,
+      currency: data.currency,
       paymentSlip: data.paymentSlip, // Cloudinary secure URL
       completedAt: data.completedAt,
       updatedAt: new Date().toISOString()

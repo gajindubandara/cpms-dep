@@ -23,7 +23,7 @@ import {
 // Create payment (Admin only)
 export const createPayment = async (req, res, next) => {
   try {
-    const { projectId, clientId, amount, dueDate, description } = req.body;
+    const { projectId, clientId, amount, dueDate, description, currency } = req.body;
 
     const validation = validateCreatePayment({
       projectId,
@@ -31,6 +31,7 @@ export const createPayment = async (req, res, next) => {
       amount,
       dueDate,
       description,
+      currency,
     });
 
     if (!validation.isValid) {
@@ -42,7 +43,7 @@ export const createPayment = async (req, res, next) => {
     }
 
     const payment = await createPaymentService(
-      { projectId, clientId, amount, dueDate, description },
+      { projectId, clientId, amount, dueDate, description, currency },
       req.user?.sub
     );
 
@@ -134,7 +135,7 @@ export const getClientPayments = async (req, res, next) => {
 export const updatePayment = async (req, res, next) => {
   try {
     const { paymentId, projectId } = req.params;
-    const { amount, dueDate, description, status } = req.body;
+    const { amount, dueDate, description, status, currency } = req.body;
 
     if (!paymentId || !projectId) {
       return res.status(400).json({
@@ -148,6 +149,7 @@ export const updatePayment = async (req, res, next) => {
       dueDate,
       description,
       status,
+      currency,
     });
 
     if (!validation.isValid) {
@@ -163,6 +165,7 @@ export const updatePayment = async (req, res, next) => {
       dueDate,
       description,
       status,
+      currency,
     });
 
     res.status(200).json({

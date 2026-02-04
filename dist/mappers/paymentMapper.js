@@ -8,6 +8,7 @@ export const mapCreatePaymentDTOtoPaymentModel = (createPaymentDTO) => {
     amount: createPaymentDTO.amount,
     dueDate: createPaymentDTO.dueDate,
     description: createPaymentDTO.description || '',
+    currency: createPaymentDTO.currency,
     status: 'PENDING',
   };
 };
@@ -20,6 +21,7 @@ export const mapUpdatePaymentDTOtoPaymentModel = (updatePaymentDTO) => {
   if (updatePaymentDTO.dueDate !== undefined) model.dueDate = updatePaymentDTO.dueDate;
   if (updatePaymentDTO.description !== undefined) model.description = updatePaymentDTO.description;
   if (updatePaymentDTO.status !== undefined) model.status = updatePaymentDTO.status;
+  if (updatePaymentDTO.currency !== undefined) model.currency = updatePaymentDTO.currency;
   
   return model;
 };
@@ -37,6 +39,7 @@ export const mapPaymentModelToClientPaymentDTO = (payment) => {
     description: attrs.description,
     paymentSlip: attrs.paymentSlip,
     completedAt: attrs.completedAt,
+    currency: attrs.currency,
   };
 };
 
@@ -55,6 +58,7 @@ export const mapPaymentModelToAdminPaymentDTO = (payment) => {
     description: attrs.description,
     paymentSlip: attrs.paymentSlip, // Return actual URL, not label
     completedAt: attrs.completedAt,
+    currency: attrs.currency,
     createdAt: attrs.createdAt,
     updatedAt: attrs.updatedAt,
     createdBy: attrs.createdBy,
