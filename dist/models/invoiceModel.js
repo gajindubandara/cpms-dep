@@ -9,10 +9,12 @@ export const Invoice = {
     Attributes: {
         clientId: data.clientId,
         clientName: data.clientName,
+        clientEmail: data.clientEmail,
         projectId: data.projectId,
         projectName: data.projectName, 
         description: data.description,
         amount: data.amount,
+        dateRange: data.dateRange,
         status: data.status ?? InvoiceStatus.SENT,
         items: data.items,
         createdAt: new Date().toISOString(),

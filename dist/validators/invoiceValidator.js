@@ -28,11 +28,17 @@ export const validateInvoiceUpdateDTO = (data = {}) => {
   if (data.clientId !== undefined && typeof data.clientId !== "string") {
     throw new BadRequest("clientId must be a string");
   }
+    if (data.clientEmail !== undefined && typeof data.clientEmail !== "string") {
+    throw new BadRequest("clientEmail must be a string");
+  }
     if (data.projectId !== undefined && typeof data.projectId !== "string") {   
     throw new BadRequest("projectId must be a string");
   }
     if (data.amount !== undefined && (typeof data.amount !== "number" || data.amount < 0)) {
     throw new BadRequest("amount must be a non-negative number");
+  }
+    if (data.dateRange !== undefined && typeof data.dateRange !== "string") {
+    throw new BadRequest("dateRange must be a string");
   }
     if (data.status !== undefined && !Object.values(InvoiceStatus).includes(data.status)) {
     throw new BadRequest("Invalid status value");
