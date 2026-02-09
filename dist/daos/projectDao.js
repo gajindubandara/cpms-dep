@@ -96,12 +96,14 @@ export const featureByFeatId = async (projectId, featureId) => {
 export const allProjects = async () => {
   const params = {
     TableName: process.env.TABLE_NAME,
-    FilterExpression: "begins_with(#sk,:skPreFix)",
+    FilterExpression: "begins_with(#pk, :pkPrefix) AND begins_with(#sk, :skPrefix)",
     ExpressionAttributeNames: {
+      "#pk": "PK",
       "#sk": "SK",
     },
     ExpressionAttributeValues: {
-      ":skPreFix": "PROJECT#",
+      ":pkPrefix": "CLIENT#",
+      ":skPrefix": "PROJECT#",
     },
   };
 

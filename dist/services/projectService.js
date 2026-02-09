@@ -85,11 +85,15 @@ export const createFeatureService = async (dto) => {
   }
 
   const features =  await featAll(model.clientId, model.projectId);
-  const featureIds = features.map(item => item.SK?.split("#")[3]).filter(id => id !== undefined);
+  // Extract only feature IDs (exclude featureId=0 which is the base project)
+  const featureIds = features
+    .map(item => item.SK?.split("#")[3])
+    .filter(id => id !== undefined && id !== '0')
+    .map(id => parseInt(id));
   
-  // Handle case when no features exist yet
-  const last = featureIds.length > 0 ? Math.max(...featureIds.map(id => parseInt(id))) : -1;
-  const featureId = last + 1;
+  // Find the max featureId among existing features (not the base project)
+  const last = featureIds.length > 0 ? Math.max(...featureIds) : 0;
+  const featureId = last + 1; // Always >= 1 for features
   
   return await createProject({
     ...model,
@@ -105,19 +109,11 @@ export const getFeatureService = async(projectId, featureId) => {
     return await featureByFeatId(projectId,featureId)
 }
 
-//get all projects
+//get all projects and features
 export const getAllProjectsService = async() => {
-  const projects =[];
   const result = await allProjects();
-  //filter the projects with 0
-  result.forEach(element => {
-    let pro = (element.SK).split("#")[3]
-    if(pro == 0){
-      projects.push(element)
-    }
-  });
-  return projects
-
+  //return all items (both projects with featureId=0 and features with featureId>0)
+  return result;
 }
 
 //update project
@@ -183,20 +179,13 @@ export const getProjectsbyquerydateService = async(queryDate) => {
 }
 
 
-//get client projects
+//get client projects and features
 export const getClientProjectsService = async(clientId) =>{
   if(!clientId){
     throw new BadRequest("ClientId is needed for querying")
   }
 
-  const projects = await projectByClientId(clientId)
-  const onlyProjects = [];
-  projects.forEach(element =>{
-    let project = (element.SK).split("#")[3]
-    if(project == 0){
-      onlyProjects.push(element)
-    }
-  })
-  return onlyProjects;
-  
+  const result = await projectByClientId(clientId)
+  //return all items (both projects with featureId=0 and features with featureId>0)
+  return result;
 }
