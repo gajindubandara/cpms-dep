@@ -10,6 +10,8 @@ import projectRoutes from "./routes/projectRoutes.js"
 import paymentRoutes from "./routes/paymentRoute.js"
 import quotationRoutes from "./routes/quotationRoute.js"
 import kpiRoute from './routes/kpiRoute.js'
+import reportRouter from './routes/reportRouter.js'
+
 dotenv.config();
 const app = express();
 const port = 3000;
@@ -52,6 +54,9 @@ app.use("/invoices", invoiceRoutes);
 
 //KPI routes
 app.use("/kpi",kpiRoute)
+
+//REPORT routes
+app.use('/report', reportRouter)
 
 // Health check endpoint
 app.get('/health', (req, res) => {
