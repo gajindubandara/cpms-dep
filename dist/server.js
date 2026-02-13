@@ -19,7 +19,7 @@ const port = 3000;
 
 import cors from 'cors';
 app.use(cors({
-    origin: ['http://localhost:5173', 'https://d1ep0pzchkamyn.cloudfront.net'],
+    origin: ['http://localhost:5173', 'https://d1ep0pzchkamyn.cloudfront.net','https://dev.gtwolabs.com'],
     credentials: true,
 }));
 
