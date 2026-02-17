@@ -70,7 +70,7 @@ export const extractPublicIdFromUrl = (secureUrl) => {
   try {
     // URL format: https://res.cloudinary.com/{cloud_name}/image/upload/{public_id}.ext
     const regex = /\/v\d+\/(.*)\.\w+$/;
-    const match = secureUrl.match(regex);
+    const match = regex.exec(secureUrl);
     return match ? match[1] : null;
   } catch (error) {
     console.error('Error extracting public ID from URL:', error);
