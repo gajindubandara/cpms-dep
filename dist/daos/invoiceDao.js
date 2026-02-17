@@ -17,7 +17,8 @@ export const createInvoice = async (invoiceData) => {
         const error = new Error("invoiceId is required");
         error.statusCode = 400;
         throw error;
-    }   if (item.Attributes) {
+    }
+    if (item.Attributes) {
         // Remove undefined values from Attributes
         item.Attributes = Object.fromEntries(
             Object.entries(item.Attributes).filter(([_, v]) => v !== undefined)

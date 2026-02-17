@@ -16,13 +16,15 @@ export const createQuotation = async (quotationData) => {
         const error = new Error("quotationId is required");
         error.statusCode = 400;
         throw error;
-    } if (item.Attributes) {
+    }
+    if (item.Attributes) {
 
     // Remove undefined values from Attributes
     item.Attributes = Object.fromEntries(
       Object.entries(item.Attributes).filter(([_, v]) => v !== undefined)
     );
-  } const params = {
+  }
+  const params = {
     TableName: "G2Labs-CPMS",
     Item: item,
     };
