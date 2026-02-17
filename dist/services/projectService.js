@@ -89,7 +89,7 @@ export const createFeatureService = async (dto) => {
   const featureIds = features
     .map(item => item.SK?.split("#")[3])
     .filter(id => id !== undefined && id !== '0')
-    .map(id => parseInt(id));
+    .map(id => Number.parseInt(id));
   
   // Find the max featureId among existing features (not the base project)
   const last = featureIds.length > 0 ? Math.max(...featureIds) : 0;

@@ -20,7 +20,7 @@ export const validateCreatePayment = (data) => {
   }
 
   // Validate date format (basic ISO check)
-  if (data.dueDate && isNaN(Date.parse(data.dueDate))) {
+  if (data.dueDate && Number.isNaN(Date.parse(data.dueDate))) {
     errors.push('dueDate must be a valid ISO date string');
   }
 
@@ -48,7 +48,7 @@ export const validateUpdatePayment = (data) => {
   }
 
   if (data.dueDate !== undefined) {
-    if (typeof data.dueDate !== 'string' || isNaN(Date.parse(data.dueDate))) {
+    if (typeof data.dueDate !== 'string' || Number.isNaN(Date.parse(data.dueDate))) {
       errors.push('dueDate must be a valid ISO date string');
     }
   }
