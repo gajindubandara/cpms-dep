@@ -1,7 +1,5 @@
-import { getPaymentsKPIReportService } from "../services/reportService.js";
-import { getPaymentsReportService } from "../services/reportService.js";
 import { exportToCSV } from "../utils/csvExport.js";
-import { getInvoicesReportService } from "../services/reportService.js";
+import { getPaymentsKPIReportService, getInvoicesReportService, getPaymentsReportService } from "../services/reportService.js";
 
 export const getPaymentsReportController = async (req, res, next) => {
   try {

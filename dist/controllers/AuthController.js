@@ -1,5 +1,5 @@
 import { jwtVerify, createRemoteJWKSet } from 'jose';
-import { BadRequest, InternalServerError, Unauthorized } from "../errors/customErrors.js";
+import { BadRequest } from "../errors/customErrors.js";
 import { requestCognitoToken } from "../helpers/RequestCognitoToken.js";
 import * as authService from "../services/authService.js";
 

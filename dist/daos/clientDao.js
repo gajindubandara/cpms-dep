@@ -6,7 +6,6 @@ import {
   GetCommand,
   QueryCommand,
   DeleteCommand,
-  ScanCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { BadRequest } from "../errors/customErrors.js";
 

@@ -1,4 +1,3 @@
-import { v2 as cloudinary } from 'cloudinary';
 import { Readable } from 'node:stream';
 
 // Initialize Cloudinary with environment variables
@@ -70,7 +69,8 @@ export const deleteFromCloudinary = async (publicId) => {
 export const extractPublicIdFromUrl = (secureUrl) => {
   try {
     // URL format: https://res.cloudinary.com/{cloud_name}/image/upload/{public_id}.ext
-    const match = secureUrl.match(/\/v\d+\/(.*)\.\w+$/);
+    const regex = /\/v\d+\/(.*)\.\w+$/;
+    const match = secureUrl.match(regex);
     return match ? match[1] : null;
   } catch (error) {
     console.error('Error extracting public ID from URL:', error);
@@ -78,4 +78,4 @@ export const extractPublicIdFromUrl = (secureUrl) => {
   }
 };
 
-export default cloudinary;
+export {default as cloudinary} from 'cloudinary';
