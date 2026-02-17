@@ -1,5 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 
 // Initialize Cloudinary with environment variables
 cloudinary.config({
@@ -17,7 +17,7 @@ cloudinary.config({
  */
 export const uploadToCloudinary = async (fileBuffer, fileName, options = {}) => {
   try {
-    return new Promise((resolve, reject) => {
+    const result = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
           resource_type: 'image', // Only accept image files
@@ -42,6 +42,7 @@ export const uploadToCloudinary = async (fileBuffer, fileName, options = {}) => 
         fileBuffer.pipe(uploadStream);
       }
     });
+    return result;
   } catch (error) {
     throw new Error(`Cloudinary upload error: ${error.message}`);
   }

@@ -34,16 +34,18 @@ export const createQuotation = async (quotationData) => {
 
 // Get Quotation by ID
 export const getQuotationById = async (quotationId) => {
-  if (!quotationId) throw new BadRequest("Quotation Id is required");
-    const params = {
+  if (!quotationId) {
+    throw new BadRequest("Quotation Id is required");
+  }
+  const params = {
     TableName: "G2Labs-CPMS",
     Key: {
       PK: Quotation.pk(quotationId),
       SK: Quotation.sk(),
     },
   };
-    const result = await ddbDocClient.send(new GetCommand(params));
-    return result.Item;
+  const result = await ddbDocClient.send(new GetCommand(params));
+  return result.Item;
 }
 
 // Update Quotation
@@ -89,18 +91,20 @@ export const updateQuotation = async (quotationId, updates) => {
 
 // Delete Quotation
 export const deleteQuotation = async (quotationId) => {
-  if (!quotationId) throw new BadRequest("Quotation Id is required");
-    const params = {
+  if (!quotationId) {
+    throw new BadRequest("Quotation Id is required");
+  }
+  const params = {
     TableName: "G2Labs-CPMS",
     Key: {
       PK: Quotation.pk(quotationId),
       SK: Quotation.sk(), 
     },
-        ConditionExpression: "attribute_exists(PK)",
-        ReturnValues: "ALL_OLD",
+    ConditionExpression: "attribute_exists(PK)",
+    ReturnValues: "ALL_OLD",
   };
-    const result = await ddbDocClient.send(new DeleteCommand(params));
-    return result.Attributes;
+  const result = await ddbDocClient.send(new DeleteCommand(params));
+  return result.Attributes;
 }
 
 // Get All Quotations

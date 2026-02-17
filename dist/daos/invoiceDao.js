@@ -59,7 +59,6 @@ export const updateInvoice = async (invoiceId, updates) => {
     const ExpressionAttributeValues = {};
     const UpdateExpressions = [];
     for (const [key, value] of Object.entries(updates)) {
-        let attrKey = key;
         let nameKey = `#${key}`;
         // Handle reserved keyword 'status'
         if (key === 'status') {
