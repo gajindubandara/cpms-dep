@@ -9,6 +9,39 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 import { BadRequest, NotFoundError } from "../errors/customErrors.js";
 
+// Helper: build DynamoDB update expression and attribute maps from updates object
+function buildUpdateParams(updates) {
+  // remove indexing keys
+  delete updates.projectId;
+  delete updates.PK;
+  delete updates.SK;
+
+  updates.updatedAt = new Date().toISOString();
+
+  const ExpressionAttributeNames = {
+    "#attr": "Attributes",
+  };
+  const ExpressionAttributeValues = {};
+  const updateParts = [];
+
+  Object.keys(updates).forEach((key, index) => {
+    const nameKey = `#key${index}`;
+    const valueKey = `:val${index}`;
+
+    // Build nested attribute path: Attributes.fieldName
+    updateParts.push(`#attr.${nameKey} = ${valueKey}`);
+
+    ExpressionAttributeNames[nameKey] = key;
+    ExpressionAttributeValues[valueKey] = updates[key];
+  });
+
+  return {
+    ExpressionAttributeNames,
+    ExpressionAttributeValues,
+    UpdateExpression: `SET ${updateParts.join(", ")}`,
+  };
+}
+
 //crerate new project
 export const createProject = async (projectData) => {
   const item = Project.create(projectData);
@@ -138,29 +171,9 @@ export const updateProject = async (clientId, projectId, updates) => {
   if (!updates || Object.keys(updates).length === 0)
     throw new BadRequest("updates Required");
 
-  //deleting indexing keys
-  delete updates.projectId;
-  delete updates.PK;
-  delete updates.SK;
-
-  updates.updatedAt = new Date().toISOString();
-
-  const ExpressionAttributeNames = {
-    "#attr": "Attributes",
-  };
-  const ExpressionAttributeValues = {};
-  const updateParts = [];
-
-  Object.keys(updates).forEach((key, index) => {
-    const nameKey = `#key${index}`;
-    const valueKey = `:val${index}`;
-
-    // Build nested attribute path: Attributes.fieldName
-    updateParts.push(`#attr.${nameKey} = ${valueKey}`);
-
-    ExpressionAttributeNames[nameKey] = key;
-    ExpressionAttributeValues[valueKey] = updates[key];
-  });
+  const { ExpressionAttributeNames, ExpressionAttributeValues, UpdateExpression } = buildUpdateParams(
+    updates
+  );
 
   const params = {
     TableName: process.env.TABLE_NAME,
@@ -168,7 +181,7 @@ export const updateProject = async (clientId, projectId, updates) => {
       PK: Project.pk(clientId),
       SK: Project.sk(projectId, 0),
     },
-    UpdateExpression: `SET ${updateParts.join(", ")}`,
+    UpdateExpression,
     ExpressionAttributeNames,
     ExpressionAttributeValues,
     ConditionExpression: "attribute_exists(PK) AND attribute_exists(SK)",
@@ -185,29 +198,9 @@ export const updateFeature = async (clientId, projectId, featureId, updates) => 
   if (!updates || Object.keys(updates).length === 0)
     throw new BadRequest("updates Required");
 
-  //deleting indexing keys
-  delete updates.projectId;
-  delete updates.PK;
-  delete updates.SK;
-
-  updates.updatedAt = new Date().toISOString();
-
-  const ExpressionAttributeNames = {
-    "#attr": "Attributes",
-  };
-  const ExpressionAttributeValues = {};
-  const updateParts = [];
-
-  Object.keys(updates).forEach((key, index) => {
-    const nameKey = `#key${index}`;
-    const valueKey = `:val${index}`;
-
-    // Build nested attribute path: Attributes.fieldName
-    updateParts.push(`#attr.${nameKey} = ${valueKey}`);
-
-    ExpressionAttributeNames[nameKey] = key;
-    ExpressionAttributeValues[valueKey] = updates[key];
-  });
+  const { ExpressionAttributeNames, ExpressionAttributeValues, UpdateExpression } = buildUpdateParams(
+    updates
+  );
 
   const params = {
     TableName: process.env.TABLE_NAME,
@@ -215,7 +208,7 @@ export const updateFeature = async (clientId, projectId, featureId, updates) => 
       PK: Project.pk(clientId),
       SK: Project.sk(projectId, featureId),
     },
-    UpdateExpression: `SET ${updateParts.join(", ")}`,
+    UpdateExpression,
     ExpressionAttributeNames,
     ExpressionAttributeValues,
     ConditionExpression: "attribute_exists(PK) AND attribute_exists(SK)",
