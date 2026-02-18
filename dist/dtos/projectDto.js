@@ -25,44 +25,38 @@ export class ProjectDTO {
     createdAt,
     updatedAt,
   } = {}) {
-    if (clientId !== undefined) this.clientId = clientId;
-    if (projectId !== undefined) this.projectId = projectId;
-    if (featureId !== undefined){ this.featureId = featureId}else{this.featureId = 0}
-    if (projectName !== undefined) this.projectName = projectName;
-    if (description !== undefined) this.description = description;
-    if (startDate !== undefined) this.startDate = startDate;
-    if (endDate !== undefined) this.endDate = endDate;
-    if (finalAmount !== undefined) this.finalAmount = finalAmount;
+    // Helper to assign a value only if defined
+    const assignIfDefined = (target, key, value) => {
+      if (value !== undefined) target[key] = value;
+    };
 
-    if (status !== undefined) {
-      this.status = Object.values(ProjectStatus).includes(status)
-        ? status
-        : ProjectStatus.PLANNED;
-    }
-    if(currency !== undefined) this.currency = currency;
-    if(cost !== undefined) this.cost = cost;
-    if (profitMargin !== undefined) this.profitMargin = profitMargin;
-    if (commissionPercent !== undefined)
-      this.commissionPercent = commissionPercent;
-    if (isRecurring !== undefined) {
-      this.isRecurring = Object.values(IsRecurring).includes(isRecurring)
-        ? isRecurring
-        : IsRecurring.NO;
-    }
-    if (billingCycle !== undefined) {
-      this.billingCycle = Object.values(BillingCycle).includes(billingCycle)
-        ? billingCycle
-        : BillingCycle.MONTHLY;
-    }
-    if (billingDate !== undefined) this.billingDate = billingDate;
+    // Helper to assign enum-validated value or fallback
+    const assignEnum = (target, key, value, enumObj, fallback) => {
+      if (value === undefined) return;
+      target[key] = Object.values(enumObj).includes(value) ? value : fallback;
+    };
 
-    if (billability !== undefined) {
-      this.billability = Object.values(Billability).includes(billability)
-        ? billability
-        : Billability.BILLABLE;
-    }
+    assignIfDefined(this, "clientId", clientId);
+    assignIfDefined(this, "projectId", projectId);
+    // featureId default to 0 when not provided
+    this.featureId = featureId ?? 0;
+    assignIfDefined(this, "projectName", projectName);
+    assignIfDefined(this, "description", description);
+    assignIfDefined(this, "startDate", startDate);
+    assignIfDefined(this, "endDate", endDate);
+    assignIfDefined(this, "finalAmount", finalAmount);
 
-    if (createdAt !== undefined) this.createdAt = createdAt;
-    if (updatedAt !== undefined) this.updatedAt = updatedAt;
+    assignEnum(this, "status", status, ProjectStatus, ProjectStatus.PLANNED);
+    assignIfDefined(this, "currency", currency);
+    assignIfDefined(this, "cost", cost);
+    assignIfDefined(this, "profitMargin", profitMargin);
+    assignIfDefined(this, "commissionPercent", commissionPercent);
+    assignEnum(this, "isRecurring", isRecurring, IsRecurring, IsRecurring.NO);
+    assignEnum(this, "billingCycle", billingCycle, BillingCycle, BillingCycle.MONTHLY);
+    assignIfDefined(this, "billingDate", billingDate);
+    assignEnum(this, "billability", billability, Billability, Billability.BILLABLE);
+
+    assignIfDefined(this, "createdAt", createdAt);
+    assignIfDefined(this, "updatedAt", updatedAt);
   }
 }
