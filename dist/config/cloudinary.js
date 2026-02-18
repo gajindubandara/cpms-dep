@@ -1,3 +1,5 @@
+
+import cloudinary from 'cloudinary';
 import { Readable } from 'node:stream';
 
 // Initialize Cloudinary with environment variables
