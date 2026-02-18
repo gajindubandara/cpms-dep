@@ -1,21 +1,31 @@
 import { TicketStatus } from "../enums/ticketStatus.js";
 
-export class TicketDTO {
-  constructor({ticketId, clientId, projectId, subject, message, status, adminResponse, createdAt, updatedAt,} = {}) {
-    if (ticketId !== undefined) this.ticketId = ticketId;
-    if (clientId !== undefined) this.clientId = clientId;
-    if (projectId !== undefined) this.projectId = projectId;
-    if (subject !== undefined) this.subject = subject;
-    if (message !== undefined) this.message = message;
+export function createTicketDTO({
+  ticketId,
+  clientId,
+  projectId,
+  subject,
+  message,
+  status,
+  adminResponse,
+  createdAt,
+  updatedAt,
+} = {}) {
+  const dto = {};
 
-    if (status !== undefined) {
-      this.status = Object.values(TicketStatus).includes(status) ? status : TicketStatus.OPEN;
-    }
+  if (ticketId !== undefined) dto.ticketId = ticketId;
+  if (clientId !== undefined) dto.clientId = clientId;
+  if (projectId !== undefined) dto.projectId = projectId;
+  if (subject !== undefined) dto.subject = subject;
+  if (message !== undefined) dto.message = message;
 
-    if (adminResponse !== undefined) this.adminResponse = adminResponse;
-    if (createdAt !== undefined) this.createdAt = createdAt;
-    if (updatedAt !== undefined) this.updatedAt = updatedAt;
+  if (status !== undefined) {
+    dto.status = Object.values(TicketStatus).includes(status) ? status : TicketStatus.OPEN;
   }
-}
 
-export default TicketDTO;
+  if (adminResponse !== undefined) dto.adminResponse = adminResponse;
+  if (createdAt !== undefined) dto.createdAt = createdAt;
+  if (updatedAt !== undefined) dto.updatedAt = updatedAt;
+
+  return dto;
+}

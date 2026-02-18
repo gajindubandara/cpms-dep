@@ -25,12 +25,12 @@ export const getQuotationsByClientIdController = async (req, res, next) => {
 // Create Quotation Controller
 export const createQuotationController = async (req, res, next) => {
     try {
-        const createQuotationDTO = new QuotationDTO(req.body);
-        const errors = validateQuotationDTO(createQuotationDTO);
-        if (errors.length > 0) {
-            return res.status(400).json({ errors });
-        }
-        const newQuotation = await createQuotationService(createQuotationDTO);
+            const dto = createQuotationDTO(req.body);
+            const errors = validateQuotationDTO(dto);
+            if (errors.length > 0) {
+                return res.status(400).json({ errors });
+            }
+            const newQuotation = await createQuotationService(dto);
         res.status(201).json(newQuotation);
     } catch (error) {
         next(error);
@@ -65,7 +65,7 @@ export const getAllQuotationsController = async (req, res, next) => {
 export const updateQuotationController = async (req, res, next) => {
     try {
         const { quotationId } = req.params; 
-        const updateQuotationDTO = new QuotationDTO(req.body);
+        const updateQuotationDTO = createQuotationDTO(req.body);
         validateQuotationUpdateDTO(updateQuotationDTO);
         const updatedQuotation = await updateQuotationService(quotationId, updateQuotationDTO);
         res.status(200).json(updatedQuotation);

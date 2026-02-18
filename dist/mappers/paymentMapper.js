@@ -1,4 +1,3 @@
-import { CreatePaymentDTO, UpdatePaymentDTO } from "../dtos/paymentDto.js";
 
 // Map CreatePaymentDTO to Payment Model
 export const mapCreatePaymentDTOtoPaymentModel = (createPaymentDTO) => {

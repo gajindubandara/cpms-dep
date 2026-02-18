@@ -10,13 +10,13 @@ import {
   getTicketsByClientIdService,
 } from "../services/ticketService.js";
 import { validateTicketDTO } from "../validators/ticketValidator.js";
-import { TicketDTO } from "../dtos/ticketDto.js";
+import { createTicketDTO } from "../dtos/ticketDto.js";
 import { NotFoundError } from "../errors/customErrors.js";
 
 // Controller to handle ticket creation
 export const createTicketController = async (req, res, next) => {
   try {
-    const dto = new TicketDTO(req.body);
+    const dto = createTicketDTO(req.body);
     validateTicketDTO(dto);
     const ticket = await createTicketService(dto);
     res.status(201).json({ success: true, ticket });
@@ -100,7 +100,7 @@ export const updateTicketMessageAsClientController = async (
 ) => {
   try {
     const { clientId, ticketId } = req.params;
-    const dto = new TicketDTO(req.body);
+    const dto = createTicketDTO(req.body);
     const updated = await updateTicketMessageAsClientService(
       clientId,
       ticketId,
@@ -120,7 +120,7 @@ export const updateTicketMessageAsClientController = async (
 export const updateTicketAsAdminController = async (req, res, next) => {
   try {
     const { clientId, ticketId } = req.params;
-    const dto = new TicketDTO(req.body);
+    const dto = createTicketDTO(req.body);
     const updated = await updateTicketAsAdminService(clientId, ticketId, dto);
     res.status(200).json({
       success: true,
