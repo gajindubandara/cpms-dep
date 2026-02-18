@@ -2,26 +2,49 @@ import { InvoiceStatus } from "../enums/invoiceStatus.js";
 import { QuotationStatus } from "../enums/quotationStatus.js";
 import { BadRequest } from "../errors/customErrors.js";
 
-export const validateInvoiceDTO = (data = {}) => {
-  const { clientId, projectId, amount, status, items } = data;
-  if (clientId == undefined || typeof clientId !== "string") {
-    throw new BadRequest("clientId must be a string");
+
+function isMissing(val) {
+  return val == undefined;
+}
+
+function isNotString(val) {
+  return typeof val !== "string";
+}
+
+function isNotNumber(val) {
+  return typeof val !== "number";
+}
+
+function isInvalidEnum(val, EnumObj) {
+  return !Object.values(EnumObj).includes(val);
+}
+
+function validateStringField(val, fieldName) {
+  if (isMissing(val) || isNotString(val)) {
+    throw new BadRequest(`${fieldName} must be a string`);
   }
-  if (projectId == undefined || typeof projectId !== "string") {
-    throw new BadRequest("projectId must be a string");
-  }
-  if (amount == undefined || typeof amount !== "number" || amount < 0) {
+}
+
+function validateAmount(val) {
+  if (isMissing(val) || isNotNumber(val) || val < 0) {
     throw new BadRequest("amount must be a non-negative number");
   }
-  if (status == undefined) {
-    throw new BadRequest("status cannot be null");
+}
+
+function validateArrayField(val, fieldName) {
+  if (!Array.isArray(val)) {
+    throw new BadRequest(`${fieldName} must be an array`);
   }
-  if (!Object.values(InvoiceStatus).includes(status)) {
-    throw new BadRequest("Invalid status value");
-  }
-  if (!Array.isArray(items)) {
-    throw new BadRequest("items must be an array");
-  }
+}
+
+export const validateInvoiceDTO = (data = {}) => {
+  const { clientId, projectId, amount, status, items } = data;
+  validateStringField(clientId, "clientId");
+  validateStringField(projectId, "projectId");
+  validateAmount(amount);
+  if (isMissing(status)) throw new BadRequest("status cannot be null");
+  if (isInvalidEnum(status, InvoiceStatus)) throw new BadRequest("Invalid status value");
+  validateArrayField(items, "items");
   return true;
 };
 
