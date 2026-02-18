@@ -10,6 +10,42 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 import { BadRequest } from "../errors/customErrors.js";
 
+// Internal helper to update ticket Attributes for a given clientId/ticketId
+async function updateTicketAttributes(clientId, ticketId, updates) {
+  if (!clientId || !ticketId) throw new BadRequest("clientId and ticketId are required");
+  if (!updates || Object.keys(updates).length === 0) throw new BadRequest("No updates provided");
+
+  updates.updatedAt = new Date().toISOString();
+
+  const ExpressionAttributeNames = { "#attrs": "Attributes" };
+  const ExpressionAttributeValues = {};
+  const updateParts = [];
+
+  Object.keys(updates).forEach((key, index) => {
+    const nameKey = `#attr${index}`;
+    const valueKey = `:val${index}`;
+    updateParts.push(`#attrs.${nameKey} = ${valueKey}`);
+    ExpressionAttributeNames[nameKey] = key;
+    ExpressionAttributeValues[valueKey] = updates[key];
+  });
+
+  const params = {
+    TableName: "G2Labs-CPMS",
+    Key: {
+      PK: `CLIENT#${clientId}`,
+      SK: `TICKET#${ticketId}`,
+    },
+    UpdateExpression: `SET ${updateParts.join(", ")}`,
+    ExpressionAttributeNames,
+    ExpressionAttributeValues,
+    ConditionExpression: "attribute_exists(PK)",
+    ReturnValues: "ALL_NEW",
+  };
+
+  const result = await ddbDocClient.send(new UpdateCommand(params));
+  return result.Attributes;
+}
+
 // Create Ticket DAO
 export const createTicket = async (data) => {
   const ticketItem = Ticket.create(data);
@@ -115,74 +151,12 @@ export const deleteTicket = async (clientId, ticketId) => {
 
 // Update ticket message as client
 export const updateTicketMessageAsClient = async (clientId, ticketId, updates) => {
-  if (!clientId || !ticketId) throw new BadRequest("clientId and ticketId are required");
-  if (!updates || Object.keys(updates).length === 0) throw new BadRequest("No updates provided");
-
-  updates.updatedAt = new Date().toISOString();
-
-  const ExpressionAttributeNames = { "#attrs": "Attributes" };
-  const ExpressionAttributeValues = {};
-  const updateParts = [];
-
-  Object.keys(updates).forEach((key, index) => {
-    const nameKey = `#attr${index}`;
-    const valueKey = `:val${index}`;
-    updateParts.push(`#attrs.${nameKey} = ${valueKey}`);
-    ExpressionAttributeNames[nameKey] = key;
-    ExpressionAttributeValues[valueKey] = updates[key];
-  });
-
-  const params = {
-    TableName: "G2Labs-CPMS",
-    Key: {
-      PK: `CLIENT#${clientId}`,
-      SK: `TICKET#${ticketId}`
-    },
-    UpdateExpression: `SET ${updateParts.join(", ")}`,
-    ExpressionAttributeNames,
-    ExpressionAttributeValues,
-    ConditionExpression: "attribute_exists(PK)",
-    ReturnValues: "ALL_NEW"
-  };
-
-  const result = await ddbDocClient.send(new UpdateCommand(params));
-  return result.Attributes;
+  return updateTicketAttributes(clientId, ticketId, updates);
 };
 
 // Update ticket status and adminResponse as admin
 export const updateTicketAsAdmin = async (clientId, ticketId, updates) => {
-  if (!clientId || !ticketId) throw new BadRequest("clientId and ticketId are required");
-  if (!updates || Object.keys(updates).length === 0) throw new BadRequest("No updates provided");
-
-  updates.updatedAt = new Date().toISOString();
-
-  const ExpressionAttributeNames = { "#attrs": "Attributes" };
-  const ExpressionAttributeValues = {};
-  const updateParts = [];
-
-  Object.keys(updates).forEach((key, index) => {
-    const nameKey = `#attr${index}`;
-    const valueKey = `:val${index}`;
-    updateParts.push(`#attrs.${nameKey} = ${valueKey}`);
-    ExpressionAttributeNames[nameKey] = key;
-    ExpressionAttributeValues[valueKey] = updates[key];
-  });
-
-  const params = {
-    TableName: "G2Labs-CPMS",
-    Key: {
-      PK: `CLIENT#${clientId}`,
-      SK: `TICKET#${ticketId}`
-    },
-    UpdateExpression: `SET ${updateParts.join(", ")}`,
-    ExpressionAttributeNames,
-    ExpressionAttributeValues,
-    ConditionExpression: "attribute_exists(PK)",
-    ReturnValues: "ALL_NEW"
-  };
-
-  const result = await ddbDocClient.send(new UpdateCommand(params));
-  return result.Attributes;
+  return updateTicketAttributes(clientId, ticketId, updates);
 };
 
 // Get all tickets by clientId
