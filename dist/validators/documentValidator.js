@@ -86,33 +86,40 @@ export const validateQuotationDTO = (data = {}) => {
   return true;
 };
 
+
+function validateOptionalString(val, fieldName) {
+  if (val !== undefined && isNotString(val)) {
+    throw new BadRequest(`${fieldName} must be a string`);
+  }
+}
+
+function validateOptionalAmount(val, fieldName) {
+  if (val !== undefined && (isNotNumber(val) || val < 0)) {
+    throw new BadRequest(`${fieldName} must be a non-negative number`);
+  }
+}
+
+function validateOptionalArray(val, fieldName) {
+  if (val !== undefined && !Array.isArray(val)) {
+    throw new BadRequest(`${fieldName} must be an array`);
+  }
+}
+
+function validateOptionalEnum(val, EnumObj, fieldName) {
+  if (val !== undefined && isInvalidEnum(val, EnumObj)) {
+    throw new BadRequest(`Invalid ${fieldName} value`);
+  }
+}
+
 export const validateQuotationUpdateDTO = (data = {}) => {
-  if (data.clientId !== undefined && typeof data.clientId !== "string") {
-    throw new BadRequest("clientId must be a string");
-  }
-  if (data.clientEmail !== undefined && typeof data.clientEmail !== "string") {
-    throw new BadRequest("clientEmail must be a string");
-  }
-  if (data.projectId !== undefined && typeof data.projectId !== "string") {
-    throw new BadRequest("projectId must be a string");
-  }
-  if (data.amount !== undefined && (typeof data.amount !== "number" || data.amount < 0)) {
-    throw new BadRequest("amount must be a non-negative number");
-  }
-  if (data.discount !== undefined && (typeof data.discount !== "number" || data.discount < 0)) {
-    throw new BadRequest("discount must be a non-negative number");
-  }
-  if (data.datePeriod !== undefined && typeof data.datePeriod !== "string") {
-    throw new BadRequest("datePeriod must be a string");
-  }
-  if (data.featureName !== undefined && !Array.isArray(data.featureName)) {
-    throw new BadRequest("featureName must be an array");
-  }
-  if (data.featureCost !== undefined && !Array.isArray(data.featureCost)) {
-    throw new BadRequest("featureCost must be an array");
-  }
-  if (data.status !== undefined && !Object.values(QuotationStatus).includes(data.status)) {
-    throw new BadRequest("Invalid status value");
-  }
+  validateOptionalString(data.clientId, "clientId");
+  validateOptionalString(data.clientEmail, "clientEmail");
+  validateOptionalString(data.projectId, "projectId");
+  validateOptionalAmount(data.amount, "amount");
+  validateOptionalAmount(data.discount, "discount");
+  validateOptionalString(data.datePeriod, "datePeriod");
+  validateOptionalArray(data.featureName, "featureName");
+  validateOptionalArray(data.featureCost, "featureCost");
+  validateOptionalEnum(data.status, QuotationStatus, "status");
   return true;
 };
