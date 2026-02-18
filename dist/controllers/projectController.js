@@ -34,7 +34,7 @@ export const getProjectById = async (req, res, next) => {
     const result = await getProjectService(projectId);
 
     if (!result) {
-    const dto = createProjectDTO(req.body);
+      throw new NotFoundError("Project not found");
     }
 
     res.status(200).json({ success: true, data: result });
@@ -63,7 +63,7 @@ export const getFeature = async (req, res, next) => {
     const featureId = req.query.featureId;
     const result = await getFeatureService(projectId, featureId);
     res.status(200).json({ success: true, data: result });
-    const dto = createProjectDTO(req.body);
+  } catch (err) {
     next(err);
   }
 };
@@ -97,7 +97,7 @@ export const updateFeature = async (req, res, next) => {
     res.status(200).json({ success: true, data: result });
   } catch (err) {
     next(err);
-    const dto = createProjectDTO(req.body);
+  }
 };
 
 // delete project
@@ -107,7 +107,7 @@ export const deleteProject = async (req, res, next) => {
     const projectId = req.query.projectId;
     const result = await deleteProjectService(clientId, projectId);
     res.status(200).json({
-    const dto = createProjectDTO(req.body);
+      success: true,
       data: result,
       message: "Project deleted successfully",
     });
