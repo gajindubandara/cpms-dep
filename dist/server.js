@@ -19,16 +19,12 @@ const port = 3000;
 
 import cors from 'cors';
 app.use(cors({
-<<<<<<< Updated upstream
     origin: [
         'http://localhost:5173',
         'https://d1ep0pzchkamyn.cloudfront.net',
         'https://dev.gtwolabs.com',
         'https://test-vercel-plum-xi.vercel.app'
     ],
-=======
-    origin: ['http://localhost:5173', 'https://d1ep0pzchkamyn.cloudfront.net','https://dev.gtwolabs.com'],
->>>>>>> Stashed changes
     credentials: true,
 }));
 
