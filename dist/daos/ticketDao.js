@@ -3,7 +3,6 @@ import { Ticket } from "../models/ticketModel.js";
 import {
   PutCommand,
   UpdateCommand,
-  GetCommand,
   QueryCommand,
   DeleteCommand,
   ScanCommand
