@@ -7,7 +7,7 @@ import {
   deleteClientService,
 } from "../services/clientService.js";
 import { validateClientDTO } from "../validators/clientValidator.js";
-import { ClientDTO } from "../dtos/clientDto.js";
+import { createClientDTO } from "../dtos/clientDto.js";
 import { NotFoundError } from "../errors/customErrors.js";
 import { validatePaymentSlip } from "../validators/paymentValidator.js";
 import { uploadToCloudinary } from "../config/cloudinary.js";
@@ -15,7 +15,7 @@ import { uploadToCloudinary } from "../config/cloudinary.js";
 // create client
 export const createClient = async (req, res, next) => {
   try {
-    const dto = new ClientDTO(req.body);
+    const dto = createClientDTO(req.body);
     validateClientDTO(dto);
     const result = await createClientService(dto);
     res.status(201).json({ success: true, data: result });
@@ -28,7 +28,7 @@ export const createClient = async (req, res, next) => {
 export const updateClient = async (req, res, next) => {
   try {
     const clientId = req.params.clientId;
-    const dto = new ClientDTO(req.body);
+    const dto = createClientDTO(req.body);
     const result = await updateClientService(clientId, dto);
     res.status(200).json({ success: true, data: result });
   } catch (err) {

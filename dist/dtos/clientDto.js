@@ -1,23 +1,39 @@
 import { ClientType } from "../enums/clientType.js";
 import { Status } from "../enums/clientStatus.js";
 
-export class ClientDTO {
-  constructor({clientId, clientName, email, address, phone, status, clientType, createdAt, updatedAt} = {}) {
-    if (clientId !== undefined) this.clientId = clientId;
-    if (clientName !== undefined) this.clientName = clientName;
-    if (email !== undefined) this.email = email;
-    if (address !== undefined) this.address = address;
-    if (phone !== undefined) this.phone = phone;
+export function createClientDTO({
+  clientId,
+  clientName,
+  email,
+  address,
+  phone,
+  status,
+  clientType,
+  createdAt,
+  updatedAt,
+} = {}) {
+  const dto = {};
 
-    if (status !== undefined) {
-      this.status = Object.values(Status).includes(status)? status: Status.ACTIVE;
-    }
+  const assignIfDefined = (target, key, value) => {
+    if (value !== undefined) target[key] = value;
+  };
 
-    if (clientType !== undefined) {
-      this.clientType = Object.values(ClientType).includes(clientType)? clientType: ClientType.UNASSIGNED;
-    }
+  const assignEnum = (target, key, value, enumObj, fallback) => {
+    if (value === undefined) return;
+    target[key] = Object.values(enumObj).includes(value) ? value : fallback;
+  };
 
-    if (createdAt !== undefined) this.createdAt = createdAt;
-    if (updatedAt !== undefined) this.updatedAt = updatedAt;
-  }
+  assignIfDefined(dto, "clientId", clientId);
+  assignIfDefined(dto, "clientName", clientName);
+  assignIfDefined(dto, "email", email);
+  assignIfDefined(dto, "address", address);
+  assignIfDefined(dto, "phone", phone);
+
+  assignEnum(dto, "status", status, Status, Status.ACTIVE);
+  assignEnum(dto, "clientType", clientType, ClientType, ClientType.UNASSIGNED);
+
+  assignIfDefined(dto, "createdAt", createdAt);
+  assignIfDefined(dto, "updatedAt", updatedAt);
+
+  return dto;
 }
