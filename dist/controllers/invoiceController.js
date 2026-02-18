@@ -10,7 +10,7 @@ import { InvoiceDTO } from "../dtos/invoiceDto.js";
 import {
     validateInvoiceDTO,
     validateInvoiceUpdateDTO,
-} from "../validators/invoiceValidator.js";
+} from "../validators/documentValidator.js";
 
 // Create Invoice Controller
 export const createInvoiceController = async (req, res, next) => {

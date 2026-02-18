@@ -7,7 +7,7 @@ import {
     getAllQuotationsService,
     getQuotationsByClientIdService,
 } from "../services/quotationService.js";
-import { validateQuotationDTO, validateQuotationUpdateDTO } from "../validators/quotationValidator.js";
+import { validateQuotationDTO, validateQuotationUpdateDTO } from "../validators/documentValidator.js";
 import { QuotationDTO } from "../dtos/quotationDto.js";
 import { NotFoundError } from "../errors/customErrors.js";
 
