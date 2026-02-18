@@ -6,7 +6,7 @@ import {
     deleteInvoiceService,
     getInvoicesByClientIdService
 } from "../services/invoiceService.js";
-import { InvoiceDTO } from "../dtos/invoiceDto.js";
+import { createInvoiceDTO } from "../dtos/invoiceDto.js";
 import {
     validateInvoiceDTO,
     validateInvoiceUpdateDTO,
@@ -15,9 +15,9 @@ import {
 // Create Invoice Controller
 export const createInvoiceController = async (req, res, next) => {
     try {
-        const createInvoiceDTO = new InvoiceDTO(req.body);
-        validateInvoiceDTO(createInvoiceDTO);
-        const newInvoice = await createInvoiceService(createInvoiceDTO);
+        const dto = createInvoiceDTO(req.body);
+        validateInvoiceDTO(dto);
+        const newInvoice = await createInvoiceService(dto);
         res.status(201).json(newInvoice);
     } catch (error) {
         next(error);
@@ -42,9 +42,9 @@ export const getInvoiceByIdController = async (req, res, next) => {
 export const updateInvoiceController = async (req, res, next) => {
     try {
         const { invoiceId } = req.params;
-        const updateInvoiceDTO = new InvoiceDTO(req.body);
-        validateInvoiceUpdateDTO(updateInvoiceDTO);
-        const updatedInvoice = await updateInvoiceService(invoiceId, updateInvoiceDTO);
+        const dto = createInvoiceDTO(req.body);
+        validateInvoiceUpdateDTO(dto);
+        const updatedInvoice = await updateInvoiceService(invoiceId, dto);
         res.status(200).json(updatedInvoice);
     } catch (error) {
         next(error);
