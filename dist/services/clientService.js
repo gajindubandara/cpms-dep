@@ -75,6 +75,7 @@ export const createClientService = async (createClientDTO) => {
     const subAttr = getUserResp.UserAttributes.find(attr => attr.Name === "sub");
     cognitoSub = subAttr ? subAttr.Value : null;
   } catch (err) {
+    console.error('Error fetching user from Cognito after creation:', err);
     throw new Error("User not found in Cognito after creation");
   }
   // Set clientId to Cognito sub
@@ -152,14 +153,14 @@ export const deleteClientService = async (clientId) => {
     const parts = element.SK.split("#");
     const featureId = parts[3];
 
-    if (featureId !== "0") {
+    if (featureId === "0") {
+      await deleteProject(clientId, element.SK.split("#")[1]);
+    } else {
       await deleteFeature(
         clientId,
         element.SK.split("#")[1],
         element.SK.split("#")[3]
       );
-    } else {
-      await deleteProject(clientId, element.SK.split("#")[1]);
     }
   }
   return await deleteClient(clientId);

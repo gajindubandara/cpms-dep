@@ -16,22 +16,22 @@ const profitCal = async (payment) => {
   let profit = 0;
   const amount = payment.Attributes.amount;
 
-  if (payment.Attributes.projectId != null) {
+  if (payment.Attributes.projectId == null) {
+    profit = amount;
+  } else {
     const project = await getProjectById(payment.Attributes.projectId);
 
     if (!project) {
       profit = amount;
-    } else if (project.Attributes.commissionPercent != null) {
+    } else if (project.Attributes.commissionPercent == null) {
+      // no commission
+      profit = amount * (project.Attributes.profitMargin / 100);
+    } else {
       // commission deducted
       profit =
         (amount - amount * (project.Attributes.commissionPercent / 100)) *
         (project.Attributes.profitMargin / 100);
-    } else {
-      // no commission
-      profit = amount * (project.Attributes.profitMargin / 100);
     }
-  } else {
-    profit = amount;
   }
 
   return profit;

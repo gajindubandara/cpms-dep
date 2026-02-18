@@ -63,6 +63,7 @@ export const getClientPaymentsService = async (clientId) => {
         };
         return enriched;
       } catch (error) {
+        console.error('Error enriching client payment:', error);
         return {
           ...payment,
           projectName: 'Unknown Project',
@@ -208,6 +209,7 @@ export const getAllPaymentsService = async () => {
         
         return enriched;
       } catch (error) {
+        console.error('Error enriching payment:', error);
         return {
           ...payment,
           clientName: 'Unknown Client',

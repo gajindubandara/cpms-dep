@@ -15,7 +15,7 @@ import {
   mapAdminUpdateTicketDTOtoTicketModel
 } from "../mappers/ticketMapper.js";
 import { getClientById } from "../daos/clientDao.js";
-import { getProjectById, projectByClientId } from "../daos/projectDao.js";
+import { projectByClientId } from "../daos/projectDao.js";
 import {
   BadRequest,
   Forbidden,
