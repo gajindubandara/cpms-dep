@@ -28,35 +28,38 @@ export const mapCreateProjectDTOtoProjectModel = (dto) => ({
 export const mapUpdateProjectDTOtoProjectModel = (dto) => {
     const model = {};
 
-    if(dto.clientId !== undefined) model.clientId = dto.clientId;
-    if(dto.projectName !== undefined) model.projectName = dto.projectName;
-    if(dto.description !== undefined) model.description = dto.description;
-    if(dto.startDate !== undefined) model.startDate = dto.startDate;
-    if(dto.endDate !== undefined) model.endDate = dto.endDate;
-    if(dto.status !== undefined) {
-        model.status = Object.values(ProjectStatus).includes(dto.status) 
-            ? dto.status 
-            : ProjectStatus.PLANNED;
-    }
-    if(dto.cost !== undefined) model.cost = dto.cost;
-    if(dto.currency !== undefined)model.currency = dto.currency;
-    if(dto.finalAmount !== undefined) model.finalAmount = dto.finalAmount;
-    if(dto.profitMargin !== undefined) model.profitMargin = dto.profitMargin;
-    if(dto.commissionPercent !== undefined) model.commissionPercent = dto.commissionPercent;
-    if(dto.isRecurring !== undefined) {
-        model.isRecurring = Object.values(IsRecurring).includes(dto.isRecurring)
-            ? dto.isRecurring
-            : IsRecurring.NO;
-    }
-    if(dto.billingCycle !== undefined) {
-        model.billingCycle = Object.values(BillingCycle).includes(dto.billingCycle)
-            ? dto.billingCycle
-            : BillingCycle.MONTHLY;
-    }
-    if(dto.billingDate !== undefined) model.billingDate = dto.billingDate;
-    model.billability = dto.billability !== undefined
-        ? (Object.values(Billability).includes(dto.billability) ? dto.billability : Billability.BILLABLE)
-        : Billability.BILLABLE;
+    const assignIfDefined = (target, key, value) => {
+        if (value !== undefined) target[key] = value;
+    };
+
+    const assignEnumDefault = (target, key, value, enumObj, defaultValue) => {
+        // set sensible default first
+        target[key] = defaultValue;
+        if (value !== undefined) {
+            target[key] = Object.values(enumObj).includes(value) ? value : defaultValue;
+        }
+    };
+
+    assignIfDefined(model, 'clientId', dto.clientId);
+    assignIfDefined(model, 'projectName', dto.projectName);
+    assignIfDefined(model, 'description', dto.description);
+    assignIfDefined(model, 'startDate', dto.startDate);
+    assignIfDefined(model, 'endDate', dto.endDate);
+
+    assignEnumDefault(model, 'status', dto.status, ProjectStatus, ProjectStatus.PLANNED);
+
+    assignIfDefined(model, 'cost', dto.cost);
+    assignIfDefined(model, 'currency', dto.currency);
+    assignIfDefined(model, 'finalAmount', dto.finalAmount);
+    assignIfDefined(model, 'profitMargin', dto.profitMargin);
+    assignIfDefined(model, 'commissionPercent', dto.commissionPercent);
+
+    assignEnumDefault(model, 'isRecurring', dto.isRecurring, IsRecurring, IsRecurring.NO);
+    assignEnumDefault(model, 'billingCycle', dto.billingCycle, BillingCycle, BillingCycle.MONTHLY);
+    assignIfDefined(model, 'billingDate', dto.billingDate);
+
+    // billability: default to BILLABLE unless a valid value is provided
+    assignEnumDefault(model, 'billability', dto.billability, Billability, Billability.BILLABLE);
 
     return model;
 };
