@@ -88,7 +88,7 @@ export const validatePaymentSlip = (file) => {
 
   // Validate file type - only allow images
   const allowedMimes = ['image/png', 'image/jpeg', 'image/jpg'];
-  if (file && file.mimetype && !allowedMimes.includes(file.mimetype)) {
+  if (file?.mimetype && !allowedMimes.includes(file.mimetype)) {
     errors.push('Only PNG, JPG, and JPEG image files are allowed');
   }
 

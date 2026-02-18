@@ -2,7 +2,6 @@ import invoiceRoutes from "./routes/invoiceRoute.js";
 import express from "express";
 import ticketRoutes from "./routes/ticketRoute.js";
 import clientRoutes from "./routes/clientRoute.js";
-// import commonMiddleware from './middleware/commonMiddleware.js';
 import authRoutes from './routes/authRoutes.js';
 import errorhandler from './middlewares/errorHandler.js';
 import dotenv from 'dotenv';
@@ -15,7 +14,6 @@ import reportRouter from './routes/reportRouter.js'
 dotenv.config();
 const app = express();
 const port = 3000;
-// import { Issuer, generators } from 'openid-client';
 
 import cors from 'cors';
 app.use(cors({

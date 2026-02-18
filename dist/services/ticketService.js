@@ -26,9 +26,11 @@ import {
 // Service to create a ticket
 export const createTicketService = async (createTicketDTO) => {
   if (!createTicketDTO || typeof createTicketDTO !== 'object') {
+    throw new BadRequest('Invalid ticket data');
   }
   const { clientId, projectId, subject, message, status } = createTicketDTO;
   if (!clientId || !subject || !message) {
+    throw new BadRequest('clientId, subject, and message are required');
   }
 
   // Fetch client from DB
@@ -45,7 +47,7 @@ export const createTicketService = async (createTicketDTO) => {
   // Ensure the project belongs to the client (if projectId is provided)
   if (projectId) {
     const projects = await projectByClientId(clientId);
-    const project = projects.find(p => p.SK && p.SK.startsWith(`PROJECT#${projectId}`));
+    const project = projects.find(p => p.SK?.startsWith(`PROJECT#${projectId}`));
     if (!project) {
       throw new Forbidden('Project does not belong to this client');
     }
@@ -98,7 +100,7 @@ export const deleteTicketService = async (clientId, ticketId) => {
   const tickets = await getTicketsByTicketId(ticketId);
   const ticket = tickets.find(t => t.PK === `CLIENT#${clientId}` && t.SK === `TICKET#${ticketId}`);
   if (!ticket) throw new NotFoundError('Ticket not found');
-  if (ticket.Attributes && ticket.Attributes.status === 'In Progress') {
+  if (ticket.Attributes?.status === 'In Progress') {
     throw new Forbidden('Cannot delete ticket: Ticket is In Progress');
   }
   try {
