@@ -8,7 +8,6 @@ import {
     getQuotationsByClientIdService,
 } from "../services/quotationService.js";
 import { validateQuotationDTO, validateQuotationUpdateDTO } from "../validators/documentValidator.js";
-import { QuotationDTO } from "../dtos/quotationDto.js";
 import { NotFoundError } from "../errors/customErrors.js";
 
 // Get Quotations by Client ID Controller
