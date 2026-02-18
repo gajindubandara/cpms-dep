@@ -50,16 +50,16 @@ export const getClientPaymentsService = async (clientId) => {
     payments.map(async (payment) => {
       try {
         // Handle both structures: payment.Attributes and direct attributes
-        const attrs = payment.Attributes || payment;
-        
-        if (!attrs || !attrs.projectId) {
+        const attrs = payment?.Attributes ?? payment;
+
+        if (!attrs?.projectId) {
           return null;
         }
-        
+
         const project = await getProjectById(attrs.projectId);
         const enriched = {
           ...payment,
-          projectName: project?.Attributes?.projectName || 'Unknown Project',
+          projectName: project?.Attributes?.projectName || "Unknown Project",
         };
         return enriched;
       } catch (error) {
@@ -89,19 +89,19 @@ export const submitPaymentSlipService = async (paymentId, projectId, fileData) =
   const payment = await getPaymentById(paymentId, projectId);
   
   // Handle both structures: payment.Attributes and direct attributes
-  const attrs = payment.Attributes || payment;
-  
+  const attrs = payment?.Attributes ?? payment;
+
   if (!attrs) {
-    throw new NotFoundError('Payment not found or invalid data structure');
+    throw new NotFoundError("Payment not found or invalid data structure");
   }
   
   // Allow submission for PENDING and REJECTED payments
   // Do NOT allow for APPROVED (already done) or COMPLETED (awaiting approval)
-  if (attrs.status === 'APPROVED') {
+  if (attrs?.status === "APPROVED") {
     throw new BadRequest('Cannot submit slip for already approved payment');
   }
-
-  if (attrs.status === 'COMPLETED') {
+  
+  if (attrs?.status === "COMPLETED") {
     throw new BadRequest('Payment slip is awaiting approval. Cannot resubmit at this time.');
   }
 
@@ -126,13 +126,13 @@ export const approvePaymentService = async (paymentId, projectId) => {
   const payment = await getPaymentById(paymentId, projectId);
   
   // Handle both structures: payment.Attributes and direct attributes
-  const attrs = payment.Attributes || payment;
+  const attrs = payment?.Attributes ?? payment;
 
-  if (attrs.status === 'APPROVED') {
+  if (attrs?.status === "APPROVED") {
     throw new BadRequest('Payment is already approved');
   }
-
-  if (attrs.status !== 'COMPLETED') {
+  
+  if (attrs?.status !== "COMPLETED") {
     throw new BadRequest('Only completed payments can be approved');
   }
 
@@ -152,9 +152,9 @@ export const rejectPaymentService = async (paymentId, projectId, reason) => {
   const payment = await getPaymentById(paymentId, projectId);
   
   // Handle both structures: payment.Attributes and direct attributes
-  const attrs = payment.Attributes || payment;
+  const attrs = payment?.Attributes ?? payment;
 
-  if (attrs.status === 'REJECTED') {
+  if (attrs?.status === "REJECTED") {
     throw new BadRequest('Payment is already rejected');
   }
 
@@ -190,20 +190,20 @@ export const getAllPaymentsService = async () => {
     payments.map(async (payment) => {
       try {
         // Handle both structures: payment.Attributes and direct attributes
-        const attrs = payment.Attributes || payment;
-        
+        const attrs = payment?.Attributes ?? payment;
+
         // Skip if we don't have valid payment data
-        if (!attrs || !attrs.paymentId || !attrs.clientId || !attrs.projectId) {
+        if (!attrs?.paymentId || !attrs?.clientId || !attrs?.projectId) {
           return null;
         }
-        
+
         const client = await getClientById(attrs.clientId);
         const project = await getProjectById(attrs.projectId);
-        
+
         const enriched = {
           ...payment,
-          clientName: client?.Attributes?.clientName || 'Unknown Client',
-          projectName: project?.Attributes?.projectName || 'Unknown Project',
+          clientName: client?.Attributes?.clientName || "Unknown Client",
+          projectName: project?.Attributes?.projectName || "Unknown Project",
         };
         
         return enriched;
