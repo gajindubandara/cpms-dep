@@ -3,7 +3,7 @@ import cloudinary from 'cloudinary';
 import { Readable } from 'node:stream';
 
 // Initialize Cloudinary with environment variables
-cloudinary.config({
+cloudinary.v2.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
@@ -19,7 +19,7 @@ cloudinary.config({
 export const uploadToCloudinary = async (fileBuffer, fileName, options = {}) => {
   try {
     const result = await new Promise((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
+      const uploadStream = cloudinary.v2.uploader.upload_stream(
         {
           resource_type: 'image', // Only accept image files
           public_id: `${fileName}`,
@@ -50,13 +50,59 @@ export const uploadToCloudinary = async (fileBuffer, fileName, options = {}) => 
 };
 
 /**
+ * Upload PDF file to Cloudinary
+ * @param {Buffer|Stream} fileBuffer - The PDF file buffer/stream to upload
+ * @param {string} fileName - Name for the uploaded file (without extension)
+ * @param {string} folder - Folder path within G2-CPMS (e.g., 'quotations')
+ * @param {Object} options - Additional Cloudinary upload options
+ * @returns {Promise<Object>} - Upload response with secure_url and public_id
+ */
+export const uploadPDFToCloudinary = async (fileBuffer, fileName, folder = 'documents', options = {}) => {
+  try {
+    const fullFolderPath = `G2-Cpms/${folder}`;
+    // Remove .pdf extension if present - Cloudinary adds it automatically for raw files
+    const fileNameWithoutExt = fileName.replace(/\.pdf$/i, '');
+    
+    const result = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.v2.uploader.upload_stream(
+        {
+          resource_type: 'raw', // For PDFs and non-image files
+          public_id: fileNameWithoutExt,
+          folder: fullFolderPath,
+          format: 'pdf', // Explicitly specify PDF format
+          overwrite: true,
+          ...options,
+        },
+        (error, result) => {
+          if (error) {
+            reject(new Error(`Cloudinary PDF upload failed: ${error.message}`));
+          } else {
+            resolve(result);
+          }
+        }
+      );
+
+      // Convert buffer to stream and pipe to upload stream
+      if (Buffer.isBuffer(fileBuffer)) {
+        Readable.from(fileBuffer).pipe(uploadStream);
+      } else {
+        fileBuffer.pipe(uploadStream);
+      }
+    });
+    return result;
+  } catch (error) {
+    throw new Error(`Cloudinary PDF upload error: ${error.message}`);
+  }
+};
+
+/**
  * Delete file from Cloudinary
  * @param {string} publicId - Public ID of the file to delete
  * @returns {Promise<Object>} - Deletion result
  */
 export const deleteFromCloudinary = async (publicId) => {
   try {
-    const result = await cloudinary.uploader.destroy(publicId);
+    const result = await cloudinary.v2.uploader.destroy(publicId);
     return result;
   } catch (error) {
     throw new Error(`Failed to delete file from Cloudinary: ${error.message}`);
@@ -75,7 +121,6 @@ export const extractPublicIdFromUrl = (secureUrl) => {
     const match = regex.exec(secureUrl);
     return match ? match[1] : null;
   } catch (error) {
-    console.error('Error extracting public ID from URL:', error);
     return null;
   }
 };

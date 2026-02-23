@@ -24,11 +24,13 @@ export const createQuotation = async (quotationData) => {
       Object.entries(item.Attributes).filter(([_, v]) => v !== undefined)
     );
   }
+  
   const params = {
     TableName: "G2Labs-CPMS",
     Item: item,
     };
     await ddbDocClient.send(new PutCommand(params));
+    
     return item;
 };
 
@@ -136,7 +138,9 @@ export const getQuotationsByClientId = async (clientId) => {
       ":clientId": clientId
     }
   };
+  
   const result = await ddbDocClient.send(new ScanCommand(params));
+  
   return (result.Items || []).map(item => ({
     quotationId: item.PK.replace("QUOTATION#", ""),
     ...item.Attributes

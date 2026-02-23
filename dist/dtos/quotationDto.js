@@ -8,11 +8,15 @@ export function createQuotationDTO({
   projectId,
   projectName,
   description,
+  projectCost,
   amount,
   discount,
+  discountAmount,
+  grandTotal,
   datePeriod,
   featureName,
   featureCost,
+  cloudinaryId,
   status,
   createdAt,
   updatedAt,
@@ -32,11 +36,15 @@ export function createQuotationDTO({
   assignIfDefined("projectId", projectId);
   assignIfDefined("projectName", projectName);
   assignIfDefined("description", description);
+  assignIfDefined("projectCost", projectCost);
   assignIfDefined("amount", amount);
   assignIfDefined("discount", discount);
+  assignIfDefined("discountAmount", discountAmount);
+  assignIfDefined("grandTotal", grandTotal);
   assignIfDefined("datePeriod", datePeriod);
   assignIfDefined("featureName", featureName);
   assignIfDefined("featureCost", featureCost);
+  assignIfDefined("cloudinaryId", cloudinaryId);
   assignEnum("status", status, QuotationStatus, QuotationStatus.SENT);
   assignIfDefined("createdAt", createdAt);
   assignIfDefined("updatedAt", updatedAt);

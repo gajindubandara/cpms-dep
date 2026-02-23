@@ -115,11 +115,15 @@ export const validateQuotationUpdateDTO = (data = {}) => {
   validateOptionalString(data.clientId, "clientId");
   validateOptionalString(data.clientEmail, "clientEmail");
   validateOptionalString(data.projectId, "projectId");
+  validateOptionalAmount(data.projectCost, "projectCost");
   validateOptionalAmount(data.amount, "amount");
   validateOptionalAmount(data.discount, "discount");
+  validateOptionalAmount(data.discountAmount, "discountAmount");
+  validateOptionalAmount(data.grandTotal, "grandTotal");
   validateOptionalString(data.datePeriod, "datePeriod");
   validateOptionalArray(data.featureName, "featureName");
   validateOptionalArray(data.featureCost, "featureCost");
+  validateOptionalString(data.cloudinaryId, "cloudinaryId");
   validateOptionalEnum(data.status, QuotationStatus, "status");
   return true;
 };

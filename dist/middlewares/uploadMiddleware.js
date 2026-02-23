@@ -14,7 +14,18 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// Create multer instance
+// File filter for PDFs
+const pdfFileFilter = (req, file, cb) => {
+  const allowedMimes = ['application/pdf'];
+  
+  if (allowedMimes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only PDF files are allowed'));
+  }
+};
+
+// Create multer instance for images
 const upload = multer({
   storage,
   fileFilter,
@@ -23,4 +34,14 @@ const upload = multer({
   },
 });
 
+// Create multer instance for PDFs
+const uploadPDF = multer({
+  storage,
+  fileFilter: pdfFileFilter,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit for PDFs
+  },
+});
+
 export const uploadSingle = upload.single('file');
+export const uploadPDFSingle = uploadPDF.single('file');
