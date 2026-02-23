@@ -10,6 +10,34 @@ cloudinary.v2.config({
 });
 
 /**
+ * Helper function to handle Cloudinary upload stream
+ * @param {Buffer|Stream} fileBuffer - The file buffer/stream to upload
+ * @param {Object} uploadOptions - Cloudinary upload options
+ * @returns {Promise<Object>} - Upload response
+ */
+const uploadStreamToCloudinary = async (fileBuffer, uploadOptions) => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.v2.uploader.upload_stream(
+      uploadOptions,
+      (error, result) => {
+        if (error) {
+          reject(new Error(`Cloudinary upload failed: ${error.message}`));
+        } else {
+          resolve(result);
+        }
+      }
+    );
+
+    // Convert buffer to stream and pipe to upload stream
+    if (Buffer.isBuffer(fileBuffer)) {
+      Readable.from(fileBuffer).pipe(uploadStream);
+    } else {
+      fileBuffer.pipe(uploadStream);
+    }
+  });
+};
+
+/**
  * Upload file to Cloudinary
  * @param {Buffer|Stream} fileBuffer - The file buffer/stream to upload
  * @param {string} fileName - Name for the uploaded file
@@ -18,30 +46,12 @@ cloudinary.v2.config({
  */
 export const uploadToCloudinary = async (fileBuffer, fileName, options = {}) => {
   try {
-    const result = await new Promise((resolve, reject) => {
-      const uploadStream = cloudinary.v2.uploader.upload_stream(
-        {
-          resource_type: 'image', // Only accept image files
-          public_id: `${fileName}`,
-          folder: 'G2-Cpms/payment-slips',
-          overwrite: true,
-          ...options,
-        },
-        (error, result) => {
-          if (error) {
-            reject(new Error(`Cloudinary upload failed: ${error.message}`));
-          } else {
-            resolve(result);
-          }
-        }
-      );
-
-      // Convert buffer to stream and pipe to upload stream
-      if (Buffer.isBuffer(fileBuffer)) {
-        Readable.from(fileBuffer).pipe(uploadStream);
-      } else {
-        fileBuffer.pipe(uploadStream);
-      }
+    const result = await uploadStreamToCloudinary(fileBuffer, {
+      resource_type: 'image', // Only accept image files
+      public_id: `${fileName}`,
+      folder: 'G2-Cpms/payment-slips',
+      overwrite: true,
+      ...options,
     });
     return result;
   } catch (error) {
@@ -60,34 +70,15 @@ export const uploadToCloudinary = async (fileBuffer, fileName, options = {}) => 
 export const uploadPDFToCloudinary = async (fileBuffer, fileName, folder = 'documents', options = {}) => {
   try {
     const fullFolderPath = `G2-Cpms/${folder}`;
-    // Remove .pdf extension if present - Cloudinary adds it automatically for raw files
     const fileNameWithoutExt = fileName.replace(/\.pdf$/i, '');
     
-    const result = await new Promise((resolve, reject) => {
-      const uploadStream = cloudinary.v2.uploader.upload_stream(
-        {
-          resource_type: 'raw', // For PDFs and non-image files
-          public_id: fileNameWithoutExt,
-          folder: fullFolderPath,
-          format: 'pdf', // Explicitly specify PDF format
-          overwrite: true,
-          ...options,
-        },
-        (error, result) => {
-          if (error) {
-            reject(new Error(`Cloudinary PDF upload failed: ${error.message}`));
-          } else {
-            resolve(result);
-          }
-        }
-      );
-
-      // Convert buffer to stream and pipe to upload stream
-      if (Buffer.isBuffer(fileBuffer)) {
-        Readable.from(fileBuffer).pipe(uploadStream);
-      } else {
-        fileBuffer.pipe(uploadStream);
-      }
+    const result = await uploadStreamToCloudinary(fileBuffer, {
+      resource_type: 'raw', 
+      public_id: fileNameWithoutExt,
+      folder: fullFolderPath,
+      format: 'pdf',
+      overwrite: true,
+      ...options,
     });
     return result;
   } catch (error) {
@@ -115,14 +106,10 @@ export const deleteFromCloudinary = async (publicId) => {
  * @returns {string} - Public ID
  */
 export const extractPublicIdFromUrl = (secureUrl) => {
-  try {
-    // URL format: https://res.cloudinary.com/{cloud_name}/image/upload/{public_id}.ext
-    const regex = /\/v\d+\/(.*)\.\w+$/;
-    const match = regex.exec(secureUrl);
-    return match ? match[1] : null;
-  } catch (error) {
-    return null;
-  }
+  // URL format: https://res.cloudinary.com/{cloud_name}/image/upload/{public_id}.ext
+  const regex = /\/v\d+\/(.*)\.\w+$/;
+  const match = regex.exec(secureUrl);
+  return match ? match[1] : null;
 };
 
 export {default as cloudinary} from 'cloudinary';
