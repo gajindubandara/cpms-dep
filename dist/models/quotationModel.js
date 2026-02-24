@@ -1,5 +1,3 @@
-import { QuotationStatus} from "../enums/quotationStatus.js";
-
 export const Quotation = {
   pk: (quotationId) => `QUOTATION#${quotationId}`,
   sk: () => `QUOTATION`,
@@ -18,12 +16,11 @@ export const Quotation = {
       discount: data.discount,
       discountAmount: data.discountAmount,
       grandTotal: data.grandTotal,
-      datePeriod: data.datePeriod,
+      quotationDate: data.quotationDate,
       featureName: data.featureName,
       featureCost: data.featureCost,
       cloudinaryId: data.cloudinaryId,
       pdfUrl: data.pdfUrl,
-      status: data.status ?? QuotationStatus.SENT,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     },

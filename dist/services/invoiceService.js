@@ -14,6 +14,44 @@ import {
 } from "../mappers/invoiceMapper.js";
 import { getClientById } from "../daos/clientDao.js";
 
+// Helper function to generate PDF URL from cloudinaryId
+const generatePdfUrl = (cloudinaryId) => {
+    if (!cloudinaryId) return null;
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME || 'your-cloud-name';
+    return `https://res.cloudinary.com/${cloudName}/raw/upload/${cloudinaryId}.pdf`;
+};
+
+// Helper function to map DynamoDB invoice to DTO and add pdfUrl
+const mapInvoiceToDTO = (invoice) => {
+    if (!invoice) return invoice;
+    
+    // Extract invoiceId from PK (format: INVOICE#id)
+    const invoiceId = invoice.PK?.replace('INVOICE#', '') || '';
+    
+    // Get attributes (might be at root level or in Attributes)
+    const attrs = invoice.Attributes || invoice;
+    
+    // Try to get cloudinaryId from multiple possible locations
+    const cloudinaryId = attrs.cloudinaryId || invoice.cloudinaryId;
+    
+    return {
+        invoiceId,
+        clientId: attrs.clientId,
+        clientName: attrs.clientName,
+        clientEmail: attrs.clientEmail,
+        projectId: attrs.projectId,
+        projectName: attrs.projectName,
+        description: attrs.description,
+        amount: attrs.amount,
+        invoiceDate: attrs.invoiceDate,
+        items: attrs.items,
+        cloudinaryId: cloudinaryId,
+        pdfUrl: generatePdfUrl(cloudinaryId),
+        createdAt: attrs.createdAt,
+        updatedAt: attrs.updatedAt,
+    };
+};
+
 // Create Invoice Service
 export const createInvoiceService = async (createInvoiceDTO) => {
     // Validate required fields before mapping
@@ -28,23 +66,29 @@ export const createInvoiceService = async (createInvoiceDTO) => {
     if (!existClient) {
         throw new BadRequest("Client with that id is not available");
     }
-    return await createInvoice(model);
+    const createdInvoice = await createInvoice(model);
+    return mapInvoiceToDTO(createdInvoice);
 }   
 
 // Get Invoice by ID Service
 export const getInvoiceByIdService = async (invoiceId) => {
-    return await getInvoiceById(invoiceId);
+    const invoice = await getInvoiceById(invoiceId);
+    return mapInvoiceToDTO(invoice);
 }
 
 // Get All Invoices Service
 export const getAllInvoicesService = async () => {
-    return await getAllInvoices();
+    const invoices = await getAllInvoices();
+    return invoices.map(mapInvoiceToDTO);
 }
 
 // Get Invoices by Client ID Service
 export const getInvoicesByClientIdService = async (clientId) => {
     if (!clientId) throw new BadRequest("clientId is required");
-    return await getInvoicesByClientId(clientId);
+    const invoices = await getInvoicesByClientId(clientId);
+    
+    // Map DynamoDB structure to DTO
+    return invoices.map(mapInvoiceToDTO);
 }
 
 // Update Invoice Service
@@ -54,7 +98,8 @@ export const updateInvoiceService = async (invoiceId, updateInvoiceDTO) => {
     if (Object.keys(updates).length === 0) {
         throw new BadRequest("No valid fields to update");
     }
-    return await updateInvoice(invoiceId, updates);
+    const updatedInvoice = await updateInvoice(invoiceId, updates);
+    return mapInvoiceToDTO(updatedInvoice);
 }
 
 // Delete Invoice Service

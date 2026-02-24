@@ -11,12 +11,17 @@ import {
     validateInvoiceDTO,
     validateInvoiceUpdateDTO,
 } from "../validators/documentValidator.js";
+import { NotFoundError } from "../errors/customErrors.js";
+import { uploadPDFToCloudinary } from "../config/cloudinary.js";
 
 // Create Invoice Controller
 export const createInvoiceController = async (req, res, next) => {
     try {
         const dto = createInvoiceDTO(req.body);
-        validateInvoiceDTO(dto);
+        const errors = validateInvoiceDTO(dto);
+        if (errors.length > 0) {
+            return res.status(400).json({ errors });
+        }
         const newInvoice = await createInvoiceService(dto);
         res.status(201).json(newInvoice);
     } catch (error) {
@@ -78,6 +83,50 @@ export const getInvoicesByClientIdController = async (req, res, next) => {
         const { clientId } = req.params;
         const invoices = await getInvoicesByClientIdService(clientId);
         res.status(200).json(invoices);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Upload Invoice PDF to Cloudinary
+export const uploadInvoicePDFController = async (req, res, next) => {
+    try {
+        const { invoiceId } = req.params;
+        
+        // Check if file exists
+        if (!req.file) {
+            return res.status(400).json({ error: 'No PDF file provided' });
+        }
+
+        // Check if invoice exists
+        const invoice = await getInvoiceByIdService(invoiceId);
+        if (!invoice) {
+            throw new NotFoundError('Invoice not found');
+        }
+
+        // Upload PDF to Cloudinary
+        const fileName = `invoice-${invoiceId}`; // Without extension, we specify format separately
+        const folderName = 'invoices';
+        const cloudinaryResponse = await uploadPDFToCloudinary(
+            req.file.buffer,
+            fileName,
+            folderName
+        );
+
+        // Update invoice with Cloudinary ID and PDF URL
+        const updateData = {
+            cloudinaryId: cloudinaryResponse.public_id,
+            pdfUrl: cloudinaryResponse.secure_url,
+        };
+        
+        const updatedInvoice = await updateInvoiceService(invoiceId, updateData);
+
+        res.status(200).json({
+            message: 'Invoice PDF uploaded successfully',
+            cloudinaryId: cloudinaryResponse.public_id,
+            pdfUrl: cloudinaryResponse.secure_url,
+            invoice: updatedInvoice,
+        });
     } catch (error) {
         next(error);
     }

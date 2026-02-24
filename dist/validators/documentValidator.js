@@ -1,5 +1,3 @@
-import { InvoiceStatus } from "../enums/invoiceStatus.js";
-import { QuotationStatus } from "../enums/quotationStatus.js";
 import { BadRequest } from "../errors/customErrors.js";
 
 
@@ -13,10 +11,6 @@ function isNotString(val) {
 
 function isNotNumber(val) {
   return typeof val !== "number";
-}
-
-function isInvalidEnum(val, EnumObj) {
-  return !Object.values(EnumObj).includes(val);
 }
 
 function validateStringField(val, fieldName) {
@@ -38,12 +32,10 @@ function validateArrayField(val, fieldName) {
 }
 
 export const validateInvoiceDTO = (data = {}) => {
-  const { clientId, projectId, amount, status, items } = data;
+  const { clientId, projectId, amount, items } = data;
   validateStringField(clientId, "clientId");
   validateStringField(projectId, "projectId");
   validateAmount(amount);
-  if (isMissing(status)) throw new BadRequest("status cannot be null");
-  if (isInvalidEnum(status, InvoiceStatus)) throw new BadRequest("Invalid status value");
   validateArrayField(items, "items");
   return true;
 };
@@ -61,11 +53,8 @@ export const validateInvoiceUpdateDTO = (data = {}) => {
   if (data.amount !== undefined && (typeof data.amount !== "number" || data.amount < 0)) {
     throw new BadRequest("amount must be a non-negative number");
   }
-  if (data.dateRange !== undefined && typeof data.dateRange !== "string") {
-    throw new BadRequest("dateRange must be a string");
-  }
-  if (data.status !== undefined && !Object.values(InvoiceStatus).includes(data.status)) {
-    throw new BadRequest("Invalid status value");
+  if (data.invoiceDate !== undefined && typeof data.invoiceDate !== "string") {
+    throw new BadRequest("invoiceDate must be a string");
   }
   if (data.items !== undefined && !Array.isArray(data.items)) {
     throw new BadRequest("items must be an array");
@@ -75,12 +64,10 @@ export const validateInvoiceUpdateDTO = (data = {}) => {
 
 
 export const validateQuotationDTO = (data = {}) => {
-  const { clientId, projectId, amount, status, featureName, featureCost } = data;
+  const { clientId, projectId, amount, featureName, featureCost } = data;
   validateStringField(clientId, "clientId");
   validateStringField(projectId, "projectId");
   validateAmount(amount);
-  if (isMissing(status)) throw new BadRequest("status cannot be null");
-  if (isInvalidEnum(status, QuotationStatus)) throw new BadRequest("Invalid status value");
   validateArrayField(featureName, "featureName");
   validateArrayField(featureCost, "featureCost");
   return true;
@@ -105,12 +92,6 @@ function validateOptionalArray(val, fieldName) {
   }
 }
 
-function validateOptionalEnum(val, EnumObj, fieldName) {
-  if (val !== undefined && isInvalidEnum(val, EnumObj)) {
-    throw new BadRequest(`Invalid ${fieldName} value`);
-  }
-}
-
 export const validateQuotationUpdateDTO = (data = {}) => {
   validateOptionalString(data.clientId, "clientId");
   validateOptionalString(data.clientEmail, "clientEmail");
@@ -120,10 +101,9 @@ export const validateQuotationUpdateDTO = (data = {}) => {
   validateOptionalAmount(data.discount, "discount");
   validateOptionalAmount(data.discountAmount, "discountAmount");
   validateOptionalAmount(data.grandTotal, "grandTotal");
-  validateOptionalString(data.datePeriod, "datePeriod");
+  validateOptionalString(data.quotationDate, "quotationDate");
   validateOptionalArray(data.featureName, "featureName");
   validateOptionalArray(data.featureCost, "featureCost");
   validateOptionalString(data.cloudinaryId, "cloudinaryId");
-  validateOptionalEnum(data.status, QuotationStatus, "status");
   return true;
 };

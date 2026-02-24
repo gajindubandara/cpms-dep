@@ -12,12 +12,11 @@ export const mapCreateQuotationDTOtoQuotationModel = (dto) => ({
   discount: dto.discount,
   discountAmount: dto.discountAmount,
   grandTotal: dto.grandTotal,
-  datePeriod: dto.datePeriod,
+  quotationDate: dto.quotationDate,
   featureName: dto.featureName,
   featureCost: dto.featureCost,
   cloudinaryId: dto.cloudinaryId,
   pdfUrl: dto.pdfUrl,
-  status: dto.status,
   createdAt: dto.createdAt,
   updatedAt: dto.updatedAt,
 });
@@ -26,13 +25,12 @@ export const mapCreateQuotationDTOtoQuotationModel = (dto) => ({
 // mapping the AdminupdateQuotationDTO to QuotationModel
 export const mapAdminUpdateQuotationDTOtoQuotationModel = (dto) => {
   const model = {};
-  if (dto.status !== undefined) model.status = dto.status;
   if (dto.projectCost !== undefined) model.projectCost = dto.projectCost;
   if (dto.amount !== undefined) model.amount = dto.amount;
   if (dto.discount !== undefined) model.discount = dto.discount;
   if (dto.discountAmount !== undefined) model.discountAmount = dto.discountAmount;
   if (dto.grandTotal !== undefined) model.grandTotal = dto.grandTotal;
-  if (dto.datePeriod !== undefined) model.datePeriod = dto.datePeriod;
+  if (dto.quotationDate !== undefined) model.quotationDate = dto.quotationDate;
   if (dto.featureName !== undefined) model.featureName = dto.featureName;
   if (dto.featureCost !== undefined) model.featureCost = dto.featureCost;
   if (dto.cloudinaryId !== undefined) model.cloudinaryId = dto.cloudinaryId;

@@ -1,5 +1,3 @@
-import { InvoiceStatus } from "../enums/invoiceStatus.js";
-
 export const Invoice = {
   pk: (invoiceId) => `INVOICE#${invoiceId}`,
   sk: () => `INVOICE`,
@@ -7,6 +5,7 @@ export const Invoice = {
     PK: `INVOICE#${data.invoiceId}`,
     SK: `INVOICE`,
     Attributes: {
+        invoiceId: data.invoiceId,
         clientId: data.clientId,
         clientName: data.clientName,
         clientEmail: data.clientEmail,
@@ -14,9 +13,10 @@ export const Invoice = {
         projectName: data.projectName, 
         description: data.description,
         amount: data.amount,
-        dateRange: data.dateRange,
-        status: data.status ?? InvoiceStatus.SENT,
+        invoiceDate: data.invoiceDate,
         items: data.items,
+        cloudinaryId: data.cloudinaryId,
+        pdfUrl: data.pdfUrl,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
     },

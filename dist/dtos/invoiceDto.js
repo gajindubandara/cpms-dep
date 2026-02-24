@@ -1,5 +1,3 @@
-import { InvoiceStatus } from "../enums/invoiceStatus.js";
-
 export function createInvoiceDTO({
   invoiceId,
   clientId,
@@ -9,21 +7,17 @@ export function createInvoiceDTO({
   projectName,
   description,
   amount,
-  dateRange,
-  status,
+  invoiceDate,
   createdAt,
   updatedAt,
   items,
+  cloudinaryId,
+  pdfUrl,
 } = {}) {
   const dto = {};
 
   const assignIfDefined = (target, key, value) => {
     if (value !== undefined) target[key] = value;
-  };
-
-  const assignEnum = (target, key, value, enumObj, fallback) => {
-    if (value === undefined) return;
-    target[key] = Object.values(enumObj).includes(value) ? value : fallback;
   };
 
   assignIfDefined(dto, "invoiceId", invoiceId);
@@ -34,13 +28,13 @@ export function createInvoiceDTO({
   assignIfDefined(dto, "projectName", projectName);
   assignIfDefined(dto, "description", description);
   assignIfDefined(dto, "amount", amount);
-  assignIfDefined(dto, "dateRange", dateRange);
-
-  assignEnum(dto, "status", status, InvoiceStatus, InvoiceStatus.SENT);
+  assignIfDefined(dto, "invoiceDate", invoiceDate);
 
   assignIfDefined(dto, "createdAt", createdAt);
   assignIfDefined(dto, "updatedAt", updatedAt);
   assignIfDefined(dto, "items", items);
+  assignIfDefined(dto, "cloudinaryId", cloudinaryId);
+  assignIfDefined(dto, "pdfUrl", pdfUrl);
 
   return dto;
 }

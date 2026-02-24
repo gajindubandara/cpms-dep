@@ -1,9 +1,8 @@
 // Mapping Update Invoice DTO to Invoice Model (for update logic)
 export const mapUpdateInvoiceDTOtoInvoiceModel = (dto) => {
   const model = {};
-  if (dto.status !== undefined) model.status = dto.status;
   if (dto.amount !== undefined) model.amount = dto.amount;
-  if (dto.dateRange !== undefined) model.dateRange = dto.dateRange;
+  if (dto.invoiceDate !== undefined) model.invoiceDate = dto.invoiceDate;
   if (dto.updatedAt !== undefined) model.updatedAt = dto.updatedAt;
   if (dto.clientId !== undefined) model.clientId = dto.clientId;
   if (dto.clientName !== undefined) model.clientName = dto.clientName;
@@ -13,6 +12,8 @@ export const mapUpdateInvoiceDTOtoInvoiceModel = (dto) => {
   if (dto.description !== undefined) model.description = dto.description;
   if (dto.items !== undefined) model.items = dto.items;
   if (dto.createdAt !== undefined) model.createdAt = dto.createdAt;
+  if (dto.cloudinaryId !== undefined) model.cloudinaryId = dto.cloudinaryId;
+  if (dto.pdfUrl !== undefined) model.pdfUrl = dto.pdfUrl;
   return model;
 };
 // Mapping Create Invoice DTO to Invoice Model
@@ -26,9 +27,10 @@ export const mapCreateInvoiceDtoToModel = (dto) => {
     projectName: dto.projectName,
     description: dto.description,
     amount: dto.amount,
-    dateRange: dto.dateRange,
-    status: dto.status,
+    invoiceDate: dto.invoiceDate,
     items: dto.items,
+    cloudinaryId: dto.cloudinaryId,
+    pdfUrl: dto.pdfUrl,
   };
 }
 
@@ -43,8 +45,7 @@ export const mapInvoiceModelToDto = (model) => {
     projectName: model.projectName,
     description: model.description,
     amount: model.amount,
-    dateRange: model.dateRange,
-    status: model.status,
+    invoiceDate: model.invoiceDate,
     items: model.items,
     // Add other fields as needed
   };

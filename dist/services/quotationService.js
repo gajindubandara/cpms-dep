@@ -19,16 +19,36 @@ const generatePdfUrl = (cloudinaryId) => {
     return `https://res.cloudinary.com/${cloudName}/raw/upload/${cloudinaryId}.pdf`;
 };
 
-// Helper function to add pdfUrl to quotation
-const enrichQuotationWithPdfUrl = (quotation) => {
+// Helper function to map quotation to DTO and add pdfUrl
+const mapQuotationToDTO = (quotation) => {
     if (!quotation) return quotation;
     
+    // Get attributes (might be at root level or in Attributes)
+    const attrs = quotation.Attributes || quotation;
+    
     // Try to get cloudinaryId from multiple possible locations
-    const cloudinaryId = quotation.cloudinaryId || quotation.Attributes?.cloudinaryId;
+    const cloudinaryId = attrs.cloudinaryId || quotation.cloudinaryId;
     
     return {
-        ...quotation,
-        pdfUrl: generatePdfUrl(cloudinaryId)
+        quotationId: quotation.quotationId,
+        clientId: attrs.clientId,
+        clientName: attrs.clientName,
+        clientEmail: attrs.clientEmail,
+        projectId: attrs.projectId,
+        projectName: attrs.projectName,
+        description: attrs.description,
+        projectCost: attrs.projectCost,
+        amount: attrs.amount,
+        discount: attrs.discount,
+        discountAmount: attrs.discountAmount,
+        grandTotal: attrs.grandTotal,
+        quotationDate: attrs.quotationDate,
+        featureName: attrs.featureName,
+        featureCost: attrs.featureCost,
+        cloudinaryId: cloudinaryId,
+        pdfUrl: generatePdfUrl(cloudinaryId),
+        createdAt: attrs.createdAt,
+        updatedAt: attrs.updatedAt,
     };
 };
 
@@ -50,19 +70,20 @@ export const createQuotationService = async (createQuotationDTO) => {
         throw new NotFoundError("Client with that id is not available");
       }
 
-    return await createQuotation(model);
+    const createdQuotation = await createQuotation(model);
+    return mapQuotationToDTO(createdQuotation);
 }
 
 // Get Quotation by ID Service
 export const getQuotationByIdService = async (quotationId) => {
     const quotation = await getQuotationById(quotationId);
-    return enrichQuotationWithPdfUrl(quotation);
+    return mapQuotationToDTO(quotation);
 }
 
 // Get All Quotations Service
 export const getAllQuotationsService = async () => {
     const quotations = await getAllQuotations();
-    return quotations.map(enrichQuotationWithPdfUrl);
+    return quotations.map(mapQuotationToDTO);
 }
 
 // Get Quotations by Client ID Service
@@ -70,8 +91,8 @@ export const getQuotationsByClientIdService = async (clientId) => {
     if (!clientId) throw new BadRequest("clientId is required");
     const quotations = await getQuotationsByClientId(clientId);
     
-    // Add pdfUrl to each quotation
-    return quotations.map(enrichQuotationWithPdfUrl);
+    // Map quotations to DTO and add pdfUrl
+    return quotations.map(mapQuotationToDTO);
 }
 
 // Update Quotation Service
@@ -82,7 +103,8 @@ export const updateQuotationService = async (quotationId, updateQuotationDTO) =>
     if (Object.keys(updates).length === 0) {
         throw new BadRequest("No valid fields to update");
     } 
-    return await updateQuotation(quotationId, updates);
+    const updatedQuotation = await updateQuotation(quotationId, updates);
+    return mapQuotationToDTO(updatedQuotation);
 }
 
 // Delete Quotation Service

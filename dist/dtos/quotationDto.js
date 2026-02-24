@@ -1,5 +1,3 @@
-import { QuotationStatus } from "../enums/quotationStatus.js";
-
 export function createQuotationDTO({
   quotationId,
   clientId,
@@ -13,21 +11,16 @@ export function createQuotationDTO({
   discount,
   discountAmount,
   grandTotal,
-  datePeriod,
+  quotationDate,
   featureName,
   featureCost,
   cloudinaryId,
-  status,
   createdAt,
   updatedAt,
 } = {}) {
   const dto = {};
   const assignIfDefined = (key, value) => {
     if (value !== undefined) dto[key] = value;
-  };
-  const assignEnum = (key, value, enumObj, fallback) => {
-    if (value === undefined) return;
-    dto[key] = Object.values(enumObj).includes(value) ? value : fallback;
   };
   assignIfDefined("quotationId", quotationId);
   assignIfDefined("clientId", clientId);
@@ -41,11 +34,10 @@ export function createQuotationDTO({
   assignIfDefined("discount", discount);
   assignIfDefined("discountAmount", discountAmount);
   assignIfDefined("grandTotal", grandTotal);
-  assignIfDefined("datePeriod", datePeriod);
+  assignIfDefined("quotationDate", quotationDate);
   assignIfDefined("featureName", featureName);
   assignIfDefined("featureCost", featureCost);
   assignIfDefined("cloudinaryId", cloudinaryId);
-  assignEnum("status", status, QuotationStatus, QuotationStatus.SENT);
   assignIfDefined("createdAt", createdAt);
   assignIfDefined("updatedAt", updatedAt);
   return dto;
