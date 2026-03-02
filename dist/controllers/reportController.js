@@ -1,5 +1,5 @@
 import { exportToCSV } from "../utils/csvExport.js";
-import { getPaymentsKPIReportService, getInvoicesReportService, getPaymentsReportService } from "../services/reportService.js";
+import { getPaymentsKPIReportService, getInvoicesReportService, getPaymentsReportService, getQuotationsReportService } from "../services/reportService.js";
 
 export const getPaymentsReportController = async (req, res, next) => {
   try {
@@ -87,6 +87,49 @@ export const getPaymentsKPIReportController = async (req, res, next) => {
       return res.status(200).json({
         success: true,
         data: kpi,
+      });
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getQuotationsReportController = async (req, res, next) => {
+  try {
+    let startDate = req.query.startDate;
+    let endDate = req.query.endDate;
+    const quotations = await getQuotationsReportService(startDate, endDate);
+    console.log("quotations filtered", quotations);
+    if (req.query.csv === "true") {
+      const fields = [
+        { label: "Quotation ID", value: (row) => row.quotationId },
+        { label: "Client ID", value: (row) => row.clientId },
+        { label: "Client Name", value: (row) => row.clientName },
+        { label: "Client Email", value: (row) => row.clientEmail },
+        { label: "Project ID", value: (row) => row.projectId },
+        { label: "Project Name", value: (row) => row.projectName },
+        { label: "Amount", value: (row) => row.amount },
+        { label: "Description", value: (row) => row.description },
+        { label: "Status", value: (row) => row.status },
+        { label: "Valid Until", value: (row) => row.validUntil },
+        { label: "Created At", value: (row) => row.createdAt },
+        { label: "Updated At", value: (row) => row.updatedAt },
+        {
+          label: "Items",
+          value: (row) =>
+            row.items
+              ?.map(
+                (item) =>
+                  `${item.name} (Qty: ${item.quantity}, Unit Price: ${item.unitPrice}, Total: ${item.total})`,
+              )
+              .join("\n") || "",
+        },
+      ];
+      return exportToCSV(quotations, fields, "quotations_report.csv", res);
+    } else {
+      return res.status(200).json({
+        success: true,
+        data: quotations,
       });
     }
   } catch (err) {

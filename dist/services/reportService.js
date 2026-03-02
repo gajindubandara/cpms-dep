@@ -1,6 +1,7 @@
 import { paymentKPIRangeService } from '../services/kpiService.js';
 import {getAllPayments} from '../daos/paymentDao.js'
 import {getAllInvoices} from '../daos/invoiceDao.js'
+import {getAllQuotations} from '../daos/quotationDao.js'
 import { BadRequest, NotFoundError } from '../errors/customErrors.js';
 
 // Get payment KPI (revenue, profit, etc) for a date range
@@ -53,4 +54,26 @@ export const getInvoicesReportService = async (startDate, endDate) => {
     }
     console.log("this is range invoices", rangeInvoices);
     return rangeInvoices;
+}
+
+export const getQuotationsReportService = async (startDate, endDate) => {
+    const quotations = await getAllQuotations();
+    console.log(quotations);
+    if (!quotations.length) throw new NotFoundError("No quotations found");
+
+    if (!startDate || !endDate) {
+        throw new BadRequest("Date range is needed");
+    }
+    let rangeQuotations = [];
+    for (let quotation of quotations) {
+        let createDate = quotation.createdAt?.split('T')[0];
+        if (createDate && createDate >= startDate && createDate <= endDate) {
+            rangeQuotations.push(quotation);
+        }
+    }
+    if (!rangeQuotations.length) {
+        throw new NotFoundError('No quotations found on that dates');
+    }
+    console.log("this is range quotations", rangeQuotations);
+    return rangeQuotations;
 }
