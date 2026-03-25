@@ -16,6 +16,20 @@ import { getClientById } from "../daos/clientDao.js";
 import { getProjectById } from "../daos/projectDao.js";
 import { uploadToCloudinary } from "../config/cloudinary.js";
 
+const filterPaymentsByCurrentMonth = (payments) => {
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth();
+  const currentYear = currentDate.getFullYear();
+
+  return payments.filter((payment) => {
+    const attrs = payment?.Attributes ?? payment;
+    if (!attrs?.dueDate) return false;
+    const dueDate = new Date(attrs.dueDate);
+    if (isNaN(dueDate.getTime())) return false;
+    return dueDate.getMonth() === currentMonth && dueDate.getFullYear() === currentYear;
+  });
+};
+
 // Create payment (Admin only)
 export const createPaymentService = async (createPaymentDTO, adminId) => {
   const model = mapCreatePaymentDTOtoPaymentModel(createPaymentDTO);
@@ -45,9 +59,15 @@ export const getClientPaymentsService = async (clientId) => {
     return [];
   }
   
+  const filteredPayments = filterPaymentsByCurrentMonth(payments);
+  
+  if (filteredPayments.length === 0) {
+    return [];
+  }
+
   // Enrich payments with project and client details
   const enrichedPayments = await Promise.all(
-    payments.map(async (payment) => {
+    filteredPayments.map(async (payment) => {
       try {
         // Handle both structures: payment.Attributes and direct attributes
         const attrs = payment?.Attributes ?? payment;
@@ -186,9 +206,15 @@ export const getAllPaymentsService = async () => {
     return [];
   }
   
+  const filteredPayments = filterPaymentsByCurrentMonth(payments);
+
+  if (filteredPayments.length === 0) {
+    return [];
+  }
+
   // Enrich payments with client and project details
   const enrichedPayments = await Promise.all(
-    payments.map(async (payment) => {
+    filteredPayments.map(async (payment) => {
       try {
         // Handle both structures: payment.Attributes and direct attributes
         const attrs = payment?.Attributes ?? payment;
