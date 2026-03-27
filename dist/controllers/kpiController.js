@@ -71,13 +71,20 @@ export const getInvoiceKpiController = async (req, res, next) => {
 // PAYMENT KPI: Overall, yearly, and custom date range
 export const getPaymentSummaryKpiController = async (req, res, next) => {
     try {
-        let { startDate, endDate } = req.query;
-        // Default to current year if not provided
-        if (!startDate || !endDate) {
-            const now = dayjs();
-            startDate = now.startOf('year').format('YYYY-MM-DD');
-            endDate = now.endOf('year').format('YYYY-MM-DD');
+        let { startDate, endDate, all } = req.query;
+        // If 'all' flag is true, retrieve unfiltered (all time) data.
+        if (all === 'true') {
+            startDate = undefined;
+            endDate = undefined;
+        } else {
+            // Default to current year if not provided
+            if (!startDate || !endDate) {
+                const now = dayjs();
+                startDate = now.startOf('year').format('YYYY-MM-DD');
+                endDate = now.endOf('year').format('YYYY-MM-DD');
+            }
         }
+
         const result = await getPaymentSummaryKpiService(startDate, endDate);
         res.status(200).json({ success: true, data: result });
     } catch (err) {
