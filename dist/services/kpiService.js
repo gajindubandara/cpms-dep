@@ -2,10 +2,15 @@ import { getAllQuotations } from "../daos/quotationDao.js";
 import { getAllInvoices } from "../daos/invoiceDao.js";
 import { getAllTickets, getTicketsByQueryDateRange } from "../daos/ticketDao.js";
 import { getAllPayments } from "../daos/paymentDao.js";
+import { allProjects, projectByClientId } from '../daos/projectDao.js';
+import { getAllClients } from '../daos/clientDao.js';
 import PaymentStatus from "../enums/paymentStatus.js";
 import { getProjectById } from "../daos/projectDao.js";
 import { BadRequest, NotFoundError } from "../errors/customErrors.js";
 import dayjs from "dayjs";
+import { ProjectStatus } from '../enums/projectStatus.js';
+import { Status as ClientStatus } from '../enums/clientStatus.js';
+import { ClientType } from '../enums/clientType.js';
 
 
 const createEmptyKPI = () => ({
@@ -239,5 +244,80 @@ export const getPaymentSummaryKpiService = async (startDate, endDate) => {
     labels: ["Received", "Dues"],
     data: [received, dues],
     count: filtered.length
+  };
+};
+
+// Helper to calculate project progress/completion KPIs
+function calculateProjectProgressKPI(projects) {
+  const total = projects.length;
+  let completed = 0;
+  let active = 0;
+  let planned = 0;
+  let onHold = 0;
+  for (const p of projects) {
+    const status = p.Attributes?.status || p.status;
+    if (status === ProjectStatus.COMPLETED) completed++;
+    else if (status === ProjectStatus.ACTIVE) active++;
+    else if (status === ProjectStatus.PLANNED) planned++;
+    else if (status === ProjectStatus.ON_HOLD) onHold++;
+  }
+  return {
+    total,
+    completed,
+    active,
+    planned,
+    onHold,
+    percentCompleted: total ? Math.round((completed / total) * 100) : 0,
+    labels: ['Completed', 'Active', 'Planned', 'On Hold'],
+    data: [completed, active, planned, onHold],
+  };
+}
+
+// Admin: All projects progress KPI
+export const getProjectProgressKpiService = async () => {
+  const projects = await allProjects();
+  // Only top-level projects (featureId == 0)
+  const filtered = projects.filter(p => (p.SK || '').split('#')[3] == 0);
+  return calculateProjectProgressKPI(filtered);
+};
+
+// Client: Only their projects progress KPI
+export const getClientProjectProgressKpiService = async (clientId) => {
+  const projects = await projectByClientId(clientId);
+  // Only top-level projects (featureId == 0)
+  const filtered = projects.filter(p => (p.SK || '').split('#')[3] == 0);
+  return calculateProjectProgressKPI(filtered);
+};
+
+// CLIENT KPI: status and type breakdown for admin dashboard
+export const getClientKpiService = async () => {
+  const clients = await getAllClients();
+  const total = (clients || []).length;
+  let active = 0;
+  let inactive = 0;
+  const typeCounts = {};
+
+  for (const c of clients) {
+    const status = c.Attributes?.status || c.status;
+    const type = c.Attributes?.clientType || c.Attributes?.type || c.type || ClientType.UNASSIGNED;
+
+    if (status === ClientStatus.ACTIVE) active++;
+    else inactive++;
+
+    typeCounts[type] = (typeCounts[type] || 0) + 1;
+  }
+
+  const allTypes = Object.values(ClientType);
+  const labels = Object.keys(typeCounts).length ? Object.keys(typeCounts) : allTypes;
+  const dataArr = labels.map((l) => typeCounts[l] || 0);
+
+  return {
+    total,
+    active,
+    inactive,
+    percentActive: total ? Math.round((active / total) * 100) : 0,
+    typeCounts,
+    labels,
+    data: dataArr,
   };
 };

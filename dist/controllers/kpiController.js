@@ -1,6 +1,8 @@
 import { getQuotationKpiService, getInvoiceKpiService } from '../services/kpiService.js';
 import { getTicketResponseKpiService } from '../services/kpiService.js';
 import {paymentKPIService, paymentKPIRangeService, projectPaymentKPIService} from '../services/kpiService.js'
+import { getProjectProgressKpiService, getClientProjectProgressKpiService } from '../services/kpiService.js';
+import { getClientKpiService } from '../services/kpiService.js';
 import dayjs from "dayjs";
 import { getPaymentSummaryKpiService } from '../services/kpiService.js';
 export const getPaymentKpiController = async(req, res,next)=>{
@@ -77,6 +79,40 @@ export const getPaymentSummaryKpiController = async (req, res, next) => {
             endDate = now.endOf('year').format('YYYY-MM-DD');
         }
         const result = await getPaymentSummaryKpiService(startDate, endDate);
+        res.status(200).json({ success: true, data: result });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// PROJECT PROGRESS KPI: Admin (all projects)
+export const getProjectProgressKpiController = async (req, res, next) => {
+    try {
+        const result = await getProjectProgressKpiService();
+        res.status(200).json({ success: true, data: result });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// PROJECT PROGRESS KPI: Client (only their projects)
+export const getClientProjectProgressKpiController = async (req, res, next) => {
+    try {
+        const clientId = req.user?.sub || req.user?.clientId;
+        if (!clientId) {
+            return res.status(400).json({ success: false, message: 'Client ID not found in token.' });
+        }
+        const result = await getClientProjectProgressKpiService(clientId);
+        res.status(200).json({ success: true, data: result });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// CLIENT KPI for admin: counts by status and type
+export const getClientKpiController = async (req, res, next) => {
+    try {
+        const result = await getClientKpiService();
         res.status(200).json({ success: true, data: result });
     } catch (err) {
         next(err);
