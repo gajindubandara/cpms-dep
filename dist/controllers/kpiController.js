@@ -1,6 +1,6 @@
 import { getQuotationKpiService, getInvoiceKpiService } from '../services/kpiService.js';
-import { getTicketResponseKpiService } from '../services/kpiService.js';
-import {paymentKPIService, paymentKPIRangeService, projectPaymentKPIService} from '../services/kpiService.js'
+import { getTicketResponseKpiService, getClientTicketResponseKpiService } from '../services/kpiService.js';
+import {paymentKPIService, paymentKPIRangeService, projectPaymentKPIService, getClientPaymentKpiService} from '../services/kpiService.js'
 import { getProjectProgressKpiService, getClientProjectProgressKpiService } from '../services/kpiService.js';
 import { getClientKpiService } from '../services/kpiService.js';
 import dayjs from "dayjs";
@@ -110,6 +110,36 @@ export const getClientProjectProgressKpiController = async (req, res, next) => {
             return res.status(400).json({ success: false, message: 'Client ID not found in token.' });
         }
         const result = await getClientProjectProgressKpiService(clientId);
+        res.status(200).json({ success: true, data: result });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// CLIENT: Payment KPI for the authenticated client
+export const getClientPaymentKpiController = async (req, res, next) => {
+    try {
+        const clientId = req.user?.sub || req.user?.clientId;
+        if (!clientId) return res.status(400).json({ success: false, message: 'Client ID not found in token.' });
+        const { startDate, endDate } = req.query;
+        const result = await getClientPaymentKpiService(clientId, startDate, endDate);
+        
+        // Remove profit to prevent business margin exposure to clients
+        delete result.profit;
+        
+        res.status(200).json({ success: true, data: result });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// CLIENT: Ticket response KPI for the authenticated client
+export const getClientTicketResponseKpiController = async (req, res, next) => {
+    try {
+        const clientId = req.user?.sub || req.user?.clientId;
+        if (!clientId) return res.status(400).json({ success: false, message: 'Client ID not found in token.' });
+        const { startDate, endDate } = req.query;
+        const result = await getClientTicketResponseKpiService(clientId, startDate, endDate);
         res.status(200).json({ success: true, data: result });
     } catch (err) {
         next(err);

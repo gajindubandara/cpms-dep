@@ -17,7 +17,8 @@ const router = express.Router();
 router.post("/",verifyAccessToken, authorize(["g2-cpms-admin"]), createClient);
 router.put("/:clientId",verifyAccessToken, authorize(["g2-cpms-admin"]), updateClient);
 router.get("/date",verifyAccessToken, authorize(["g2-cpms-admin"]), getAllClientsByQueryDate);
-router.get("/:clientId",verifyAccessToken,authorize(["g2-cpms-admin","g2-cpms-user"]), getClientById);
+// Allow clients to fetch their own details as well
+router.get("/:clientId", verifyAccessToken, authorize(["g2-cpms-admin", "g2-cpms-user", "g2-cpms-client"]), getClientById);
 router.get("/",verifyAccessToken, authorize(["g2-cpms-admin"]), getAllClients);
 router.delete("/:clientId",verifyAccessToken, authorize(["g2-cpms-admin"]), deleteClient);
 

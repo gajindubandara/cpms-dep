@@ -1,7 +1,7 @@
 import { getAllQuotations } from "../daos/quotationDao.js";
 import { getAllInvoices } from "../daos/invoiceDao.js";
-import { getAllTickets, getTicketsByQueryDateRange } from "../daos/ticketDao.js";
-import { getAllPayments } from "../daos/paymentDao.js";
+import { getAllTickets, getTicketsByQueryDateRange, getTicketsByClientId } from "../daos/ticketDao.js";
+import { getAllPayments, getPaymentsByClientId } from "../daos/paymentDao.js";
 import { allProjects, projectByClientId } from '../daos/projectDao.js';
 import { getAllClients } from '../daos/clientDao.js';
 import PaymentStatus from "../enums/paymentStatus.js";
@@ -47,9 +47,17 @@ const profitCal = async (payment) => {
 };
 
 const processPayment = async (kpi, payment) => {
-  const amount = payment.Attributes.amount;
+  const amount = payment.Attributes?.amount || payment.amount || 0;
+  let status = payment.Attributes?.status || payment.status;
+  const dueDate = payment.Attributes?.dueDate || payment.dueDate;
 
-  switch (payment.Attributes.status) {
+  if (status === PaymentStatus.PENDING && dueDate) {
+    if (dayjs(dueDate).startOf('day').isBefore(dayjs().startOf('day'))) {
+      status = PaymentStatus.OVERDUE;
+    }
+  }
+
+  switch (status) {
     case PaymentStatus.APPROVED:
       kpi.revenue += amount;
       kpi.profit += await profitCal(payment);
@@ -226,8 +234,16 @@ export const getPaymentSummaryKpiService = async (startDate, endDate) => {
   let received = 0;
   let dues = 0;
   for (const payment of filtered) {
-    const status = payment.Attributes?.status || payment.status;
+    let status = payment.Attributes?.status || payment.status;
     const amount = payment.Attributes?.amount || payment.amount || 0;
+    const dueDate = payment.Attributes?.dueDate || payment.dueDate;
+
+    if (status === "PENDING" && dueDate) {
+      if (dayjs(dueDate).startOf('day').isBefore(dayjs().startOf('day'))) {
+        status = "OVERDUE";
+      }
+    }
+
     total += amount;
     if (status === "APPROVED") {
       received += amount;
@@ -319,5 +335,72 @@ export const getClientKpiService = async () => {
     typeCounts,
     labels,
     data: dataArr,
+  };
+};
+
+// CLIENT PAYMENT KPI: payments belonging to a client (optional date range)
+export const getClientPaymentKpiService = async (clientId, startDate, endDate) => {
+  if (!clientId) {
+    throw new BadRequest("Client id is not specified");
+  }
+
+  const payments = await getPaymentsByClientId(clientId);
+
+  if (!payments.length) {
+    throw new NotFoundError("No payments were found for the client");
+  }
+
+  // reuse calculatePaymentKPI with a date filter when provided
+  return calculatePaymentKPI(payments, (payment) => {
+    if (!startDate || !endDate) return true;
+    const paymentDate = (payment.Attributes?.createdAt || payment.createdAt || '').split('T')[0];
+    return paymentDate && paymentDate >= startDate && paymentDate <= endDate;
+  });
+};
+
+// CLIENT TICKET RESPONSE KPI: tickets belonging to a client (optional date range)
+export const getClientTicketResponseKpiService = async (clientId, startDate, endDate) => {
+  if (!clientId) {
+    throw new BadRequest("Client id is not specified");
+  }
+
+  const tickets = await getTicketsByClientId(clientId);
+
+  if (!tickets.length) {
+    return {
+      total: 0,
+      responded: 0,
+      notResponded: 0,
+      labels: ["Responded", "Not Responded"],
+      data: [0, 0],
+      startDate: startDate || null,
+      endDate: endDate || null
+    };
+  }
+
+  const filtered = (startDate && endDate)
+    ? tickets.filter(t => {
+        const qd = t.queryDate || (t.Attributes && t.Attributes.queryDate) || null;
+        return qd && qd >= startDate && qd <= endDate;
+      })
+    : tickets;
+
+  let responded = 0;
+  let notResponded = 0;
+  for (const ticket of filtered) {
+    const adminResponse = ticket.Attributes?.adminResponse || ticket.adminResponse;
+    if (adminResponse && String(adminResponse).trim() !== "") responded++;
+    else notResponded++;
+  }
+
+  const total = filtered.length;
+  return {
+    total,
+    responded,
+    notResponded,
+    labels: ["Responded", "Not Responded"],
+    data: [responded, notResponded],
+    startDate: startDate || null,
+    endDate: endDate || null
   };
 };

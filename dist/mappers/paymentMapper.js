@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 
 // Map CreatePaymentDTO to Payment Model
 export const mapCreatePaymentDTOtoPaymentModel = (createPaymentDTO) => {
@@ -28,13 +29,20 @@ export const mapUpdatePaymentDTOtoPaymentModel = (updatePaymentDTO) => {
 // Map Payment Model to ClientPaymentDTO (for client view)
 export const mapPaymentModelToClientPaymentDTO = (payment) => {
   const attrs = payment.Attributes || payment;
+  let status = attrs.status;
+  if (status === 'PENDING' && attrs.dueDate) {
+    if (dayjs(attrs.dueDate).startOf('day').isBefore(dayjs().startOf('day'))) {
+      status = 'OVERDUE';
+    }
+  }
+  
   return {
     paymentId: attrs.paymentId,
     projectId: attrs.projectId,
     projectName: payment.projectName || 'Unknown Project',
     amount: attrs.amount,
     dueDate: attrs.dueDate,
-    status: attrs.status,
+    status: status,
     description: attrs.description,
     paymentSlip: attrs.paymentSlip,
     completedAt: attrs.completedAt,
@@ -45,6 +53,13 @@ export const mapPaymentModelToClientPaymentDTO = (payment) => {
 // Map Payment Model to AdminPaymentDTO (for admin view)
 export const mapPaymentModelToAdminPaymentDTO = (payment) => {
   const attrs = payment.Attributes || payment;
+  let status = attrs.status;
+  if (status === 'PENDING' && attrs.dueDate) {
+    if (dayjs(attrs.dueDate).startOf('day').isBefore(dayjs().startOf('day'))) {
+      status = 'OVERDUE';
+    }
+  }
+
   return {
     paymentId: attrs.paymentId,
     projectId: attrs.projectId,
@@ -53,7 +68,7 @@ export const mapPaymentModelToAdminPaymentDTO = (payment) => {
     clientName: payment.clientName || 'Unknown Client',
     amount: attrs.amount,
     dueDate: attrs.dueDate,
-    status: attrs.status,
+    status: status,
     description: attrs.description,
     paymentSlip: attrs.paymentSlip, // Return actual URL, not label
     completedAt: attrs.completedAt,
