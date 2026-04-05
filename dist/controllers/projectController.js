@@ -59,8 +59,8 @@ export const createFeature = async (req, res, next) => {
 // controller for getfeature
 export const getFeature = async (req, res, next) => {
   try {
-    const projectId = req.query.projectId;
-    const featureId = req.query.featureId;
+    const projectId = req.params.projectId;
+    const featureId = req.params.featureId;
     const result = await getFeatureService(projectId, featureId);
     res.status(200).json({ success: true, data: result });
   } catch (err) {
@@ -81,7 +81,8 @@ export const getAllProjects = async (req, res, next) => {
 // update project
 export const updateProject = async (req, res, next) => {
   try {
-    const dto = new ProjectDTO(req.body);
+    const projectId = req.params.projectId;
+    const dto = new ProjectDTO({ ...req.body, projectId });
     const result = await updateProjectService(dto);
     res.status(200).json({ success: true, data: result });
   } catch (err) {
@@ -91,7 +92,9 @@ export const updateProject = async (req, res, next) => {
 
 export const updateFeature = async (req, res, next) => {
   try {
-    const dto = new ProjectDTO(req.body);
+    const projectId = req.params.projectId;
+    const featureId = req.params.featureId;
+    const dto = new ProjectDTO({ ...req.body, projectId, featureId });
     validateProjectDTO(dto);
     const result = await updateFeatureService(dto);
     res.status(200).json({ success: true, data: result });
@@ -103,8 +106,8 @@ export const updateFeature = async (req, res, next) => {
 // delete project
 export const deleteProject = async (req, res, next) => {
   try {
-    const clientId = req.query.clientId;
-    const projectId = req.query.projectId;
+    const projectId = req.params.projectId;
+    const clientId = req.body.clientId;
     const result = await deleteProjectService(clientId, projectId);
     res.status(200).json({
       success: true,
@@ -119,9 +122,9 @@ export const deleteProject = async (req, res, next) => {
 // delete feature
 export const deleteFeature = async (req, res, next) => {
   try {
-    const clientId = req.query.clientId;
-    const projectId = req.query.projectId;
-    const featureId = req.query.featureId;
+    const projectId = req.params.projectId;
+    const featureId = req.params.featureId;
+    const clientId = req.body.clientId;
     const result = await deleteFeatureService(clientId, projectId, featureId);
     res.status(200).json({ success: true, data: result });
   } catch (err) {
