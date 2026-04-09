@@ -24,12 +24,12 @@ export const errorHandler = (err, req, res, next) => {
     }
 
     // Handle unexpected errors
-    console.error("Unexpected Error:", err);
+    console.error("Unexpected Error:", err.message, err.stack);
     return res.status(500).json({
-        error: {
-            code: 500,
-            details: "Something went wrong, please try again later."
-        }
+      error: {
+        code: 500,
+        details: err.message || "Something went wrong, please try again later."
+      }
     });
 };
 export default errorHandler;

@@ -13,6 +13,18 @@ import {
 } from "../mappers/expenseMapper.js";
 import { BadRequest, NotFoundError } from "../errors/customErrors.js";
 import { getProjectById } from "../daos/projectDao.js";
+import { uploadExpenseSlipToS3, deletePaymentSlipFromS3 } from "../config/s3config.js";
+
+const DEBUG = process.env.NODE_ENV !== 'production';
+
+const safeDeleteSlip = async (slipUrl) => {
+  if (!slipUrl) return;
+  try {
+    await deletePaymentSlipFromS3(slipUrl);
+  } catch (error) {
+    console.warn('[Expense] Failed to delete old slip:', error.message);
+  }
+};
 
 export const createExpenseService = async (dto) => {
   if (dto.projectId) {
@@ -20,7 +32,29 @@ export const createExpenseService = async (dto) => {
     if (!project) throw new NotFoundError("Project not found");
   }
 
-  const model = mapCreateExpenseDTOtoExpenseModel({ ...dto, expenseId: randomUUID() });
+  let paymentSlipUrl = null;
+
+  // Upload file to S3 if provided
+  if (dto.file) {
+    try {
+      const expenseId = randomUUID();
+      const s3Response = await uploadExpenseSlipToS3({
+        fileBuffer: dto.file.buffer,
+        fileName: `expense-${expenseId}`,
+        mimeType: dto.file.mimetype || 'application/octet-stream',
+      });
+      paymentSlipUrl = s3Response.url;
+      if (DEBUG) console.log('[Expense] Slip uploaded:', s3Response.url);
+    } catch (error) {
+      throw new Error(`Failed to upload expense slip: ${error.message}`);
+    }
+  }
+
+  const model = mapCreateExpenseDTOtoExpenseModel({
+    ...dto,
+    expenseId: randomUUID(),
+    paymentSlip: paymentSlipUrl,
+  });
   return await createExpense(model);
 };
 
@@ -40,11 +74,32 @@ export const getAllExpensesService = async () => {
 export const updateExpenseService = async (expenseId, dto) => {
   if (!expenseId) throw new BadRequest("expenseId is required");
 
-  const updates = mapUpdateExpenseDTOtoExpenseModel(dto);
-  if (Object.keys(updates).length === 0) throw new BadRequest("No valid fields to update");
-
   const existing = await getExpenseById(expenseId);
   if (!existing) throw new NotFoundError("Expense not found");
+
+  let paymentSlipUrl = null;
+
+  // Upload new file to S3 if provided
+  if (dto.file) {
+    try {
+      // Delete old slip if exists
+      const existingSlip = existing?.Attributes?.paymentSlip || existing?.paymentSlip;
+      await safeDeleteSlip(existingSlip);
+
+      const s3Response = await uploadExpenseSlipToS3({
+        fileBuffer: dto.file.buffer,
+        fileName: `expense-${expenseId}`,
+        mimeType: dto.file.mimetype || 'application/octet-stream',
+      });
+      paymentSlipUrl = s3Response.url;
+      if (DEBUG) console.log('[Expense] Slip updated:', s3Response.url);
+    } catch (error) {
+      throw new Error(`Failed to upload expense slip: ${error.message}`);
+    }
+  }
+
+  const updates = mapUpdateExpenseDTOtoExpenseModel({ ...dto, paymentSlip: paymentSlipUrl });
+  if (Object.keys(updates).length === 0) throw new BadRequest("No valid fields to update");
 
   return await updateExpense(expenseId, updates);
 };
@@ -55,6 +110,10 @@ export const deleteExpenseService = async (expenseId) => {
   const existing = await getExpenseById(expenseId);
   if (!existing) throw new NotFoundError("Expense not found");
 
+  // Delete slip from S3
+  const slipUrl = existing?.Attributes?.paymentSlip || existing?.paymentSlip;
+  await safeDeleteSlip(slipUrl);
+
   return await deleteExpense(expenseId);
 };
 
@@ -63,3 +122,31 @@ export const getExpensesByDateRangeService = async (startDate, endDate) => {
 
   return await getExpensesByDateRange(startDate, endDate);
 };
+
+// Upload payment slip to existing expense
+export const uploadExpensePaymentSlipService = async (expenseId, fileData) => {
+  const expense = await getExpenseById(expenseId);
+
+  if (!expense) {
+    throw new NotFoundError("Expense not found");
+  }
+
+  // Delete old slip if exists
+  const existingSlip = expense?.Attributes?.paymentSlip || expense?.paymentSlip;
+  await safeDeleteSlip(existingSlip);
+
+  // Upload new slip to S3
+  const s3Response = await uploadExpenseSlipToS3({
+    fileBuffer: fileData.buffer,
+    fileName: `expense-${expenseId}`,
+    mimeType: fileData.mimetype || 'application/octet-stream',
+  });
+
+  if (DEBUG) console.log('[Expense] Slip uploaded:', s3Response.url);
+
+  // Update expense with slip URL
+  return await updateExpense(expenseId, {
+    paymentSlip: s3Response.url,
+  });
+};
+

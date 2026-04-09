@@ -5,6 +5,7 @@ import {
   updateExpenseService,
   deleteExpenseService,
   getExpensesByDateRangeService,
+  uploadExpensePaymentSlipService,
 } from "../services/expenseService.js";
 import { createExpenseDto } from "../dtos/expenseDto.js";
 import { validateExpenseDTO } from "../validators/expenseValidator.js";
@@ -12,7 +13,10 @@ import { validateExpenseDTO } from "../validators/expenseValidator.js";
 // create expense
 export const createExpense = async (req, res, next) => {
   try {
-    const dto = createExpenseDto(req.body);
+    const dto = createExpenseDto({
+      ...req.body,
+      file: req.file,
+    });
     validateExpenseDTO(dto);
     const result = await createExpenseService(dto);
     res.status(201).json({ success: true, data: result });
@@ -46,7 +50,10 @@ export const getAllExpenses = async (req, res, next) => {
 export const updateExpense = async (req, res, next) => {
   try {
     const { expenseId } = req.params;
-    const dto = createExpenseDto(req.body);
+    const dto = createExpenseDto({
+      ...req.body,
+      file: req.file,
+    });
     const result = await updateExpenseService(expenseId, dto);
     res.status(200).json({ success: true, data: result });
   } catch (err) {
@@ -71,6 +78,37 @@ export const getExpensesByDateRange = async (req, res, next) => {
     const { startDate, endDate } = req.query;
     const result = await getExpensesByDateRangeService(startDate, endDate);
     res.status(200).json({ success: true, data: result });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// upload payment slip for expense
+export const uploadPaymentSlip = async (req, res, next) => {
+  try {
+    const { expenseId } = req.params;
+
+    if (!expenseId) {
+      return res.status(400).json({
+        success: false,
+        message: 'expenseId is required',
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No file uploaded',
+      });
+    }
+
+    const result = await uploadExpensePaymentSlipService(expenseId, req.file);
+
+    res.status(200).json({
+      success: true,
+      message: 'Payment slip uploaded successfully',
+      data: result,
+    });
   } catch (err) {
     next(err);
   }

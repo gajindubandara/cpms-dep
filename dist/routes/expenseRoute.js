@@ -1,6 +1,7 @@
 import express from "express";
 import { verifyAccessToken } from "../middlewares/verifyAccessToken.js";
 import { authorize } from "../middlewares/authorizeAccess.js";
+import { uploadSingle } from "../middlewares/uploadMiddleware.js";
 import {
   createExpense,
   getExpenseById,
@@ -8,15 +9,22 @@ import {
   updateExpense,
   deleteExpense,
   getExpensesByDateRange,
+  uploadPaymentSlip,
 } from "../controllers/expenseController.js";
 
 const router = express.Router();
 
-router.post("/", verifyAccessToken, authorize(["g2-cpms-admin"]), createExpense);
+// Specific routes must come before parameterized routes
 router.get("/date", verifyAccessToken, authorize(["g2-cpms-admin"]), getExpensesByDateRange);
-router.get("/:expenseId", verifyAccessToken, authorize(["g2-cpms-admin"]), getExpenseById);
+
+// POST and general GET routes
+router.post("/", verifyAccessToken, authorize(["g2-cpms-admin"]), uploadSingle, createExpense);
 router.get("/", verifyAccessToken, authorize(["g2-cpms-admin"]), getAllExpenses);
-router.put("/:expenseId", verifyAccessToken, authorize(["g2-cpms-admin"]), updateExpense);
+
+// Parameterized routes - must come last
+router.post("/:expenseId/payment-slip", verifyAccessToken, authorize(["g2-cpms-admin"]), uploadSingle, uploadPaymentSlip);
+router.get("/:expenseId", verifyAccessToken, authorize(["g2-cpms-admin"]), getExpenseById);
+router.put("/:expenseId", verifyAccessToken, authorize(["g2-cpms-admin"]), uploadSingle, updateExpense);
 router.delete("/:expenseId", verifyAccessToken, authorize(["g2-cpms-admin"]), deleteExpense);
 
 export default router;

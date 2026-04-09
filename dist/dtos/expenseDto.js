@@ -16,6 +16,7 @@ export function createExpenseDto({
     expenseStatus,
     description,
     paymentSlip,
+    file,
 } = {}) {
     const dto = {};
 
@@ -25,6 +26,7 @@ export function createExpenseDto({
     assignedIfDefined(dto, "amount", amount);
     assignedIfDefined(dto, "description", description);
     assignedIfDefined(dto, "paymentSlip", paymentSlip);
+    assignedIfDefined(dto, "file", file);
 
     return dto;
 }
