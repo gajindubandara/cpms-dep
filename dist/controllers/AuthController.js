@@ -29,13 +29,32 @@ const logout = (req, res) => {
 
 // Callback controller
 const callback = async (req, res, next) => {
-     const code = req.query.code;
+    const code = req.query.code;
+    const error = req.query.error;
+    const error_description = req.query.error_description;
+
+    // Handle Cognito errors
+    if (error) {
+        console.error('Cognito returned error:', { error, error_description });
+        return res.status(400).json({
+            success: false,
+            error: error,
+            message: error_description || 'Authentication failed'
+        });
+    }
 
     if (!code) {
-        return next(new BadRequest("Missing authorization code"));
+        console.error('Missing authorization code');
+        return res.status(400).json({
+            success: false,
+            error: 'Missing authorization code'
+        });
     }
 
     try {
+        console.log('[Auth] Processing callback with code:', code);
+        console.log('[Auth] Redirect URI:', process.env.COGNITO_REDIRECT_URI);
+
         const tokenData = await requestCognitoToken({
             grant_type: "authorization_code",
             client_id: process.env.COGNITO_CLIENT_ID,
@@ -46,15 +65,24 @@ const callback = async (req, res, next) => {
         const userData = authService.decodeIdToken(tokenData.id_token);
 
         return res.json({
+            success: true,
             name: userData.name,
             email: userData.email,
-            image: userData.profile,
+            image: userData.picture || userData.profile,
             role: userData["custom:role"],
             tokens: tokenData,
         });
     } catch (err) {
-        console.error(err.response?.data || err.message);
-        return next(new BadRequest(`Failed to fetch token: ${err.response?.data?.error || err.message}`));
+        console.error('[Auth] Callback error:', {
+            message: err.message,
+            cognitoError: err.response?.data,
+            code: err.response?.status
+        });
+        return res.status(500).json({
+            success: false,
+            error: 'Token exchange failed',
+            message: err.response?.data?.error_description || err.message
+        });
     }
 };
 
