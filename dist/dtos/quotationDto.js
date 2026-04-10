@@ -14,7 +14,8 @@ export function createQuotationDTO({
   quotationDate,
   featureName,
   featureCost,
-  cloudinaryId,
+  s3Key,
+  pdfUrl,
   createdAt,
   updatedAt,
 } = {}) {
@@ -37,7 +38,8 @@ export function createQuotationDTO({
   assignIfDefined("quotationDate", quotationDate);
   assignIfDefined("featureName", featureName);
   assignIfDefined("featureCost", featureCost);
-  assignIfDefined("cloudinaryId", cloudinaryId);
+  assignIfDefined("s3Key", s3Key);
+  assignIfDefined("pdfUrl", pdfUrl);
   assignIfDefined("createdAt", createdAt);
   assignIfDefined("updatedAt", updatedAt);
   return dto;

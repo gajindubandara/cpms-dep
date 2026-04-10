@@ -10,7 +10,7 @@ import {
 import { createQuotationDTO } from "../dtos/quotationDto.js";
 import { validateQuotationDTO, validateQuotationUpdateDTO } from "../validators/documentValidator.js";
 import { NotFoundError } from "../errors/customErrors.js";
-import { uploadPDFToCloudinary } from "../config/cloudinary.js";
+import { uploadQuotationPDFToS3 } from "../config/s3config.js";
 
 // Get Quotations by Client ID Controller
 export const getQuotationsByClientIdController = async (req, res, next) => {
@@ -86,7 +86,7 @@ export const deleteQuotationController = async (req, res, next) => {
     }
 };
 
-// Upload Quotation PDF to Cloudinary
+// Upload Quotation PDF to S3
 export const uploadQuotationPDFController = async (req, res, next) => {
     try {
         const { quotationId } = req.params;
@@ -102,27 +102,26 @@ export const uploadQuotationPDFController = async (req, res, next) => {
             throw new NotFoundError('Quotation not found');
         }
 
-        // Upload PDF to Cloudinary
-        const fileName = `quotation-${quotationId}`; // Without extension, we specify format separately
-        const folderName = 'quotations';
-        const cloudinaryResponse = await uploadPDFToCloudinary(
-            req.file.buffer,
-            fileName,
-            folderName
-        );
+        // Upload PDF to S3
+        const fileName = `quotation-${quotationId}.pdf`;
+        const s3Response = await uploadQuotationPDFToS3({
+            fileBuffer: req.file.buffer,
+            fileName: fileName,
+            mimeType: 'application/pdf'
+        });
 
-        // Update quotation with Cloudinary ID and PDF URL
+        // Update quotation with S3 URL
         const updateData = {
-            cloudinaryId: cloudinaryResponse.public_id,
-            pdfUrl: cloudinaryResponse.secure_url,
+            s3Key: s3Response.key,
+            pdfUrl: s3Response.url,
         };
         
         const updatedQuotation = await updateQuotationService(quotationId, updateData);
 
         res.status(200).json({
             message: 'Quotation PDF uploaded successfully',
-            cloudinaryId: cloudinaryResponse.public_id,
-            pdfUrl: cloudinaryResponse.secure_url,
+            s3Key: s3Response.key,
+            pdfUrl: s3Response.url,
             quotation: updatedQuotation,
         });
     } catch (error) {

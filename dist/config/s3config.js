@@ -5,6 +5,8 @@ const PAYMENT_SLIP_BASE_URL = process.env.AWS_S3_PAYMENT_SLIP_BASE_URL;
 const DEFAULT_BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME;
 const PAYMENT_SLIP_FOLDER = process.env.AWS_S3_PAYMENT_SLIP_FOLDER;
 const EXPENSE_SLIP_FOLDER = process.env.AWS_S3_EXPENSE_SLIP_FOLDER;
+const INVOICE_PDF_FOLDER = process.env.AWS_S3_INVOICE_FOLDER || 'cpms/invoices';
+const QUOTATION_PDF_FOLDER = process.env.AWS_S3_QUOTATION_FOLDER || 'cpms/quotations';
 const AWS_REGION = process.env.AWS_REGION_NAME;
 const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
 const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
@@ -160,6 +162,136 @@ export const deletePaymentSlipFromS3 = async (slipUrl) => {
   } catch (error) {
     console.error('[S3 Delete Error]', { message: error.message });
     throw new Error(`Failed to delete payment slip from S3: ${error.message}`);
+  }
+};
+
+// Upload Invoice PDF to S3
+export const uploadInvoicePDFToS3 = async ({ fileBuffer, fileName, mimeType }) => {
+  if (!fileBuffer) {
+    throw new Error('Invoice PDF file buffer is required.');
+  }
+
+  try {
+    const normalizedFileName = safeFileName(fileName);
+    const objectKey = `${INVOICE_PDF_FOLDER}/${Date.now()}-${normalizedFileName}`;
+
+    const command = new PutObjectCommand({
+      Bucket: DEFAULT_BUCKET_NAME,
+      Key: objectKey,
+      Body: fileBuffer,
+      ContentType: mimeType || 'application/pdf',
+    });
+
+    await s3config.send(command);
+
+    const resultUrl = `${PAYMENT_SLIP_BASE_URL.replace(/\/$/, '')}/${objectKey}`;
+    if (DEBUG) console.log('[S3 Invoice Upload Success]', { url: resultUrl });
+
+    return {
+      bucket: DEFAULT_BUCKET_NAME,
+      key: objectKey,
+      url: resultUrl,
+    };
+  } catch (error) {
+    console.error('[S3 Invoice Upload Error]', {
+      message: error.message,
+      code: error.code,
+    });
+    throw new Error(`Failed to upload invoice PDF to S3: ${error.message}`);
+  }
+};
+
+// Upload Quotation PDF to S3
+export const uploadQuotationPDFToS3 = async ({ fileBuffer, fileName, mimeType }) => {
+  if (!fileBuffer) {
+    throw new Error('Quotation PDF file buffer is required.');
+  }
+
+  try {
+    const normalizedFileName = safeFileName(fileName);
+    const objectKey = `${QUOTATION_PDF_FOLDER}/${Date.now()}-${normalizedFileName}`;
+
+    const command = new PutObjectCommand({
+      Bucket: DEFAULT_BUCKET_NAME,
+      Key: objectKey,
+      Body: fileBuffer,
+      ContentType: mimeType || 'application/pdf',
+    });
+
+    await s3config.send(command);
+
+    const resultUrl = `${PAYMENT_SLIP_BASE_URL.replace(/\/$/, '')}/${objectKey}`;
+    if (DEBUG) console.log('[S3 Quotation Upload Success]', { url: resultUrl });
+
+    return {
+      bucket: DEFAULT_BUCKET_NAME,
+      key: objectKey,
+      url: resultUrl,
+    };
+  } catch (error) {
+    console.error('[S3 Quotation Upload Error]', {
+      message: error.message,
+      code: error.code,
+    });
+    throw new Error(`Failed to upload quotation PDF to S3: ${error.message}`);
+  }
+};
+
+// Delete Invoice PDF from S3
+export const deleteInvoicePDFFromS3 = async (pdfUrl) => {
+  if (!pdfUrl) {
+    return { success: true, message: 'No file URL to delete' };
+  }
+
+  try {
+    const objectKey = extractS3Key(pdfUrl);
+
+    const command = new DeleteObjectCommand({
+      Bucket: DEFAULT_BUCKET_NAME,
+      Key: objectKey,
+    });
+
+    await s3config.send(command);
+
+    if (DEBUG) console.log('[S3 Invoice Delete Success]', { key: objectKey });
+
+    return {
+      success: true,
+      message: 'Invoice PDF deleted successfully',
+      deletedKey: objectKey,
+    };
+  } catch (error) {
+    console.error('[S3 Invoice Delete Error]', { message: error.message });
+    throw new Error(`Failed to delete invoice PDF from S3: ${error.message}`);
+  }
+};
+
+// Delete Quotation PDF from S3
+export const deleteQuotationPDFFromS3 = async (pdfUrl) => {
+  if (!pdfUrl) {
+    return { success: true, message: 'No file URL to delete' };
+  }
+
+  try {
+    const objectKey = extractS3Key(pdfUrl);
+
+    const command = new DeleteObjectCommand({
+      Bucket: DEFAULT_BUCKET_NAME,
+      Key: objectKey,
+    });
+
+    await s3config.send(command);
+
+    if (DEBUG) console.log('[S3 Quotation Delete Success]', { key: objectKey });
+
+    return {
+      success: true,
+      message: 'Quotation PDF deleted successfully',
+      deletedKey: objectKey,
+    };
+  } catch (error) {
+    console.error('[S3 Quotation Delete Error]', { message: error.message });
+    throw new Error(`Failed to delete quotation PDF from S3: ${error.message}`);
   }
 };
 

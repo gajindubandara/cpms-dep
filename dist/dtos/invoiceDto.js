@@ -11,7 +11,7 @@ export function createInvoiceDTO({
   createdAt,
   updatedAt,
   items,
-  cloudinaryId,
+  s3Key,
   pdfUrl,
 } = {}) {
   const dto = {};
@@ -33,7 +33,7 @@ export function createInvoiceDTO({
   assignIfDefined(dto, "createdAt", createdAt);
   assignIfDefined(dto, "updatedAt", updatedAt);
   assignIfDefined(dto, "items", items);
-  assignIfDefined(dto, "cloudinaryId", cloudinaryId);
+  assignIfDefined(dto, "s3Key", s3Key);
   assignIfDefined(dto, "pdfUrl", pdfUrl);
 
   return dto;

@@ -14,14 +14,7 @@ import {
 } from "../mappers/invoiceMapper.js";
 import { getClientById } from "../daos/clientDao.js";
 
-// Helper function to generate PDF URL from cloudinaryId
-const generatePdfUrl = (cloudinaryId) => {
-    if (!cloudinaryId) return null;
-    const cloudName = process.env.CLOUDINARY_CLOUD_NAME || 'your-cloud-name';
-    return `https://res.cloudinary.com/${cloudName}/raw/upload/${cloudinaryId}.pdf`;
-};
-
-// Helper function to map DynamoDB invoice to DTO and add pdfUrl
+// Helper function to map DynamoDB invoice to DTO and use pdfUrl directly from S3
 const mapInvoiceToDTO = (invoice) => {
     if (!invoice) return invoice;
     
@@ -30,9 +23,6 @@ const mapInvoiceToDTO = (invoice) => {
     
     // Get attributes (might be at root level or in Attributes)
     const attrs = invoice.Attributes || invoice;
-    
-    // Try to get cloudinaryId from multiple possible locations
-    const cloudinaryId = attrs.cloudinaryId || invoice.cloudinaryId;
     
     return {
         invoiceId,
@@ -45,8 +35,8 @@ const mapInvoiceToDTO = (invoice) => {
         amount: attrs.amount,
         invoiceDate: attrs.invoiceDate,
         items: attrs.items,
-        cloudinaryId: cloudinaryId,
-        pdfUrl: generatePdfUrl(cloudinaryId),
+        s3Key: attrs.s3Key,
+        pdfUrl: attrs.pdfUrl,
         createdAt: attrs.createdAt,
         updatedAt: attrs.updatedAt,
     };

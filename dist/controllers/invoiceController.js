@@ -12,7 +12,7 @@ import {
     validateInvoiceUpdateDTO,
 } from "../validators/documentValidator.js";
 import { NotFoundError } from "../errors/customErrors.js";
-import { uploadPDFToCloudinary } from "../config/cloudinary.js";
+import { uploadInvoicePDFToS3 } from "../config/s3config.js";
 
 // Create Invoice Controller
 export const createInvoiceController = async (req, res, next) => {
@@ -88,7 +88,7 @@ export const getInvoicesByClientIdController = async (req, res, next) => {
     }
 };
 
-// Upload Invoice PDF to Cloudinary
+// Upload Invoice PDF to S3
 export const uploadInvoicePDFController = async (req, res, next) => {
     try {
         const { invoiceId } = req.params;
@@ -104,27 +104,26 @@ export const uploadInvoicePDFController = async (req, res, next) => {
             throw new NotFoundError('Invoice not found');
         }
 
-        // Upload PDF to Cloudinary
-        const fileName = `invoice-${invoiceId}`; // Without extension, we specify format separately
-        const folderName = 'invoices';
-        const cloudinaryResponse = await uploadPDFToCloudinary(
-            req.file.buffer,
-            fileName,
-            folderName
-        );
+        // Upload PDF to S3
+        const fileName = `invoice-${invoiceId}.pdf`;
+        const s3Response = await uploadInvoicePDFToS3({
+            fileBuffer: req.file.buffer,
+            fileName: fileName,
+            mimeType: 'application/pdf'
+        });
 
-        // Update invoice with Cloudinary ID and PDF URL
+        // Update invoice with S3 URL
         const updateData = {
-            cloudinaryId: cloudinaryResponse.public_id,
-            pdfUrl: cloudinaryResponse.secure_url,
+            s3Key: s3Response.key,
+            pdfUrl: s3Response.url,
         };
         
         const updatedInvoice = await updateInvoiceService(invoiceId, updateData);
 
         res.status(200).json({
             message: 'Invoice PDF uploaded successfully',
-            cloudinaryId: cloudinaryResponse.public_id,
-            pdfUrl: cloudinaryResponse.secure_url,
+            s3Key: s3Response.key,
+            pdfUrl: s3Response.url,
             invoice: updatedInvoice,
         });
     } catch (error) {
