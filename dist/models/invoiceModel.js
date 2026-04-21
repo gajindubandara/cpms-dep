@@ -1,3 +1,5 @@
+import { getDateOnly } from '../utils/dateOnly.js';
+
 export const Invoice = {
   pk: (invoiceId) => `INVOICE#${invoiceId}`,
   sk: () => `INVOICE`,
@@ -20,5 +22,6 @@ export const Invoice = {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
     },
+    queryDate: getDateOnly(),
   }),
 };

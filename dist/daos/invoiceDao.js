@@ -124,3 +124,22 @@ export const getInvoicesByClientId = async (clientId) => {
     const result = await ddbDocClient.send(new ScanCommand(params));
     return result.Items;
 }
+
+// Get Invoices by Date Range
+export const getInvoicesByDateRange = async (startDate, endDate) => {
+    if (!startDate || !endDate) throw new BadRequest("startDate and endDate are required");
+    const params = {
+        TableName: "G2Labs-CPMS",
+        FilterExpression: "begins_with(PK, :pkPrefix) AND Attributes.#invoiceDate BETWEEN :startDate AND :endDate",
+        ExpressionAttributeNames: {
+            "#invoiceDate": "invoiceDate"
+        },
+        ExpressionAttributeValues: {
+            ":pkPrefix": "INVOICE#",
+            ":startDate": startDate,
+            ":endDate": endDate
+        },
+    };
+    const result = await ddbDocClient.send(new ScanCommand(params));
+    return result.Items;
+}

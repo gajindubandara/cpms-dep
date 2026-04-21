@@ -6,6 +6,7 @@ import {
     updateInvoiceController,
     deleteInvoiceController,
     getInvoicesByClientIdController,
+    getInvoicesByDateRangeController,
     uploadInvoicePDFController
 } from "../controllers/invoiceController.js";
 import { verifyAccessToken } from "../middlewares/verifyAccessToken.js";
@@ -18,6 +19,7 @@ const router = express.Router();
 // Note: Specific routes must come BEFORE parameterized routes to avoid conflicts
 router.post('/', verifyAccessToken, authorize (["g2-cpms-admin"]), createInvoiceController);
 router.get('/', verifyAccessToken, authorize(["g2-cpms-admin"]), getAllInvoicesController);
+router.get('/by-query-date-range', verifyAccessToken, authorize(["g2-cpms-admin"]), getInvoicesByDateRangeController);
 // Route to get invoices by clientId (for client dashboard)
 router.get('/client/:clientId', verifyAccessToken, authorize(["g2-cpms-admin","g2-cpms-user"]), getInvoicesByClientIdController);
 router.post('/:invoiceId/upload-pdf', verifyAccessToken, authorize(["g2-cpms-admin"]), uploadPDFSingle, uploadInvoicePDFController);

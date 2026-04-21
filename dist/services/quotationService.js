@@ -4,7 +4,8 @@ import {
     getQuotationById,
     updateQuotation,
     deleteQuotation,
-    getQuotationsByClientId
+    getQuotationsByClientId,
+    getQuotationsByDateRange
 } from "../daos/quotationDao.js";
 import {
     mapCreateQuotationDTOtoQuotationModel,
@@ -103,4 +104,11 @@ export const deleteQuotationService = async (quotationId) => {
     const existingQuotation = await getQuotationById(quotationId);
     if (!existingQuotation) throw new NotFoundError("Quotation not found");
     return await deleteQuotation(quotationId);
+}
+
+// Get Quotations by Date Range Service
+export const getQuotationsByDateRangeService = async (startDate, endDate) => {
+    if (!startDate || !endDate) throw new BadRequest("startDate and endDate are required");
+    const quotations = await getQuotationsByDateRange(startDate, endDate);
+    return quotations.map(mapQuotationToDTO);
 }

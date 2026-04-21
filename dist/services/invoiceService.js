@@ -4,7 +4,8 @@ import {
     getAllInvoices,
     updateInvoice,
     deleteInvoice,
-    getInvoicesByClientId
+    getInvoicesByClientId,
+    getInvoicesByDateRange
 } from "../daos/invoiceDao.js";
 
 import  { BadRequest } from "../errors/customErrors.js";
@@ -98,5 +99,12 @@ export const deleteInvoiceService = async (invoiceId) => {
     const existingInvoice = await getInvoiceById(invoiceId);
     if (!existingInvoice) throw new BadRequest("Invoice not found");
     return await deleteInvoice(invoiceId);
+};
+
+// Get Invoices by Date Range Service
+export const getInvoicesByDateRangeService = async (startDate, endDate) => {
+    if (!startDate || !endDate) throw new BadRequest("startDate and endDate are required");
+    const invoices = await getInvoicesByDateRange(startDate, endDate);
+    return invoices.map(mapInvoiceToDTO);
 };
 

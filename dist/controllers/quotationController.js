@@ -6,6 +6,7 @@ import {
     deleteQuotationService,
     getAllQuotationsService,
     getQuotationsByClientIdService,
+    getQuotationsByDateRangeService,
 } from "../services/quotationService.js";
 import { createQuotationDTO } from "../dtos/quotationDto.js";
 import { validateQuotationDTO, validateQuotationUpdateDTO } from "../validators/documentValidator.js";
@@ -81,6 +82,17 @@ export const deleteQuotationController = async (req, res, next) => {
         const { quotationId } = req.params;
         await deleteQuotationService(quotationId);
         res.status(204).send();
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Get Quotations by Date Range Controller
+export const getQuotationsByDateRangeController = async (req, res, next) => {
+    try {
+        const { startDate, endDate } = req.query;
+        const quotations = await getQuotationsByDateRangeService(startDate, endDate);
+        res.status(200).json(quotations);
     } catch (error) {
         next(error);
     }

@@ -146,3 +146,26 @@ export const getQuotationsByClientId = async (clientId) => {
     ...item.Attributes
   }));
 };
+
+// Get Quotations by Date Range
+export const getQuotationsByDateRange = async (startDate, endDate) => {
+  if (!startDate || !endDate) throw new BadRequest("startDate and endDate are required");
+  const { ScanCommand } = await import("@aws-sdk/lib-dynamodb");
+  const params = {
+    TableName: "G2Labs-CPMS",
+    FilterExpression: "begins_with(PK, :pkPrefix) AND Attributes.#quotationDate BETWEEN :startDate AND :endDate",
+    ExpressionAttributeNames: {
+      "#quotationDate": "quotationDate"
+    },
+    ExpressionAttributeValues: {
+      ":pkPrefix": "QUOTATION#",
+      ":startDate": startDate,
+      ":endDate": endDate
+    }
+  };
+  const result = await ddbDocClient.send(new ScanCommand(params));
+  return (result.Items || []).map(item => ({
+    quotationId: item.PK.replace("QUOTATION#", ""),
+    ...item.Attributes
+  }));
+};

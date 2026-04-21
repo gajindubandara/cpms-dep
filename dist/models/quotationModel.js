@@ -1,3 +1,5 @@
+import { getDateOnly } from '../utils/dateOnly.js';
+
 export const Quotation = {
   pk: (quotationId) => `QUOTATION#${quotationId}`,
   sk: () => `QUOTATION`,
@@ -24,5 +26,6 @@ export const Quotation = {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     },
+    queryDate: getDateOnly(),
   }),
 };

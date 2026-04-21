@@ -5,6 +5,7 @@ import { createQuotationController,
         updateQuotationController,
         deleteQuotationController,
         getQuotationsByClientIdController,
+        getQuotationsByDateRangeController,
         uploadQuotationPDFController
  } from '../controllers/quotationController.js';
 import { verifyAccessToken } from '../middlewares/verifyAccessToken.js';
@@ -18,6 +19,7 @@ const router = express.Router();
 // Note: Specific routes must come BEFORE parameterized routes to avoid conflicts
 router.post('/', verifyAccessToken, authorize (["g2-cpms-admin"]), createQuotationController);
 router.get('/', verifyAccessToken, authorize(["g2-cpms-admin"]), getAllQuotationsController);
+router.get('/by-query-date-range', verifyAccessToken, authorize(["g2-cpms-admin"]), getQuotationsByDateRangeController);
 router.get('/client/:clientId', verifyAccessToken, authorize(["g2-cpms-admin","g2-cpms-user","client"]), getQuotationsByClientIdController);
 router.post('/:quotationId/upload-pdf', verifyAccessToken, authorize(["g2-cpms-admin"]), uploadPDFSingle, uploadQuotationPDFController);
 router.get('/:quotationId', verifyAccessToken, authorize(["g2-cpms-admin","g2-cpms-user"]), getQuotationByIdController);
