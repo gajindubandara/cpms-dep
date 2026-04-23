@@ -15,11 +15,16 @@ import { NotFoundError, BadRequest } from "../errors/customErrors.js";
 import { getClientById } from "../daos/clientDao.js";
 import { getProjectById } from "../daos/projectDao.js";
 import { uploadPaymentSlipToS3, deletePaymentSlipFromS3 } from "../config/s3config.js";
+import { buildNotificationMessage, sendTelegramNotification } from "../config/telegramNotificationService.js";
 
 // Helper functions
 const getAttrs = (payment) => payment?.Attributes ?? payment;
 const getTimestamp = () => new Date().toISOString();
 const DEBUG = process.env.NODE_ENV !== 'production';
+const getPaymentId = (payment) => {
+  const attrs = getAttrs(payment);
+  return attrs?.paymentId || payment?.PK?.replace('PAYMENT#', '') || 'N/A';
+};
 
 const safeDeleteSlip = async (slipUrl) => {
   if (!slipUrl) return;
@@ -68,7 +73,15 @@ const validatePaymentForSubmission = (attrs) => {
 export const createPaymentService = async (createPaymentDTO, adminId) => {
   const model = mapCreatePaymentDTOtoPaymentModel(createPaymentDTO);
   model.createdBy = adminId;
-  return await createPayment(model);
+  const created = await createPayment(model);
+  void sendTelegramNotification(
+    buildNotificationMessage('New payment created', [
+      `Payment ID: ${getPaymentId(created)}`,
+      `Project ID: ${model.projectId || 'N/A'}`,
+      `Client ID: ${model.clientId || 'N/A'}`,
+    ])
+  );
+  return created;
 };
 
 // Get payment by ID
@@ -93,7 +106,14 @@ export const getClientPaymentsService = async (clientId) => {
 // Update payment (Admin can update amount, dueDate, description)
 export const updatePaymentService = async (paymentId, projectId, updatePaymentDTO) => {
   const model = mapUpdatePaymentDTOtoPaymentModel(updatePaymentDTO);
-  return await updatePayment(paymentId, projectId, model);
+  const updated = await updatePayment(paymentId, projectId, model);
+  void sendTelegramNotification(
+    buildNotificationMessage('Payment updated', [
+      `Payment ID: ${paymentId}`,
+      `Project ID: ${projectId}`,
+    ])
+  );
+  return updated;
 };
 
 // Submit payment with slip (Client action)
@@ -120,11 +140,18 @@ export const submitPaymentSlipService = async (paymentId, projectId, fileData) =
   if (DEBUG) console.log('[Payment] Slip uploaded:', s3Response.url);
 
   // Update payment with slip URL and completion time
-  return await updatePayment(paymentId, projectId, {
+  const updated = await updatePayment(paymentId, projectId, {
     paymentSlip: s3Response.url,
     status: 'COMPLETED',
     completedAt: getTimestamp(),
   });
+  void sendTelegramNotification(
+    buildNotificationMessage('Payment slip submitted', [
+      `Payment ID: ${paymentId}`,
+      `Project ID: ${projectId}`,
+    ])
+  );
+  return updated;
 };
 
 // Approve payment (Admin action)
@@ -139,10 +166,17 @@ export const approvePaymentService = async (paymentId, projectId) => {
     throw new BadRequest('Only completed payments can be approved');
   }
 
-  return await updatePayment(paymentId, projectId, {
+  const updated = await updatePayment(paymentId, projectId, {
     status: 'APPROVED',
     updatedAt: getTimestamp(),
   });
+  void sendTelegramNotification(
+    buildNotificationMessage('Payment approved', [
+      `Payment ID: ${paymentId}`,
+      `Project ID: ${projectId}`,
+    ])
+  );
+  return updated;
 };
 
 // Reject payment (Admin action)
@@ -157,12 +191,20 @@ export const rejectPaymentService = async (paymentId, projectId, reason) => {
   // Delete slip from S3
   await safeDeleteSlip(attrs.paymentSlip);
 
-  return await updatePayment(paymentId, projectId, {
+  const updated = await updatePayment(paymentId, projectId, {
     status: 'REJECTED',
     paymentSlip: null,
     completedAt: null,
     updatedAt: getTimestamp(),
   });
+  void sendTelegramNotification(
+    buildNotificationMessage('Payment rejected', [
+      `Payment ID: ${paymentId}`,
+      `Project ID: ${projectId}`,
+      reason ? `Reason: ${reason}` : null,
+    ])
+  );
+  return updated;
 };
 
 // Delete payment (Admin only)

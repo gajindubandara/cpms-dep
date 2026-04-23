@@ -12,16 +12,18 @@ import {
     mapAdminUpdateQuotationDTOtoQuotationModel} from "../mappers/quotationMapper.js";
 import { BadRequest, NotFoundError } from "../errors/customErrors.js";
 import { getClientById } from "../daos/clientDao.js";
+import { buildNotificationMessage, sendTelegramNotification } from "../config/telegramNotificationService.js";
 
 // Helper function to map quotation to DTO using S3 URL directly
-const mapQuotationToDTO = (quotation) => {
+const mapQuotationToDTO = (quotation, fallbackQuotationId = '') => {
     if (!quotation) return quotation;
     
     // Get attributes (might be at root level or in Attributes)
     const attrs = quotation.Attributes || quotation;
+    const quotationId = quotation.quotationId || quotation.PK?.replace('QUOTATION#', '') || attrs.quotationId || fallbackQuotationId;
     
     return {
-        quotationId: quotation.quotationId,
+        quotationId,
         clientId: attrs.clientId,
         clientName: attrs.clientName,
         clientEmail: attrs.clientEmail,
@@ -62,7 +64,15 @@ export const createQuotationService = async (createQuotationDTO) => {
       }
 
     const createdQuotation = await createQuotation(model);
-    return mapQuotationToDTO(createdQuotation);
+        const dto = mapQuotationToDTO(createdQuotation, model.quotationId);
+        void sendTelegramNotification(
+            buildNotificationMessage('New quotation created', [
+                `Quotation ID: ${dto.quotationId}`,
+                `Client: ${dto.clientName || 'Unknown'}`,
+                `Grand Total: $${Number(dto.grandTotal || 0).toFixed(2)}`,
+            ])
+        );
+        return dto;
 }
 
 // Get Quotation by ID Service
@@ -87,15 +97,25 @@ export const getQuotationsByClientIdService = async (clientId) => {
 }
 
 // Update Quotation Service
-export const updateQuotationService = async (quotationId, updateQuotationDTO) => {
+export const updateQuotationService = async (quotationId, updateQuotationDTO, options = {}) => {
     if (!quotationId) throw new BadRequest("quotationId is required");
+    const { notify = true } = options;
     const updates = mapAdminUpdateQuotationDTOtoQuotationModel(updateQuotationDTO);
 
     if (Object.keys(updates).length === 0) {
         throw new BadRequest("No valid fields to update");
     } 
     const updatedQuotation = await updateQuotation(quotationId, updates);
-    return mapQuotationToDTO(updatedQuotation);
+        const dto = mapQuotationToDTO(updatedQuotation, quotationId);
+        if (notify) {
+            void sendTelegramNotification(
+                buildNotificationMessage('Quotation updated', [
+                    `Quotation ID: ${quotationId}`,
+                    `Client: ${dto.clientName || 'Unknown'}`,
+                ])
+            );
+        }
+        return dto;
 }
 
 // Delete Quotation Service

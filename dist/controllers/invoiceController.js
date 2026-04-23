@@ -130,7 +130,7 @@ export const uploadInvoicePDFController = async (req, res, next) => {
             pdfUrl: s3Response.url,
         };
         
-        const updatedInvoice = await updateInvoiceService(invoiceId, updateData);
+        const updatedInvoice = await updateInvoiceService(invoiceId, updateData, { notify: false });
 
         res.status(200).json({
             message: 'Invoice PDF uploaded successfully',

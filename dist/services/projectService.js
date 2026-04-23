@@ -17,6 +17,7 @@ import {
 } from "../daos/projectDao.js";
 import { getClientById } from "../daos/clientDao.js";
 import { BadRequest, NotFoundError, AlreadyExistsError } from "../errors/customErrors.js";
+import { buildNotificationMessage, sendTelegramNotification } from "../config/telegramNotificationService.js";
 //create Project
 export const createprojectService = async (createProjectDTO) => {
   // Validate required fields before mapping
@@ -48,10 +49,20 @@ export const createprojectService = async (createProjectDTO) => {
     }
   }
 
-  return await createProject({
+  const created = await createProject({
     ...model,
     featureId,
   });
+
+  void sendTelegramNotification(
+    buildNotificationMessage('New project created', [
+      `Project ID: ${model.projectId}`,
+      `Client ID: ${model.clientId}`,
+      `Project Name: ${model.projectName || 'N/A'}`,
+    ])
+  );
+
+  return created;
 };
 
 //get project by projectId
@@ -95,10 +106,20 @@ export const createFeatureService = async (dto) => {
   const last = featureIds.length > 0 ? Math.max(...featureIds) : 0;
   const featureId = last + 1; // Always >= 1 for features
   
-  return await createProject({
+  const created = await createProject({
     ...model,
     featureId
   });
+
+  void sendTelegramNotification(
+    buildNotificationMessage('New project feature created', [
+      `Project ID: ${model.projectId}`,
+      `Feature ID: ${featureId}`,
+      `Client ID: ${model.clientId}`,
+    ])
+  );
+
+  return created;
 };
 
 //get feature of a project
@@ -122,7 +143,14 @@ export const updateProjectService = async(dto) => {
   const clientId = dto.clientId;
 
   const updates = mapUpdateProjectDTOtoProjectModel(dto)
-  return updateProject(clientId, projectId, updates);
+  const updated = await updateProject(clientId, projectId, updates);
+  void sendTelegramNotification(
+    buildNotificationMessage('Project updated', [
+      `Project ID: ${projectId}`,
+      `Client ID: ${clientId}`,
+    ])
+  );
+  return updated;
 }
 
 
@@ -133,7 +161,15 @@ export const updateFeatureService = async(dto) => {
   const featureId = dto.featureId;
 
   const updates = mapUpdateProjectDTOtoProjectModel(dto)
-  return updateFeature(clientId, projectId, featureId, updates);
+  const updated = await updateFeature(clientId, projectId, featureId, updates);
+  void sendTelegramNotification(
+    buildNotificationMessage('Project feature updated', [
+      `Project ID: ${projectId}`,
+      `Feature ID: ${featureId}`,
+      `Client ID: ${clientId}`,
+    ])
+  );
+  return updated;
 }
 
 //delete project

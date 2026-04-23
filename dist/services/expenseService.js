@@ -14,8 +14,14 @@ import {
 import { BadRequest, NotFoundError } from "../errors/customErrors.js";
 import { getProjectById } from "../daos/projectDao.js";
 import { uploadExpenseSlipToS3, deletePaymentSlipFromS3 } from "../config/s3config.js";
+import { buildNotificationMessage, sendTelegramNotification } from "../config/telegramNotificationService.js";
 
 const DEBUG = process.env.NODE_ENV !== 'production';
+
+const getExpenseId = (expense, fallbackExpenseId = '') => {
+  if (!expense) return fallbackExpenseId;
+  return expense.expenseId || expense.PK?.replace('EXPENSE#', '') || expense.Attributes?.expenseId || fallbackExpenseId;
+};
 
 const safeDeleteSlip = async (slipUrl) => {
   if (!slipUrl) return;
@@ -55,7 +61,17 @@ export const createExpenseService = async (dto) => {
     expenseId: randomUUID(),
     paymentSlip: paymentSlipUrl,
   });
-  return await createExpense(model);
+  const created = await createExpense(model);
+
+  void sendTelegramNotification(
+    buildNotificationMessage('New expense created', [
+      `Expense ID: ${getExpenseId(created, model.expenseId)}`,
+      `Project ID: ${model.projectId || 'N/A'}`,
+      `Amount: ${model.currency || ''} ${Number(model.amount || 0).toFixed(2)}`.trim(),
+    ])
+  );
+
+  return created;
 };
 
 export const getExpenseByIdService = async (expenseId) => {
@@ -101,7 +117,16 @@ export const updateExpenseService = async (expenseId, dto) => {
   const updates = mapUpdateExpenseDTOtoExpenseModel({ ...dto, paymentSlip: paymentSlipUrl });
   if (Object.keys(updates).length === 0) throw new BadRequest("No valid fields to update");
 
-  return await updateExpense(expenseId, updates);
+  const updated = await updateExpense(expenseId, updates);
+
+  void sendTelegramNotification(
+    buildNotificationMessage('Expense updated', [
+      `Expense ID: ${expenseId}`,
+      `Project ID: ${updated?.Attributes?.projectId || updated?.projectId || dto.projectId || 'N/A'}`,
+    ])
+  );
+
+  return updated;
 };
 
 export const deleteExpenseService = async (expenseId) => {
@@ -145,8 +170,16 @@ export const uploadExpensePaymentSlipService = async (expenseId, fileData) => {
   if (DEBUG) console.log('[Expense] Slip uploaded:', s3Response.url);
 
   // Update expense with slip URL
-  return await updateExpense(expenseId, {
+  const updated = await updateExpense(expenseId, {
     paymentSlip: s3Response.url,
   });
+
+  void sendTelegramNotification(
+    buildNotificationMessage('Expense payment slip uploaded', [
+      `Expense ID: ${expenseId}`,
+    ])
+  );
+
+  return updated;
 };
 

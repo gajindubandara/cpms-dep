@@ -14,13 +14,14 @@ import {
     mapUpdateInvoiceDTOtoInvoiceModel,
 } from "../mappers/invoiceMapper.js";
 import { getClientById } from "../daos/clientDao.js";
+import { buildNotificationMessage, sendTelegramNotification } from "../config/telegramNotificationService.js";
 
 // Helper function to map DynamoDB invoice to DTO and use pdfUrl directly from S3
-const mapInvoiceToDTO = (invoice) => {
+const mapInvoiceToDTO = (invoice, fallbackInvoiceId = '') => {
     if (!invoice) return invoice;
     
     // Extract invoiceId from PK (format: INVOICE#id)
-    const invoiceId = invoice.PK?.replace('INVOICE#', '') || '';
+    const invoiceId = invoice.invoiceId || invoice.PK?.replace('INVOICE#', '') || invoice.Attributes?.invoiceId || fallbackInvoiceId;
     
     // Get attributes (might be at root level or in Attributes)
     const attrs = invoice.Attributes || invoice;
@@ -58,7 +59,15 @@ export const createInvoiceService = async (createInvoiceDTO) => {
         throw new BadRequest("Client with that id is not available");
     }
     const createdInvoice = await createInvoice(model);
-    return mapInvoiceToDTO(createdInvoice);
+    const dto = mapInvoiceToDTO(createdInvoice, model.invoiceId);
+    void sendTelegramNotification(
+        buildNotificationMessage('New invoice created', [
+            `Invoice ID: ${dto.invoiceId}`,
+            `Client: ${dto.clientName || 'Unknown'}`,
+            `Amount: $${Number(dto.amount || 0).toFixed(2)}`,
+        ])
+    );
+    return dto;
 }   
 
 // Get Invoice by ID Service
@@ -83,14 +92,24 @@ export const getInvoicesByClientIdService = async (clientId) => {
 }
 
 // Update Invoice Service
-export const updateInvoiceService = async (invoiceId, updateInvoiceDTO) => {
+export const updateInvoiceService = async (invoiceId, updateInvoiceDTO, options = {}) => {
     if (!invoiceId) throw new BadRequest("invoiceId is required");
+    const { notify = true } = options;
     const updates = mapUpdateInvoiceDTOtoInvoiceModel(updateInvoiceDTO);
     if (Object.keys(updates).length === 0) {
         throw new BadRequest("No valid fields to update");
     }
     const updatedInvoice = await updateInvoice(invoiceId, updates);
-    return mapInvoiceToDTO(updatedInvoice);
+    const dto = mapInvoiceToDTO(updatedInvoice, invoiceId);
+    if (notify) {
+        void sendTelegramNotification(
+            buildNotificationMessage('Invoice updated', [
+                `Invoice ID: ${invoiceId}`,
+                `Client: ${dto.clientName || 'Unknown'}`,
+            ])
+        );
+    }
+    return dto;
 }
 
 // Delete Invoice Service

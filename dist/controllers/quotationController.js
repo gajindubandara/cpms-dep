@@ -128,7 +128,7 @@ export const uploadQuotationPDFController = async (req, res, next) => {
             pdfUrl: s3Response.url,
         };
         
-        const updatedQuotation = await updateQuotationService(quotationId, updateData);
+        const updatedQuotation = await updateQuotationService(quotationId, updateData, { notify: false });
 
         res.status(200).json({
             message: 'Quotation PDF uploaded successfully',
