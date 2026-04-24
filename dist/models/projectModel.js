@@ -21,6 +21,8 @@ export const Project = {
             profitMargin: data.profitMargin,
             commissionPercent: data.commissionPercent,
             isRecurring: data.isRecurring,
+            recurCurrency: data.recurCurrency,
+            recurAmount: data.recurAmount,
             billingCycle: data.billingCycle ?? BillingCycle.NONE,
             billingDate: data.billingDate,
             billability: data.billability?? Billability.NON_BILLLABLE,

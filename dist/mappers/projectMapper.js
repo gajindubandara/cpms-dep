@@ -18,6 +18,8 @@ export const mapCreateProjectDTOtoProjectModel = (dto) => ({
     profitMargin: dto.profitMargin,
     commissionPercent: dto.commissionPercent,
     isRecurring: dto.isRecurring,
+    recurCurrency: dto.recurCurrency,
+    recurAmount: dto.recurAmount,
     billingCycle: dto.billingCycle,
     billingDate: dto.billingDate,
     billability: dto.billability,
@@ -55,6 +57,8 @@ export const mapUpdateProjectDTOtoProjectModel = (dto) => {
     assignIfDefined(model, 'commissionPercent', dto.commissionPercent);
 
     assignEnumDefault(model, 'isRecurring', dto.isRecurring, IsRecurring, IsRecurring.NO);
+    assignIfDefined(model, 'recurCurrency', dto.recurCurrency);
+    assignIfDefined(model, 'recurAmount', dto.recurAmount);
     assignEnumDefault(model, 'billingCycle', dto.billingCycle, BillingCycle, BillingCycle.MONTHLY);
     assignIfDefined(model, 'billingDate', dto.billingDate);
 

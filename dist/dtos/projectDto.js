@@ -19,6 +19,8 @@ export class ProjectDTO {
     profitMargin,
     commissionPercent,
     isRecurring,
+    recurCurrency,
+    recurAmount,
     billingCycle,
     billingDate,
     billability,
@@ -52,6 +54,8 @@ export class ProjectDTO {
     assignIfDefined(this, "profitMargin", profitMargin);
     assignIfDefined(this, "commissionPercent", commissionPercent);
     assignEnum(this, "isRecurring", isRecurring, IsRecurring, IsRecurring.NO);
+    assignIfDefined(this, "recurCurrency", recurCurrency);
+    assignIfDefined(this, "recurAmount", recurAmount);
     assignEnum(this, "billingCycle", billingCycle, BillingCycle, BillingCycle.MONTHLY);
     assignIfDefined(this, "billingDate", billingDate);
     assignEnum(this, "billability", billability, Billability, Billability.BILLABLE);
