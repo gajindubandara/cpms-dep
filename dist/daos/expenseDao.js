@@ -32,15 +32,16 @@ export const getExpenseById = async  (expenseId, type) => {
 export const getAllExpenses = async () => {
     const params = {
         TableName: process.env.TABLE_NAME,
-        FilterExpression: "#sk = :skValue",
+        IndexName: "type-index",
+        KeyConditionExpression: "#type = :typeValue",
         ExpressionAttributeNames: {
-            "#sk": "SK"
+            "#type": "type"
         },
         ExpressionAttributeValues: {
-            ":skValue": "EXPENSE"
+            ":typeValue": "EXPENSE"
         }
     };
-    const result = await ddbDocClient.send(new ScanCommand(params));
+    const result = await ddbDocClient.send(new QueryCommand(params));
     return result.Items || [];
 };
 
@@ -94,15 +95,15 @@ export const updateExpense = async (expenseId, updates) => {
 export const getExpensesByDateRange = async (startDate, endDate) => {
     const params = {
         TableName: process.env.TABLE_NAME,
-        IndexName: "SK-index",
-        KeyConditionExpression: "#sk = :sk",
+        IndexName: "type-index",
+        KeyConditionExpression: "#type = :typeValue",
         FilterExpression: "#queryDate BETWEEN :start AND :end",
         ExpressionAttributeNames: {
-            "#sk": "SK",
+            "#type": "type",
             "#queryDate": "queryDate",
         },
         ExpressionAttributeValues: {
-            ":sk": "EXPENSE",
+            ":typeValue": "EXPENSE",
             ":start": startDate,
             ":end": endDate,
         },

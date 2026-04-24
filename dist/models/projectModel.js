@@ -9,6 +9,7 @@ export const Project = {
     create: (data) =>({
         PK: `CLIENT#${data.clientId}`,
         SK: `PROJECT#${data.projectId}#FEATURE#${data.featureId}`,
+        type: `PROJECT`,
         Attributes: {
             projectName: data.projectName,
             description: data.description,

@@ -7,6 +7,7 @@ export const Expense = {
     create: (data) => ({
         PK: `EXPENSE#${data.expenseId}`,
         SK: `EXPENSE`,
+        type: `EXPENSE`,
         Attributes: {
             projectId: data.projectId ?? null,
             currency: data.currency,

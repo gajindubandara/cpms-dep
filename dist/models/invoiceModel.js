@@ -6,6 +6,7 @@ export const Invoice = {
     create: (data) => ({
     PK: `INVOICE#${data.invoiceId}`,
     SK: `INVOICE`,
+    type: `INVOICE`,
     Attributes: {
         invoiceId: data.invoiceId,
         clientId: data.clientId,

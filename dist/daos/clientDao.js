@@ -97,16 +97,16 @@ export const getClientById = async (clientId) => {
 // get all clients
 export const getAllClients = async () => {
   const params = {
-    TableName: "G2Labs-CPMS",
-    IndexName: "SK-index", //GSI and sk as partition key
-    KeyConditionExpression: "#sk = :sk",
-    ExpressionAttributeNames: {
-      "#sk": "SK",
-    },
-    ExpressionAttributeValues: {
-      ":sk": "CLIENT",
-    },
-  };
+        TableName: process.env.TABLE_NAME,
+        IndexName: "type-index",
+        KeyConditionExpression: "#type = :typeValue",
+        ExpressionAttributeNames: {
+            "#type": "type"
+        },
+        ExpressionAttributeValues: {
+            ":typeValue": "CLIENT"
+        }
+    };
 
   const result = await ddbDocClient.send(new QueryCommand(params));
   return result.Items || [];
@@ -118,7 +118,7 @@ export const getAllClientsByQueryDate = async (queryDate) => {
 
   const params = {
     TableName: "G2Labs-CPMS",
-    IndexName: "queryDate-SK-index", // queryDate as GSI partition with sk
+    IndexName: "queryDate-SK-index",
     KeyConditionExpression: "#queryDate = :queryDate AND #sk = :sk",
     ExpressionAttributeNames: {
       "#queryDate": "queryDate",

@@ -8,6 +8,7 @@ export const Payment = {
   create: (data) => ({
     PK: `PAYMENT#${data.paymentId}`,
     SK: `PROJECT#${data.projectId}`,
+    type: `PAYMENT`,
     Attributes: {
       paymentId: data.paymentId,
       projectId: data.projectId,
@@ -25,7 +26,7 @@ export const Payment = {
     },
     queryDate: getDateOnly()
   }),
-
+ 
   update: (data) => ({
     Attributes: {
       amount: data.amount,

@@ -99,36 +99,42 @@ export const getTicketsByQueryDate = async (queryDate) => {
   return result.Items || [];
 };
 
-// Get all tickets by queryDate range using Scan (for small tables)
+// Get all tickets by queryDate range using QueryCommand with type-index
 export const getTicketsByQueryDateRange = async (startDate, endDate) => {
   if (!startDate || !endDate) throw new BadRequest("startDate and endDate are required");
   const params = {
     TableName: "G2Labs-CPMS",
-    FilterExpression: "#queryDate BETWEEN :startDate AND :endDate AND begins_with(#sk, :skPrefix)",
+    IndexName: "type-index",
+    KeyConditionExpression: "#type = :typeValue",
+    FilterExpression: "#queryDate BETWEEN :startDate AND :endDate",
     ExpressionAttributeNames: {
-      "#queryDate": "queryDate",
-      "#sk": "SK"
+      "#type": "type",
+      "#queryDate": "queryDate"
     },
     ExpressionAttributeValues: {
+      ":typeValue": "TICKET",
       ":startDate": startDate,
-      ":endDate": endDate,
-      ":skPrefix": "TICKET#"
+      ":endDate": endDate
     }
   };
-  const result = await ddbDocClient.send(new ScanCommand(params));
+  const result = await ddbDocClient.send(new QueryCommand(params));
   return result.Items || [];
 };
 
-// Get all tickets (scan entire table)
+// Get all tickets (query using type-index)
 export const getAllTickets = async () => {
   const params = {
     TableName: "G2Labs-CPMS",
-    FilterExpression: "begins_with(SK, :skPrefix)",
+    IndexName: "type-index",
+    KeyConditionExpression: "#type = :typeValue",
+    ExpressionAttributeNames: {
+      "#type": "type"
+    },
     ExpressionAttributeValues: {
-      ":skPrefix": "TICKET#"
+      ":typeValue": "TICKET"
     }
   };
-  const result = await ddbDocClient.send(new ScanCommand(params));
+  const result = await ddbDocClient.send(new QueryCommand(params));
   return result.Items || [];
 };
 

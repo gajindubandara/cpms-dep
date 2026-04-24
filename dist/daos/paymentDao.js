@@ -6,6 +6,7 @@ import {
   GetCommand,
   DeleteCommand,
   ScanCommand,
+  QueryCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { BadRequest, NotFoundError } from "../errors/customErrors.js";
 import { v4 as uuidv4 } from "uuid";
@@ -66,18 +67,21 @@ export const getPaymentsByProjectId = async (projectId) => {
   if (!projectId) {
     throw new BadRequest("projectId is required");
   }
-
-  // Use Scan with FilterExpression instead of GSI1 (which may not exist)
   const params = {
     TableName: "G2Labs-CPMS",
-    FilterExpression: "begins_with(PK, :pk) AND Attributes.projectId = :projectId",
+    IndexName: "type-index",
+    KeyConditionExpression: "#type = :typeValue",
+    FilterExpression: "Attributes.projectId = :projectId",
+    ExpressionAttributeNames: {
+      "#type": "type"
+    },
     ExpressionAttributeValues: {
-      ":pk": "PAYMENT#",
+      ":typeValue": "PAYMENT",
       ":projectId": projectId,
     },
   };
 
-  const result = await ddbDocClient.send(new ScanCommand(params));
+  const result = await ddbDocClient.send(new QueryCommand(params));
   return result.Items || [];
 };
 
@@ -87,17 +91,21 @@ export const getPaymentsByClientId = async (clientId) => {
     throw new BadRequest("clientId is required");
   }
 
-  // Use Scan with FilterExpression to find payments by clientId
   const params = {
     TableName: "G2Labs-CPMS",
-    FilterExpression: "begins_with(PK, :pk) AND Attributes.clientId = :clientId",
-    ExpressionAttributeValues: {
-      ":pk": "PAYMENT#",
-      ":clientId": clientId,
+    IndexName: "type-index",
+    KeyConditionExpression: "#type = :typeValue",
+    FilterExpression: "Attributes.clientId = :clientId",
+    ExpressionAttributeNames: {
+      "#type": "type"
     },
+    ExpressionAttributeValues: {
+      ":typeValue": "PAYMENT",
+      ":clientId": clientId
+    }
   };
 
-  const result = await ddbDocClient.send(new ScanCommand(params));
+  const result = await ddbDocClient.send(new QueryCommand(params));
   
   return result.Items || [];
 };
@@ -170,13 +178,17 @@ export const deletePayment = async (paymentId, projectId) => {
 export const getAllPayments = async () => {
   const params = {
     TableName: "G2Labs-CPMS",
-    FilterExpression: "begins_with(PK, :pk)",
-    ExpressionAttributeValues: {
-      ":pk": "PAYMENT#",
+    IndexName: "type-index",
+    KeyConditionExpression: "#type = :typeValue",
+    ExpressionAttributeNames: {
+      "#type": "type"
     },
+    ExpressionAttributeValues: {
+      ":typeValue": "PAYMENT"
+    }
   };
 
-  const result = await ddbDocClient.send(new ScanCommand(params));
+  const result = await ddbDocClient.send(new QueryCommand(params));
   return result.Items || [];
 };
 

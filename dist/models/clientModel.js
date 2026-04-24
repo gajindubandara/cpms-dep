@@ -9,7 +9,8 @@ export const Client = {
     
     create: (data) => ({
         PK: `CLIENT#${data.clientId}`,
-        SK: `CLIENT`,        
+        SK: `CLIENT`,
+        type: `ClIENT`,        
         Attributes: {
             clientName: data.clientName ,
             email: data.email,

@@ -6,6 +6,7 @@ export const Quotation = {
   create: (data) => ({
     PK: `QUOTATION#${data.quotationId}`,
     SK: `QUOTATION`,
+    type: `QUOTATION`,
     Attributes: {
       clientId: data.clientId,
       clientName: data.clientName,

@@ -128,19 +128,18 @@ export const featureByFeatId = async (projectId, featureId) => {
 //get all projects
 export const allProjects = async () => {
   const params = {
-    TableName: process.env.TABLE_NAME,
-    FilterExpression: "begins_with(#pk, :pkPrefix) AND begins_with(#sk, :skPrefix)",
-    ExpressionAttributeNames: {
-      "#pk": "PK",
-      "#sk": "SK",
-    },
-    ExpressionAttributeValues: {
-      ":pkPrefix": "CLIENT#",
-      ":skPrefix": "PROJECT#",
-    },
-  };
+        TableName: process.env.TABLE_NAME,
+        IndexName: "type-index",
+        KeyConditionExpression: "#type = :typeValue",
+        ExpressionAttributeNames: {
+            "#type": "type"
+        },
+        ExpressionAttributeValues: {
+            ":typeValue": "PROJECT"
+        }
+    };
 
-  const result = await ddbDocClient.send(new ScanCommand(params));
+  const result = await ddbDocClient.send(new QueryCommand(params));
   return result.Items || [];
 };
 

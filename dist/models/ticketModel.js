@@ -11,6 +11,7 @@ export const Ticket = {
         return {
             PK: `CLIENT#${data.clientId}`,
             SK: `TICKET#${id}`,
+            type: `TICKET`,
             Attributes: {
                 clientId: data.clientId,
                 clientName: data.clientName,
