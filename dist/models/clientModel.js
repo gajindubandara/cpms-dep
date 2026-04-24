@@ -10,12 +10,13 @@ export const Client = {
     create: (data) => ({
         PK: `CLIENT#${data.clientId}`,
         SK: `CLIENT`,
-        type: `ClIENT`,        
+        type: `CLIENT`,        
         Attributes: {
             clientName: data.clientName ,
             email: data.email,
             address: data.address,
             phone: data.phone,
+            currency: data.currency,
             status: data.status ?? Status.ACTIVE,
             clientType:data.clientType ?? ClientType.INDIVIDUAL,
             createdAt: new Date().toISOString(),

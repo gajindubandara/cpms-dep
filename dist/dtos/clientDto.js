@@ -7,6 +7,7 @@ export function createClientDTO({
   email,
   address,
   phone,
+  currency,
   status,
   clientType,
   createdAt,
@@ -28,6 +29,7 @@ export function createClientDTO({
   assignIfDefined(dto, "email", email);
   assignIfDefined(dto, "address", address);
   assignIfDefined(dto, "phone", phone);
+  assignIfDefined(dto, "currency", currency);
 
   assignEnum(dto, "status", status, Status, Status.ACTIVE);
   assignEnum(dto, "clientType", clientType, ClientType, ClientType.UNASSIGNED);

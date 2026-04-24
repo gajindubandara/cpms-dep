@@ -4,6 +4,7 @@ export const mapCreateClientDTOtoClientModel = (dto) => ({
   email: dto.email,
   address: dto.address,
   phone: dto.phone,
+  currency: dto.currency,
   status: dto.status,
   clientType: dto.clientType,
 });
@@ -15,6 +16,7 @@ export const mapUpdateClientDTOtoClientModel = (dto) => {
   if (dto.email !== undefined) model.email = dto.email;
   if (dto.address !== undefined) model.address = dto.address;
   if (dto.phone !== undefined) model.phone = dto.phone;
+  if (dto.currency !== undefined) model.currency = dto.currency;
   if (dto.status !== undefined) model.status = dto.status;
   if (dto.clientType !== undefined) model.clientType = dto.clientType;
 

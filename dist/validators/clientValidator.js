@@ -3,7 +3,7 @@ import { Status } from "../enums/clientStatus.js";
 import { ClientType } from "../enums/clientType.js";
 
 export const validateClientDTO = (data = {}) => {
-  const { clientName, email, address, phone, status, clientType } = data;
+  const { clientName, email, address, phone, currency, status, clientType } = data;
 
   if (clientName == undefined || typeof clientName !== "string") {
     throw new BadRequest("clientName must be a string");
@@ -28,6 +28,10 @@ export const validateClientDTO = (data = {}) => {
 
   if (phone == undefined) {
     throw new BadRequest("phone cannot be null");
+  }
+
+  if (currency != undefined && typeof currency !== "string") {
+    throw new BadRequest("currency must be a string");
   }
 
   if (status == undefined) {
