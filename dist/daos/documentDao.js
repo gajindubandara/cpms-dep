@@ -5,7 +5,7 @@ import {
   GetCommand,
   UpdateCommand,
   DeleteCommand,
-  ScanCommand, QueryCommand,
+  QueryCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { BadRequest } from "../errors/customErrors.js";
 
@@ -255,10 +255,12 @@ export const getDocumentsByTypeAndDateRange = async (
 
   const params = {
     TableName: "G2Labs-CPMS",
-    FilterExpression:
-      "#type = :typeValue AND queryDate BETWEEN :startDate AND :endDate",
+    IndexName: "type-index",
+    KeyConditionExpression: "#type = :typeValue",
+    FilterExpression: "#queryDate BETWEEN :startDate AND :endDate",
     ExpressionAttributeNames: {
       "#type": "type",
+      "#queryDate": "queryDate",
     },
     ExpressionAttributeValues: {
       ":typeValue": documentType.toUpperCase(),
@@ -267,7 +269,7 @@ export const getDocumentsByTypeAndDateRange = async (
     },
   };
 
-  const result = await ddbDocClient.send(new ScanCommand(params));
+  const result = await ddbDocClient.send(new QueryCommand(params));
   return result.Items || [];
 };
 
@@ -289,10 +291,12 @@ export const getDocumentsByTypeAndClientIdAndDateRange = async (
 
   const params = {
     TableName: "G2Labs-CPMS",
-    FilterExpression:
-      "#type = :typeValue AND clientId = :clientId AND queryDate BETWEEN :startDate AND :endDate",
+    IndexName: "type-index",
+    KeyConditionExpression: "#type = :typeValue",
+    FilterExpression: "clientId = :clientId AND #queryDate BETWEEN :startDate AND :endDate",
     ExpressionAttributeNames: {
       "#type": "type",
+      "#queryDate": "queryDate",
     },
     ExpressionAttributeValues: {
       ":typeValue": documentType.toUpperCase(),
@@ -302,7 +306,7 @@ export const getDocumentsByTypeAndClientIdAndDateRange = async (
     },
   };
 
-  const result = await ddbDocClient.send(new ScanCommand(params));
+  const result = await ddbDocClient.send(new QueryCommand(params));
   return result.Items || [];
 };
 
