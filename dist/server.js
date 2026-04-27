@@ -11,6 +11,7 @@ import quotationRoutes from "./routes/quotationRoute.js"
 import kpiRoute from './routes/kpiRoute.js'
 import reportRouter from './routes/reportRouter.js'
 import expenseRoutes from './routes/expenseRoute.js'
+import documentRoutes from './routes/documentRoute.js'
 
 dotenv.config();
 const app = express();
@@ -63,6 +64,9 @@ app.use("/quotations", quotationRoutes);
 
 // Invoice routes
 app.use("/invoices", invoiceRoutes);
+
+// Documents routes (unified module for Quotations and Invoices)
+app.use("/documents", documentRoutes);
 
 //KPI routes
 app.use("/kpi",kpiRoute)
