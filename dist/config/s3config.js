@@ -1,25 +1,25 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 
-// Load all configuration from environment variables
+// configuration from environment variables
 const PAYMENT_SLIP_BASE_URL = process.env.AWS_S3_PAYMENT_SLIP_BASE_URL;
 const DEFAULT_BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME;
-const PAYMENT_SLIP_FOLDER = process.env.AWS_S3_PAYMENT_SLIP_FOLDER;
-const EXPENSE_SLIP_FOLDER = process.env.AWS_S3_EXPENSE_SLIP_FOLDER;
-const INVOICE_PDF_FOLDER = process.env.AWS_S3_INVOICE_FOLDER || 'cpms/invoices';
-const QUOTATION_PDF_FOLDER = process.env.AWS_S3_QUOTATION_FOLDER || 'cpms/quotations';
 const AWS_REGION = process.env.AWS_REGION_NAME;
 const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
 const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
 const CLOUDFRONT_DOMAIN = '.cloudfront.net/';
 const DEBUG = process.env.NODE_ENV !== 'production';
 
+// Single Use Configurations
+const PAYMENT_SLIP_FOLDER = 'cpms/payments';
+const EXPENSE_SLIP_FOLDER = 'cpms/expenses';
+const INVOICE_PDF_FOLDER = 'cpms/invoices';
+const QUOTATION_PDF_FOLDER = 'cpms/quotations';
+
 // Validate all required environment variables
 const validateEnvVariables = () => {
   const requiredVars = {
     'AWS_S3_PAYMENT_SLIP_BASE_URL': PAYMENT_SLIP_BASE_URL,
     'AWS_S3_BUCKET_NAME': DEFAULT_BUCKET_NAME,
-    'AWS_S3_PAYMENT_SLIP_FOLDER': PAYMENT_SLIP_FOLDER,
-    'AWS_S3_EXPENSE_SLIP_FOLDER': EXPENSE_SLIP_FOLDER,
     'AWS_REGION_NAME': AWS_REGION,
     'AWS_ACCESS_KEY_ID': AWS_ACCESS_KEY_ID,
     'AWS_SECRET_ACCESS_KEY': AWS_SECRET_ACCESS_KEY,
