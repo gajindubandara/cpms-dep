@@ -47,15 +47,10 @@ async function updateTicketAttributes(clientId, ticketId, updates) {
 
 // Create Ticket DAO
 export const createTicket = async (data) => {
-  const ticketItem = Ticket.create(data);
+  const item = Ticket.create(data);
   const params = {
     TableName: "G2Labs-CPMS",
-    Item: {
-      PK: ticketItem.PK,
-      SK: ticketItem.SK,
-      Attributes: ticketItem.Attributes,
-      queryDate: ticketItem.queryDate
-    }
+    Item: item
   };
   await ddbDocClient.send(new PutCommand(params));
   return params.Item;

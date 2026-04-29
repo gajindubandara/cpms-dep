@@ -6,11 +6,10 @@ export const Ticket = {
     pk: (clientId) => `CLIENT#${clientId}`,
     sk: (ticketId) => `TICKET#${ticketId}`,
 
-    create: (data) => {
-        const id = data.ticketId || uuidv4(); // Generate a new UUID if ticketId is not provided    
+    create: (data) => {  
         return {
             PK: `CLIENT#${data.clientId}`,
-            SK: `TICKET#${id}`,
+            SK: `TICKET#${data.ticketId}`,
             type: `TICKET`,
             Attributes: {
                 clientId: data.clientId,
