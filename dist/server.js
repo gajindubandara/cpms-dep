@@ -1,4 +1,3 @@
-import invoiceRoutes from "./routes/invoiceRoute.js";
 import express from "express";
 import ticketRoutes from "./routes/ticketRoute.js";
 import clientRoutes from "./routes/clientRoute.js";
@@ -7,7 +6,6 @@ import errorhandler from './middlewares/errorHandler.js';
 import dotenv from 'dotenv';
 import projectRoutes from "./routes/projectRoutes.js"
 import paymentRoutes from "./routes/paymentRoute.js"
-import quotationRoutes from "./routes/quotationRoute.js"
 import kpiRoute from './routes/kpiRoute.js'
 import reportRouter from './routes/reportRouter.js'
 import expenseRoutes from './routes/expenseRoute.js'
@@ -58,12 +56,6 @@ app.use("/payments", paymentRoutes);
 
 // Auth routes
 app.use("/auth", authRoutes);
-
-// Quotation routes
-app.use("/quotations", quotationRoutes);
-
-// Invoice routes
-app.use("/invoices", invoiceRoutes);
 
 // Documents routes (unified module for Quotations and Invoices)
 app.use("/documents", documentRoutes);
