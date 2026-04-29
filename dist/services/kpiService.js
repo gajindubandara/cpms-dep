@@ -2,10 +2,11 @@ import { getAllQuotations } from "../daos/quotationDao.js";
 import { getAllInvoices } from "../daos/invoiceDao.js";
 import { getAllTickets, getTicketsByQueryDateRange, getTicketsByClientId } from "../daos/ticketDao.js";
 import { getAllPayments, getPaymentsByClientId } from "../daos/paymentDao.js";
+import { getAllExpenses } from "../daos/expenseDao.js";
 import { allProjects, projectByClientId } from '../daos/projectDao.js';
 import { getAllClients } from '../daos/clientDao.js';
 import PaymentStatus from "../enums/paymentStatus.js";
-import { getProjectById } from "../daos/projectDao.js";
+import { ExpenseStatus } from "../enums/expenseStatus.js";
 import { BadRequest, NotFoundError } from "../errors/customErrors.js";
 import dayjs from "dayjs";
 import { ProjectStatus } from '../enums/projectStatus.js';
@@ -15,38 +16,12 @@ import { ClientType } from '../enums/clientType.js';
 
 const createEmptyKPI = () => ({
   revenue: 0,
-  profit: 0,
   overdue: 0,
   cancel: 0,
   pending: 0,
 });
 
-const profitCal = async (payment) => {
-  let profit = 0;
-  const amount = payment.Attributes.amount;
-
-  if (payment.Attributes.projectId == null) {
-    profit = amount;
-  } else {
-    const project = await getProjectById(payment.Attributes.projectId);
-
-    if (!project) {
-      profit = amount;
-    } else if (project.Attributes.commissionPercent == null) {
-      // no commission
-      profit = amount * (project.Attributes.profitMargin / 100);
-    } else {
-      // commission deducted
-      profit =
-        (amount - amount * (project.Attributes.commissionPercent / 100)) *
-        (project.Attributes.profitMargin / 100);
-    }
-  }
-
-  return profit;
-};
-
-const processPayment = async (kpi, payment) => {
+const processPayment = (kpi, payment) => {
   const amount = payment.Attributes?.amount || payment.amount || 0;
   let status = payment.Attributes?.status || payment.status;
   const dueDate = payment.Attributes?.dueDate || payment.dueDate;
@@ -60,82 +35,62 @@ const processPayment = async (kpi, payment) => {
   switch (status) {
     case PaymentStatus.APPROVED:
       kpi.revenue += amount;
-      kpi.profit += await profitCal(payment);
       break;
-
     case PaymentStatus.OVERDUE:
       kpi.overdue += amount;
       break;
-
     case PaymentStatus.REJECTED:
       kpi.cancel += amount;
       break;
-
     case PaymentStatus.PENDING:
       kpi.pending += amount;
       break;
   }
 };
 
-const calculatePaymentKPI = async (payments, filterFn = () => true) => {
+const calculatePaymentKPI = (payments, filterFn = () => true) => {
   const kpi = createEmptyKPI();
-
   for (const payment of payments) {
-    if (filterFn(payment)) {
-      await processPayment(kpi, payment);
-    }
+    if (filterFn(payment)) processPayment(kpi, payment);
   }
-
   return kpi;
+};
+
+const calculatePaymentKPIByCurrency = (payments, filterFn = () => true) => {
+  const byCurrency = {};
+  for (const payment of payments) {
+    if (!filterFn(payment)) continue;
+    const currency = (payment.Attributes?.currency || payment.currency || 'USD').toUpperCase();
+    if (!byCurrency[currency]) byCurrency[currency] = createEmptyKPI();
+    processPayment(byCurrency[currency], payment);
+  }
+  return byCurrency;
 };
 
 // ALL PAYMENTS KPI
 export const paymentKPIService = async () => {
   const payments = await getAllPayments();
-
-  if (!payments.length) {
-    throw new NotFoundError("No payments were found");
-  }
-
+  if (!payments.length) throw new NotFoundError("No payments were found");
   return calculatePaymentKPI(payments);
 };
 
 // PAYMENT KPI BY DATE RANGE
 export const paymentKPIRangeService = async (startDate, endDate) => {
   const payments = await getAllPayments();
-
-  if (!payments.length) {
-    throw new NotFoundError("No payments were found");
-  }
-  if (!startDate) {
-    throw new BadRequest("No date range specified");
-  }
-
+  if (!payments.length) throw new NotFoundError("No payments were found");
+  if (!startDate) throw new BadRequest("No date range specified");
   return calculatePaymentKPI(payments, (payment) => {
     const paymentDate = payment.Attributes.createdAt.split("T")[0];
-
-    return (
-      (paymentDate >= startDate && paymentDate <= endDate) ||
-      (paymentDate >= startDate && endDate == null)
-    );
+    return (paymentDate >= startDate && paymentDate <= endDate) || (paymentDate >= startDate && endDate == null);
   });
 };
 
 // PROJECT LEVEL PAYMENT KPI
 export const projectPaymentKPIService = async (projectId) => {
   const payments = await getAllPayments();
-
-  if (!payments.length) {
-    throw new NotFoundError("No payments were found");
-  }
-  if (!projectId) {
-    throw new BadRequest("Project id is not specified");
-  }
-
-  return calculatePaymentKPI(
-    payments,
-    (payment) => payment.Attributes.projectId == projectId
-  );
+  if (!payments.length) throw new NotFoundError("No payments were found");
+  if (!projectId) throw new BadRequest("Project id is not specified");
+  return calculatePaymentKPI(payments, (payment) => payment.Attributes.projectId == projectId);
 };
 
 export const getTicketResponseKpiService = async (startDate, endDate) => {
@@ -338,24 +293,58 @@ export const getClientKpiService = async () => {
   };
 };
 
-// CLIENT PAYMENT KPI: payments belonging to a client (optional date range)
-export const getClientPaymentKpiService = async (clientId, startDate, endDate) => {
-  if (!clientId) {
-    throw new BadRequest("Client id is not specified");
+// ADMIN EXPENSE KPI: grouped by currency
+export const getExpenseKPIByCurrencyService = async (startDate, endDate) => {
+  const expenses = await getAllExpenses();
+  if (!expenses.length) return { byCurrency: {}, count: 0 };
+
+  const byCurrency = {};
+  let count = 0;
+  for (const expense of expenses) {
+    const createdAt = (expense.Attributes?.createdAt || expense.createdAt || '').split('T')[0];
+    if (startDate && endDate && !(createdAt >= startDate && createdAt <= endDate)) continue;
+
+    count++;
+    const currency = (expense.Attributes?.currency || expense.currency || 'USD').toUpperCase();
+    const amount = expense.Attributes?.amount || expense.amount || 0;
+    const status = expense.Attributes?.expenseStatus || expense.expenseStatus || ExpenseStatus.PENDING;
+
+    if (!byCurrency[currency]) byCurrency[currency] = { pending: 0, done: 0 };
+    if (status === ExpenseStatus.DONE) byCurrency[currency].done += amount;
+    else byCurrency[currency].pending += amount;
   }
 
-  const payments = await getPaymentsByClientId(clientId);
+  return { byCurrency, count };
+};
 
-  if (!payments.length) {
-    throw new NotFoundError("No payments were found for the client");
-  }
+// ADMIN PAYMENT KPI: grouped by currency (all payments)
+export const getAdminPaymentKPIByCurrencyService = async (startDate, endDate) => {
+  const payments = await getAllPayments();
+  if (!payments.length) return { byCurrency: {} };
 
-  // reuse calculatePaymentKPI with a date filter when provided
-  return calculatePaymentKPI(payments, (payment) => {
+  const byCurrency = calculatePaymentKPIByCurrency(payments, (payment) => {
     if (!startDate || !endDate) return true;
     const paymentDate = (payment.Attributes?.createdAt || payment.createdAt || '').split('T')[0];
     return paymentDate && paymentDate >= startDate && paymentDate <= endDate;
   });
+
+  return { byCurrency };
+};
+
+// CLIENT PAYMENT KPI: grouped by currency
+export const getClientPaymentKpiService = async (clientId, startDate, endDate) => {
+  if (!clientId) throw new BadRequest("Client id is not specified");
+
+  const payments = await getPaymentsByClientId(clientId);
+  if (!payments.length) return { byCurrency: {} };
+
+  const byCurrency = calculatePaymentKPIByCurrency(payments, (payment) => {
+    if (!startDate || !endDate) return true;
+    const paymentDate = (payment.Attributes?.createdAt || payment.createdAt || '').split('T')[0];
+    return paymentDate && paymentDate >= startDate && paymentDate <= endDate;
+  });
+
+  return { byCurrency };
 };
 
 // CLIENT TICKET RESPONSE KPI: tickets belonging to a client (optional date range)

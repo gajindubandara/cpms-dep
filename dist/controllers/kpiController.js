@@ -1,6 +1,6 @@
 import { getQuotationKpiService, getInvoiceKpiService } from '../services/kpiService.js';
 import { getTicketResponseKpiService, getClientTicketResponseKpiService } from '../services/kpiService.js';
-import {paymentKPIService, paymentKPIRangeService, projectPaymentKPIService, getClientPaymentKpiService} from '../services/kpiService.js'
+import {paymentKPIService, paymentKPIRangeService, projectPaymentKPIService, getClientPaymentKpiService, getAdminPaymentKPIByCurrencyService, getExpenseKPIByCurrencyService} from '../services/kpiService.js'
 import { getProjectProgressKpiService, getClientProjectProgressKpiService } from '../services/kpiService.js';
 import { getClientKpiService } from '../services/kpiService.js';
 import dayjs from "dayjs";
@@ -123,10 +123,6 @@ export const getClientPaymentKpiController = async (req, res, next) => {
         if (!clientId) return res.status(400).json({ success: false, message: 'Client ID not found in token.' });
         const { startDate, endDate } = req.query;
         const result = await getClientPaymentKpiService(clientId, startDate, endDate);
-        
-        // Remove profit to prevent business margin exposure to clients
-        delete result.profit;
-        
         res.status(200).json({ success: true, data: result });
     } catch (err) {
         next(err);
@@ -150,6 +146,30 @@ export const getClientTicketResponseKpiController = async (req, res, next) => {
 export const getClientKpiController = async (req, res, next) => {
     try {
         const result = await getClientKpiService();
+        res.status(200).json({ success: true, data: result });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// ADMIN EXPENSE KPI: grouped by currency
+export const getExpenseKPIByCurrencyController = async (req, res, next) => {
+    try {
+        let { startDate, endDate, all } = req.query;
+        if (all === 'true') { startDate = undefined; endDate = undefined; }
+        const result = await getExpenseKPIByCurrencyService(startDate, endDate);
+        res.status(200).json({ success: true, data: result });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// ADMIN PAYMENT KPI: grouped by currency
+export const getAdminPaymentKPIByCurrencyController = async (req, res, next) => {
+    try {
+        let { startDate, endDate, all } = req.query;
+        if (all === 'true') { startDate = undefined; endDate = undefined; }
+        const result = await getAdminPaymentKPIByCurrencyService(startDate, endDate);
         res.status(200).json({ success: true, data: result });
     } catch (err) {
         next(err);

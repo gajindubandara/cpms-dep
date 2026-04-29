@@ -1,4 +1,4 @@
-import { getPaymentKpiController, getPaymentKpiRangeController, getProjectPaymentKpiController, getTicketResponseKpiController, getPaymentSummaryKpiController, getQuotationKpiController, getInvoiceKpiController, getClientKpiController, getClientPaymentKpiController, getClientTicketResponseKpiController } from '../controllers/kpiController.js'
+import { getPaymentKpiController, getPaymentKpiRangeController, getProjectPaymentKpiController, getTicketResponseKpiController, getPaymentSummaryKpiController, getQuotationKpiController, getInvoiceKpiController, getClientKpiController, getClientPaymentKpiController, getClientTicketResponseKpiController, getAdminPaymentKPIByCurrencyController, getExpenseKPIByCurrencyController } from '../controllers/kpiController.js'
 import { verifyAccessToken } from '../middlewares/verifyAccessToken.js'
 import { authorize } from '../middlewares/authorizeAccess.js'
 import { getProjectProgressKpiController, getClientProjectProgressKpiController } from '../controllers/kpiController.js';
@@ -20,4 +20,6 @@ router.get("/ticketres", verifyAccessToken, authorize(["g2-cpms-admin"]), getTic
 router.get("/quotations", verifyAccessToken, authorize(["g2-cpms-admin"]), getQuotationKpiController)
 router.get("/invoices", verifyAccessToken, authorize(["g2-cpms-admin"]), getInvoiceKpiController)
 router.get("/paymentsummary", verifyAccessToken, authorize(["g2-cpms-admin"]), getPaymentSummaryKpiController)
+router.get("/paymentsbycurrency", verifyAccessToken, authorize(["g2-cpms-admin"]), getAdminPaymentKPIByCurrencyController)
+router.get("/expensesbycurrency", verifyAccessToken, authorize(["g2-cpms-admin"]), getExpenseKPIByCurrencyController)
 export default router
