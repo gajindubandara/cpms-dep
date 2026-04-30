@@ -9,6 +9,7 @@ import {
   updateTicketAsAdmin,
   getTicketsByClientId
 } from "../daos/ticketDao.js";
+import { v4 as uuidv4 } from 'uuid';
 import {
   mapCreateTicketDTOtoTicketModel,
   mapClientUpdateTicketDTOtoTicketModel,
@@ -59,6 +60,7 @@ export const createTicketService = async (createTicketDTO) => {
   try {
     const ticketData = mapCreateTicketDTOtoTicketModel({
       ...createTicketDTO,
+      ticketId: uuidv4(),
       clientName,
       projectName,
       status: status || 'Open'
@@ -109,7 +111,7 @@ export const deleteTicketService = async (clientId, ticketId) => {
   const tickets = await getTicketsByTicketId(ticketId);
   const ticket = tickets.find(t => t.PK === `CLIENT#${clientId}` && t.SK === `TICKET#${ticketId}`);
   if (!ticket) throw new NotFoundError('Ticket not found');
-  if (ticket.Attributes?.status === 'In Progress') {
+  if ((ticket.Attributes?.status || '').toLowerCase().replace(/\s+/g, '_') === 'in_progress') {
     throw new Forbidden('Cannot delete ticket: Ticket is In Progress');
   }
   try {
@@ -169,8 +171,9 @@ export const updateTicketMessageAsClientService = async (clientId, ticketId, upd
   const tickets = await getTicketsByTicketId(ticketId);
   const ticket = tickets.find(t => t.PK === `CLIENT#${clientId}` && t.SK === `TICKET#${ticketId}`);
   if (!ticket) throw new NotFoundError('Ticket not found');
-  if (ticket.Attributes && (ticket.Attributes.status === 'In Progress' || ticket.Attributes.status === 'Resolved')) {
-    throw new Forbidden('Cannot update message: Ticket is In Progress or Resolved');
+  const ticketStatus = (ticket.Attributes?.status || '').toLowerCase().replace(/\s+/g, '_');
+  if (ticketStatus !== 'open') {
+    throw new Forbidden('Cannot update message: Only open tickets can be edited');
   }
   const updates = mapClientUpdateTicketDTOtoTicketModel(updateDTO);
   if (Object.keys(updates).length === 0) throw new BadRequest('No valid fields to update');

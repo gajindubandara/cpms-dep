@@ -1,4 +1,5 @@
 export const mapCreateTicketDTOtoTicketModel = (dto) => ({
+  ticketId: dto.ticketId,
   clientId: dto.clientId,
   clientName: dto.clientName,
   projectId: dto.projectId,
@@ -14,6 +15,7 @@ export const mapCreateTicketDTOtoTicketModel = (dto) => ({
 // mapping the ClientupdateTicketDTO to TicketModel
 export const mapClientUpdateTicketDTOtoTicketModel = (dto) => {
   const model = {};
+  if (dto.subject !== undefined) model.subject = dto.subject;
   if (dto.message !== undefined) model.message = dto.message;
   if (dto.updatedAt !== undefined) model.updatedAt = dto.updatedAt;
   return model;
