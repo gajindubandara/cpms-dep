@@ -109,6 +109,7 @@ export const getPaymentsByProject = async (req, res, next) => {
 export const getClientPayments = async (req, res, next) => {
   try {
     const clientId = req.user?.sub; // Get user ID from JWT token
+    const { startDate, endDate } = req.query;
 
     if (!clientId) {
       return res.status(400).json({
@@ -117,7 +118,7 @@ export const getClientPayments = async (req, res, next) => {
       });
     }
 
-    const payments = await getClientPaymentsService(clientId);
+    const payments = await getClientPaymentsService(clientId, startDate, endDate);
 
     const mappedPayments = payments.map(mapPaymentModelToClientPaymentDTO);
 
@@ -296,7 +297,8 @@ export const deletePayment = async (req, res, next) => {
 // Get all payments (Admin dashboard)
 export const getAllPayments = async (req, res, next) => {
   try {
-    const payments = await getAllPaymentsService();
+    const { startDate, endDate } = req.query;
+    const payments = await getAllPaymentsService(startDate, endDate);
 
     const mappedPayments = payments.map(mapPaymentModelToAdminPaymentDTO);
 

@@ -95,11 +95,27 @@ export const getPaymentsByProjectService = async (projectId) => {
 };
 
 // Get payments for client (Client's "My Payments" section)
-export const getClientPaymentsService = async (clientId) => {
+export const getClientPaymentsService = async (clientId, startDate, endDate) => {
   const payments = await getPaymentsByClientId(clientId);
   if (!payments?.length) return [];
 
-  const enrichedPayments = await Promise.all(payments.map((p) => enrichPayment(p)));
+  // Filter by date range if provided
+  let filteredPayments = payments;
+  if (startDate && endDate) {
+    filteredPayments = payments.filter((payment) => {
+      const attrs = getAttrs(payment);
+      const dueDate = attrs?.dueDate;
+      if (!dueDate) return false;
+
+      // Handle timezone-aware dates by converting to Date object first
+      const dueDateObj = new Date(dueDate);
+      const paymentDueDateLocalString = dueDateObj.toISOString().split('T')[0]; // Use ISO string which is UTC
+
+      return paymentDueDateLocalString >= startDate && paymentDueDateLocalString <= endDate;
+    });
+  }
+
+  const enrichedPayments = await Promise.all(filteredPayments.map((p) => enrichPayment(p)));
   return enrichedPayments.filter(Boolean);
 };
 
@@ -213,12 +229,28 @@ export const deletePaymentService = async (paymentId, projectId) => {
 };
 
 // Get all payments (Admin dashboard)
-export const getAllPaymentsService = async () => {
+export const getAllPaymentsService = async (startDate, endDate) => {
   const payments = await getAllPayments();
   if (!payments?.length) return [];
 
+  // Filter by date range if provided
+  let filteredPayments = payments;
+  if (startDate && endDate) {
+    filteredPayments = payments.filter((payment) => {
+      const attrs = getAttrs(payment);
+      const dueDate = attrs?.dueDate;
+      if (!dueDate) return false;
+
+      // Handle timezone-aware dates by converting to Date object first
+      const dueDateObj = new Date(dueDate);
+      const paymentDueDateLocalString = dueDateObj.toISOString().split('T')[0]; // Use ISO string which is UTC
+
+      return paymentDueDateLocalString >= startDate && paymentDueDateLocalString <= endDate;
+    });
+  }
+
   const enrichedPayments = await Promise.all(
-    payments.map((p) => enrichPayment(p, true))
+    filteredPayments.map((p) => enrichPayment(p, true))
   );
   return enrichedPayments.filter(Boolean);
 };
