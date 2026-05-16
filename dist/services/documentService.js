@@ -17,6 +17,7 @@ import {
 } from "../mappers/documentMapper.js";
 import { BadRequest, NotFoundError, AlreadyExistsError } from "../errors/customErrors.js";
 import { getClientById } from "../daos/clientDao.js";
+import { buildNotificationMessage, sendTelegramNotification } from "../config/telegramNotificationService.js";
 
 /**
  * Helper to extract documentId from PK
@@ -69,6 +70,15 @@ export const createDocumentService = async (createDocumentDTO) => {
 
   // Create in database
   const createdDocument = await createDocument(model);
+
+  // Send Telegram notification
+  void sendTelegramNotification(
+    buildNotificationMessage(`New ${docType} created`, [
+      `Document Number: ${meta.document_number}`,
+      clientId ? `Client ID: ${clientId}` : null,
+      model.meta?.issue_date ? `Date: ${model.meta.issue_date}` : null,
+    ])
+  );
 
   // Transform back to DTO format for response
   return mapDocumentModelToDTO(createdDocument);
@@ -197,13 +207,22 @@ export const updateDocumentService = async (
     updates.queryDate = updates.meta.issue_date;
   }
 
-  const updatedDocument = await updateDocument(
-    documentType,
-    documentNumber,
-    updates
+   const updatedDocument = await updateDocument(
+     documentType,
+     documentNumber,
+     updates
+   );
+
+  // Send Telegram notification
+  void sendTelegramNotification(
+    buildNotificationMessage(`${documentType} updated`, [
+      `Document Number: ${documentNumber}`,
+      updates.clientId ? `Client ID: ${updates.clientId}` : null,
+      updates.meta?.issue_date ? `Date: ${updates.meta.issue_date}` : null,
+    ])
   );
 
-  return mapDocumentModelToDTO(updatedDocument);
+   return mapDocumentModelToDTO(updatedDocument);
 };
 
 /**
@@ -218,7 +237,16 @@ export const deleteDocumentService = async (documentType, documentNumber) => {
     throw new NotFoundError("Document not found");
   }
 
-  return await deleteDocument(documentType, documentNumber);
+  const deleted = await deleteDocument(documentType, documentNumber);
+
+  // Send Telegram notification
+  void sendTelegramNotification(
+    buildNotificationMessage(`${documentType} deleted`, [
+      `Document Number: ${documentNumber}`,
+    ])
+  );
+
+  return deleted;
 };
 
 
