@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 const DEBUG = process.env.NODE_ENV !== 'production';
+const PROD = process.env.NODE_ENV === 'production';
 
 const getTelegramConfig = () => {
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
@@ -17,13 +18,23 @@ const getTelegramConfig = () => {
 export const sendTelegramNotification = async (message) => {
   const { enabled, botToken, chatId } = getTelegramConfig();
 
-  // Enhanced logging for debugging
+  // Enhanced logging for debugging (dev and prod)
   if (DEBUG) {
     console.log('[Telegram Config]', {
       enabled,
       botTokenPresent: !!botToken,
       chatIdPresent: !!chatId,
       messagePresent: !!message,
+    });
+  }
+
+  // Log config in production too for debugging issues
+  if (PROD && (!botToken || !chatId)) {
+    console.error('[Telegram] Production config issue:', {
+      botTokenPresent: !!botToken,
+      chatIdPresent: !!chatId,
+      enabledValue: process.env.TELEGRAM_NOTIFICATIONS_ENABLED,
+      allEnv: Object.keys(process.env).filter(k => k.includes('TELEGRAM')),
     });
   }
 
@@ -48,7 +59,7 @@ export const sendTelegramNotification = async (message) => {
   }
 
   try {
-    if (DEBUG) console.log('[Telegram] Sending notification...');
+    if (DEBUG || PROD) console.log('[Telegram] Sending notification...');
 
     const response = await axios.post(
       `https://api.telegram.org/bot${botToken}/sendMessage`,
@@ -63,15 +74,19 @@ export const sendTelegramNotification = async (message) => {
       }
     );
 
-    if (DEBUG) console.log('[Telegram] Notification sent successfully:', response.status);
+    // Log success in both dev and prod
+    console.log(`[Telegram] Notification sent successfully: ${response.status}`);
     return true;
   } catch (error) {
     const errorMsg = error.response?.data?.description || error.message;
+    // Always log errors
     console.error('[Telegram] Failed to send notification:', {
       status: error.response?.status,
       statusText: error.response?.statusText,
       message: errorMsg,
       code: error.code,
+      botTokenLen: botToken?.length || 0,
+      chatIdValue: chatId || 'EMPTY',
     });
     return false;
   }

@@ -15,6 +15,16 @@ dotenv.config();
 const app = express();
 const port = 3000;
 
+// Startup diagnostics for Telegram
+const isProduction = process.env.NODE_ENV === 'production';
+console.log('[Startup] Environment:', {
+  nodeEnv: process.env.NODE_ENV,
+  isProduction,
+  telegramEnabled: process.env.TELEGRAM_NOTIFICATIONS_ENABLED,
+  telegramBotSet: !!process.env.TELEGRAM_BOT_TOKEN,
+  telegramChatSet: !!process.env.TELEGRAM_CHAT_ID,
+});
+
 import cors from 'cors';
 
 // Configure CORS with explicit allowed origins
