@@ -17,7 +17,7 @@ import {
 } from "../mappers/documentMapper.js";
 import { BadRequest, NotFoundError, AlreadyExistsError } from "../errors/customErrors.js";
 import { getClientById } from "../daos/clientDao.js";
-import { buildNotificationMessage, sendTelegramNotification } from "../config/telegramNotificationService.js";
+import { buildDocumentNotificationMessage, sendTelegramNotification } from "../config/telegramNotificationService.js";
 
 /**
  * Helper to extract documentId from PK
@@ -68,20 +68,17 @@ export const createDocumentService = async (createDocumentDTO) => {
   // Transform DTO to model
   const model = mapDocumentDTOtoModel(createDocumentDTO);
 
-  // Create in database
-  const createdDocument = await createDocument(model);
+   // Create in database
+   const createdDocument = await createDocument(model);
 
-  // Send Telegram notification
-  void sendTelegramNotification(
-    buildNotificationMessage(`New ${docType} created`, [
-      `Document Number: ${meta.document_number}`,
-      clientId ? `Client ID: ${clientId}` : null,
-      model.meta?.issue_date ? `Date: ${model.meta.issue_date}` : null,
-    ])
-  );
+    // Send Telegram notification
+    void (async () => {
+      const message = await buildDocumentNotificationMessage(`New ${docType} Created`, docType, createdDocument);
+      await sendTelegramNotification(message);
+    })();
 
-  // Transform back to DTO format for response
-  return mapDocumentModelToDTO(createdDocument);
+   // Transform back to DTO format for response
+   return mapDocumentModelToDTO(createdDocument);
 };
 
 /**
@@ -211,18 +208,15 @@ export const updateDocumentService = async (
      documentType,
      documentNumber,
      updates
-   );
+    );
 
-  // Send Telegram notification
-  void sendTelegramNotification(
-    buildNotificationMessage(`${documentType} updated`, [
-      `Document Number: ${documentNumber}`,
-      updates.clientId ? `Client ID: ${updates.clientId}` : null,
-      updates.meta?.issue_date ? `Date: ${updates.meta.issue_date}` : null,
-    ])
-  );
+    // Send Telegram notification
+    void (async () => {
+      const message = await buildDocumentNotificationMessage(`${documentType} Updated`, documentType, updatedDocument);
+      await sendTelegramNotification(message);
+    })();
 
-   return mapDocumentModelToDTO(updatedDocument);
+    return mapDocumentModelToDTO(updatedDocument);
 };
 
 /**
@@ -237,16 +231,15 @@ export const deleteDocumentService = async (documentType, documentNumber) => {
     throw new NotFoundError("Document not found");
   }
 
-  const deleted = await deleteDocument(documentType, documentNumber);
+   const deleted = await deleteDocument(documentType, documentNumber);
 
-  // Send Telegram notification
-  void sendTelegramNotification(
-    buildNotificationMessage(`${documentType} deleted`, [
-      `Document Number: ${documentNumber}`,
-    ])
-  );
+    // Send Telegram notification
+    void (async () => {
+      const message = await buildDocumentNotificationMessage(`${documentType} Deleted`, documentType, existingDocument);
+      await sendTelegramNotification(message);
+    })();
 
-  return deleted;
+   return deleted;
 };
 
 

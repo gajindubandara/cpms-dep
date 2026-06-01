@@ -24,7 +24,7 @@ import {
   AdminDeleteUserCommand,
   AdminAddUserToGroupCommand,
 } from "@aws-sdk/client-cognito-identity-provider";
-import { buildNotificationMessage, sendTelegramNotification } from "../config/telegramNotificationService.js";
+import { buildClientNotificationMessage, sendTelegramNotification } from "../config/telegramNotificationService.js";
 
 //create client
 export const createClientService = async (createClientDTO) => {
@@ -88,13 +88,9 @@ export const createClientService = async (createClientDTO) => {
     cognitoPassword: password // Optionally store the generated password
   });
 
-  void sendTelegramNotification(
-    buildNotificationMessage('New client created', [
-      `Client: ${model.clientName || model.name || 'Unknown'}`,
-      `Email: ${model.email || 'N/A'}`,
-      `Client ID: ${clientId}`,
-    ])
-  );
+   void sendTelegramNotification(
+     buildClientNotificationMessage('New Client Created', createdClient)
+   );
 
   // Return both client and Cognito sub
   return {
@@ -115,11 +111,9 @@ export const updateClientService = async (clientId, updateClientDTO) => {
   }
 
   const updated = await updateClient(clientId, updates);
-  void sendTelegramNotification(
-    buildNotificationMessage('Client updated', [
-      `Client ID: ${clientId}`,
-    ])
-  );
+   void sendTelegramNotification(
+     buildClientNotificationMessage('Client Updated', updated)
+   );
   return updated;
 };
 

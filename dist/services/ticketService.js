@@ -23,7 +23,10 @@ import {
   InternalServerError,
   NotFoundError,
 } from "../errors/customErrors.js";
-import { buildNotificationMessage, sendTelegramNotification } from "../config/telegramNotificationService.js";
+import {
+  buildTicketNotificationMessage,
+  sendTelegramNotification
+} from "../config/telegramNotificationService.js";
 
 // Service to create a ticket
 export const createTicketService = async (createTicketDTO) => {
@@ -66,13 +69,10 @@ export const createTicketService = async (createTicketDTO) => {
       status: status || 'Open'
     });
     const created = await createTicket(ticketData);
-    void sendTelegramNotification(
-      buildNotificationMessage('New ticket created', [
-        `Client ID: ${clientId}`,
-        `Project ID: ${projectId || 'N/A'}`,
-        `Subject: ${subject}`,
-      ])
-    );
+      void (async () => {
+        const message = await buildTicketNotificationMessage('New Ticket Created', created);
+        await sendTelegramNotification(message);
+      })();
     return created;
   } catch (err) {
     console.error('Error in createTicketService:', err);
@@ -177,15 +177,13 @@ export const updateTicketMessageAsClientService = async (clientId, ticketId, upd
   }
   const updates = mapClientUpdateTicketDTOtoTicketModel(updateDTO);
   if (Object.keys(updates).length === 0) throw new BadRequest('No valid fields to update');
-  try {
-    const updated = await updateTicketMessageAsClient(clientId, ticketId, updates);
-    void sendTelegramNotification(
-      buildNotificationMessage('Ticket updated by client', [
-        `Client ID: ${clientId}`,
-        `Ticket ID: ${ticketId}`,
-      ])
-    );
-    return updated;
+   try {
+     const updated = await updateTicketMessageAsClient(clientId, ticketId, updates);
+      void (async () => {
+        const message = await buildTicketNotificationMessage('Ticket Updated by Client', updated);
+        await sendTelegramNotification(message);
+      })();
+     return updated;
   } catch (err) {
     console.error('Error in updateTicketMessageAsClientService:', err);
     throw new InternalServerError('Failed to update ticket message. ' + (err.message || ''));
@@ -198,15 +196,13 @@ export const updateTicketAsAdminService = async (clientId, ticketId, updateDTO) 
   if (!clientId || !ticketId) throw new BadRequest('clientId and ticketId are required');
   const updates = mapAdminUpdateTicketDTOtoTicketModel(updateDTO);
   if (Object.keys(updates).length === 0) throw new BadRequest('No valid fields to update');
-  try {
-    const updated = await updateTicketAsAdmin(clientId, ticketId, updates);
-    void sendTelegramNotification(
-      buildNotificationMessage('Ticket updated by admin', [
-        `Client ID: ${clientId}`,
-        `Ticket ID: ${ticketId}`,
-      ])
-    );
-    return updated;
+   try {
+     const updated = await updateTicketAsAdmin(clientId, ticketId, updates);
+      void (async () => {
+        const message = await buildTicketNotificationMessage('Ticket Updated by Admin', updated);
+        await sendTelegramNotification(message);
+      })();
+     return updated;
   } catch (err) {
     console.error('Error in updateTicketAsAdminService:', err);
     throw new InternalServerError('Failed to update ticket as admin. ' + (err.message || ''));
